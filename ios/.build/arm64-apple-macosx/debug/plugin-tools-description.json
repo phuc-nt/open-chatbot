@@ -1,0 +1,391 @@
+{
+  "builtTestProducts" : [
+
+  ],
+  "copyCommands" : {
+
+  },
+  "explicitTargetDependencyImportCheckingMode" : {
+    "none" : {
+
+    }
+  },
+  "generatedSourceTargetSet" : [
+
+  ],
+  "pluginDescriptions" : [
+
+  ],
+  "swiftCommands" : {
+    "C.OpenChatbot-arm64-apple-macosx15.0-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/sources",
+      "importPath" : "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/App/ContentView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/App/OpenChatbotApp.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Models/APIKey.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Models/Conversation.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Models/Message.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/ViewModels/ChatViewModel.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/ViewModels/HistoryViewModel.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/ViewModels/SettingsViewModel.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Views/Chat/ChatView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Views/Chat/HistoryView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Views/Common/MessageBubbleView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Views/Settings/SettingsView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "OpenChatbot",
+      "moduleOutputPath" : "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/Modules/OpenChatbot.swiftmodule",
+      "objects" : [
+        "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/ContentView.swift.o",
+        "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/OpenChatbotApp.swift.o",
+        "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/APIKey.swift.o",
+        "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/Conversation.swift.o",
+        "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/Message.swift.o",
+        "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/ChatViewModel.swift.o",
+        "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/HistoryViewModel.swift.o",
+        "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/SettingsViewModel.swift.o",
+        "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/ChatView.swift.o",
+        "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/HistoryView.swift.o",
+        "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/MessageBubbleView.swift.o",
+        "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/SettingsView.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx10.13",
+        "-enable-batch-mode",
+        "-index-store-path",
+        "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j11",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-module-cache-path",
+        "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/OpenChatbot-Swift.h",
+        "-color-diagnostics",
+        "-swift-version",
+        "5",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "ios"
+      ],
+      "outputFileMapPath" : "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/ContentView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/OpenChatbotApp.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/APIKey.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/Conversation.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/Message.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/ChatViewModel.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/HistoryViewModel.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/SettingsViewModel.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/ChatView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/HistoryView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/MessageBubbleView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/SettingsView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/Modules/OpenChatbot.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/App/ContentView.swift",
+        "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/App/OpenChatbotApp.swift",
+        "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Models/APIKey.swift",
+        "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Models/Conversation.swift",
+        "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Models/Message.swift",
+        "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/ViewModels/ChatViewModel.swift",
+        "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/ViewModels/HistoryViewModel.swift",
+        "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/ViewModels/SettingsViewModel.swift",
+        "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Views/Chat/ChatView.swift",
+        "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Views/Chat/HistoryView.swift",
+        "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Views/Common/MessageBubbleView.swift",
+        "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Views/Settings/SettingsView.swift"
+      ],
+      "tempsPath" : "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build",
+      "wholeModuleOptimization" : false
+    }
+  },
+  "swiftFrontendCommands" : {
+
+  },
+  "swiftTargetScanArgs" : {
+    "OpenChatbot" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "OpenChatbot",
+      "-package-name",
+      "ios",
+      "-incremental",
+      "-c",
+      "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/App/ContentView.swift",
+      "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/App/OpenChatbotApp.swift",
+      "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Models/APIKey.swift",
+      "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Models/Conversation.swift",
+      "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Models/Message.swift",
+      "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/ViewModels/ChatViewModel.swift",
+      "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/ViewModels/HistoryViewModel.swift",
+      "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/ViewModels/SettingsViewModel.swift",
+      "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Views/Chat/ChatView.swift",
+      "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Views/Chat/HistoryView.swift",
+      "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Views/Common/MessageBubbleView.swift",
+      "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Views/Settings/SettingsView.swift",
+      "-I",
+      "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx10.13",
+      "-enable-batch-mode",
+      "-index-store-path",
+      "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j11",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-module-cache-path",
+      "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/OpenChatbot-Swift.h",
+      "-color-diagnostics",
+      "-swift-version",
+      "5",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "ios",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ]
+  },
+  "targetDependencyMap" : {
+    "OpenChatbot" : [
+
+    ]
+  },
+  "testDiscoveryCommands" : {
+
+  },
+  "testEntryPointCommands" : {
+
+  },
+  "traitConfiguration" : {
+    "enableAllTraits" : false
+  },
+  "writeCommands" : {
+    "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/App/ContentView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/App/OpenChatbotApp.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Models/APIKey.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Models/Conversation.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Models/Message.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/ViewModels/ChatViewModel.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/ViewModels/HistoryViewModel.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/ViewModels/SettingsViewModel.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Views/Chat/ChatView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Views/Chat/HistoryView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Views/Common/MessageBubbleView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Views/Settings/SettingsView.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/sources"
+    },
+    "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt" : {
+      "alwaysOutOfDate" : true,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<swift-get-version>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+        }
+      ],
+      "outputFilePath" : "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+    }
+  }
+}

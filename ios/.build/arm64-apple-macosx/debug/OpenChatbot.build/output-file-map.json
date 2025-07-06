@@ -1,0 +1,77 @@
+{
+  "": {
+    "swift-dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/master.swiftdeps"
+  },
+  "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/App/ContentView.swift": {
+    "dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/ContentView.d",
+    "object": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/ContentView.swift.o",
+    "swiftmodule": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/ContentView~partial.swiftmodule",
+    "swift-dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/ContentView.swiftdeps"
+  },
+  "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/App/OpenChatbotApp.swift": {
+    "dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/OpenChatbotApp.d",
+    "object": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/OpenChatbotApp.swift.o",
+    "swiftmodule": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/OpenChatbotApp~partial.swiftmodule",
+    "swift-dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/OpenChatbotApp.swiftdeps"
+  },
+  "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Models/APIKey.swift": {
+    "dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/APIKey.d",
+    "object": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/APIKey.swift.o",
+    "swiftmodule": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/APIKey~partial.swiftmodule",
+    "swift-dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/APIKey.swiftdeps"
+  },
+  "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Models/Conversation.swift": {
+    "dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/Conversation.d",
+    "object": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/Conversation.swift.o",
+    "swiftmodule": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/Conversation~partial.swiftmodule",
+    "swift-dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/Conversation.swiftdeps"
+  },
+  "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Models/Message.swift": {
+    "dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/Message.d",
+    "object": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/Message.swift.o",
+    "swiftmodule": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/Message~partial.swiftmodule",
+    "swift-dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/Message.swiftdeps"
+  },
+  "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/ViewModels/ChatViewModel.swift": {
+    "dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/ChatViewModel.d",
+    "object": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/ChatViewModel.swift.o",
+    "swiftmodule": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/ChatViewModel~partial.swiftmodule",
+    "swift-dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/ChatViewModel.swiftdeps"
+  },
+  "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/ViewModels/HistoryViewModel.swift": {
+    "dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/HistoryViewModel.d",
+    "object": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/HistoryViewModel.swift.o",
+    "swiftmodule": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/HistoryViewModel~partial.swiftmodule",
+    "swift-dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/HistoryViewModel.swiftdeps"
+  },
+  "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/ViewModels/SettingsViewModel.swift": {
+    "dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/SettingsViewModel.d",
+    "object": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/SettingsViewModel.swift.o",
+    "swiftmodule": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/SettingsViewModel~partial.swiftmodule",
+    "swift-dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/SettingsViewModel.swiftdeps"
+  },
+  "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Views/Chat/ChatView.swift": {
+    "dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/ChatView.d",
+    "object": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/ChatView.swift.o",
+    "swiftmodule": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/ChatView~partial.swiftmodule",
+    "swift-dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/ChatView.swiftdeps"
+  },
+  "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Views/Chat/HistoryView.swift": {
+    "dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/HistoryView.d",
+    "object": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/HistoryView.swift.o",
+    "swiftmodule": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/HistoryView~partial.swiftmodule",
+    "swift-dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/HistoryView.swiftdeps"
+  },
+  "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Views/Common/MessageBubbleView.swift": {
+    "dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/MessageBubbleView.d",
+    "object": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/MessageBubbleView.swift.o",
+    "swiftmodule": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/MessageBubbleView~partial.swiftmodule",
+    "swift-dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/MessageBubbleView.swiftdeps"
+  },
+  "/Users/phucnt/Workspace/open-chatbot/ios/OpenChatbot/Views/Settings/SettingsView.swift": {
+    "dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/SettingsView.d",
+    "object": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/SettingsView.swift.o",
+    "swiftmodule": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/SettingsView~partial.swiftmodule",
+    "swift-dependencies": "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/SettingsView.swiftdeps"
+  }
+}

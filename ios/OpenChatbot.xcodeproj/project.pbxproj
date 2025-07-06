@@ -1,0 +1,602 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10001001D000000001D0000 /* OpenChatbotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001011D000000001D0000 /* OpenChatbotApp.swift */; };
+		A10001021D000000001D0000 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001031D000000001D0000 /* ContentView.swift */; };
+		A10001041D000000001D0000 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001051D000000001D0000 /* ChatView.swift */; };
+		A10001061D000000001D0000 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001071D000000001D0000 /* HistoryView.swift */; };
+		A10001081D000000001D0000 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001091D000000001D0000 /* SettingsView.swift */; };
+		A1000110D000000001D0000 /* MessageBubbleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000111D000000001D0000 /* MessageBubbleView.swift */; };
+		A1000112D000000001D0000 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000113D000000001D0000 /* Message.swift */; };
+		A1000114D000000001D0000 /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000115D000000001D0000 /* Conversation.swift */; };
+		A1000116D000000001D0000 /* APIKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000117D000000001D0000 /* APIKey.swift */; };
+		A1000118D000000001D0000 /* CoreDataExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000119D000000001D0000 /* CoreDataExtensions.swift */; };
+		A1000120D000000001D0000 /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000121D000000001D0000 /* ChatViewModel.swift */; };
+		A1000122D000000001D0000 /* HistoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000123D000000001D0000 /* HistoryViewModel.swift */; };
+		A1000124D000000001D0000 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000125D000000001D0000 /* SettingsViewModel.swift */; };
+		A1000126D000000001D0000 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000127D000000001D0000 /* PersistenceController.swift */; };
+		A1000128D000000001D0000 /* DataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000129D000000001D0000 /* DataService.swift */; };
+		A1000130D000000001D0000 /* OpenChatbot.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A1000131D000000001D0000 /* OpenChatbot.xcdatamodeld */; };
+		A1000140D000000001D0000 /* CoreDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000141D000000001D0000 /* CoreDataTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A1000150D000000001D0000 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A1000200D000000001D0000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A1000201D000000001D0000;
+			remoteInfo = OpenChatbot;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		A1000202D000000001D0000 /* OpenChatbot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpenChatbot.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10001011D000000001D0000 /* OpenChatbotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenChatbotApp.swift; sourceTree = "<group>"; };
+		A10001031D000000001D0000 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A10001051D000000001D0000 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
+		A10001071D000000001D0000 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		A10001091D000000001D0000 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A1000111D000000001D0000 /* MessageBubbleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageBubbleView.swift; sourceTree = "<group>"; };
+		A1000113D000000001D0000 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
+		A1000115D000000001D0000 /* Conversation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Conversation.swift; sourceTree = "<group>"; };
+		A1000117D000000001D0000 /* APIKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKey.swift; sourceTree = "<group>"; };
+		A1000119D000000001D0000 /* CoreDataExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataExtensions.swift; sourceTree = "<group>"; };
+		A1000121D000000001D0000 /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
+		A1000123D000000001D0000 /* HistoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryViewModel.swift; sourceTree = "<group>"; };
+		A1000125D000000001D0000 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+		A1000127D000000001D0000 /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
+		A1000129D000000001D0000 /* DataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataService.swift; sourceTree = "<group>"; };
+		A1000131D000000001D0000 /* OpenChatbot.xcdatamodeld */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = OpenChatbot.xcdatamodeld; sourceTree = "<group>"; };
+		A1000132D000000001D0000 /* OpenChatbot.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = OpenChatbot.xcdatamodel; sourceTree = "<group>"; };
+		A1000141D000000001D0000 /* CoreDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataTests.swift; sourceTree = "<group>"; };
+		A1000160D000000001D0000 /* OpenChatbotTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OpenChatbotTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1000170D000000001D0000 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A1000203D000000001D0000 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1000161D000000001D0000 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A1000204D000000001D0000 = {
+			isa = PBXGroup;
+			children = (
+				A1000205D000000001D0000 /* OpenChatbot */,
+				A1000162D000000001D0000 /* OpenChatbotTests */,
+				A1000206D000000001D0000 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A1000205D000000001D0000 /* OpenChatbot */ = {
+			isa = PBXGroup;
+			children = (
+				A1000207D000000001D0000 /* App */,
+				A1000208D000000001D0000 /* Views */,
+				A1000209D000000001D0000 /* ViewModels */,
+				A1000210D000000001D0000 /* Models */,
+				A1000211D000000001D0000 /* Services */,
+				A1000212D000000001D0000 /* Resources */,
+				A1000170D000000001D0000 /* Info.plist */,
+			);
+			path = OpenChatbot;
+			sourceTree = "<group>";
+		};
+		A1000206D000000001D0000 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A1000202D000000001D0000 /* OpenChatbot.app */,
+				A1000160D000000001D0000 /* OpenChatbotTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A1000207D000000001D0000 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				A10001011D000000001D0000 /* OpenChatbotApp.swift */,
+				A10001031D000000001D0000 /* ContentView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		A1000208D000000001D0000 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A1000213D000000001D0000 /* Chat */,
+				A1000214D000000001D0000 /* Settings */,
+				A1000215D000000001D0000 /* Common */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A1000209D000000001D0000 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				A1000121D000000001D0000 /* ChatViewModel.swift */,
+				A1000123D000000001D0000 /* HistoryViewModel.swift */,
+				A1000125D000000001D0000 /* SettingsViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		A1000210D000000001D0000 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A1000113D000000001D0000 /* Message.swift */,
+				A1000115D000000001D0000 /* Conversation.swift */,
+				A1000117D000000001D0000 /* APIKey.swift */,
+				A1000119D000000001D0000 /* CoreDataExtensions.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		A1000211D000000001D0000 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				A1000127D000000001D0000 /* PersistenceController.swift */,
+				A1000129D000000001D0000 /* DataService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		A1000212D000000001D0000 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A1000131D000000001D0000 /* OpenChatbot.xcdatamodeld */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		A1000213D000000001D0000 /* Chat */ = {
+			isa = PBXGroup;
+			children = (
+				A10001051D000000001D0000 /* ChatView.swift */,
+				A10001071D000000001D0000 /* HistoryView.swift */,
+			);
+			path = Chat;
+			sourceTree = "<group>";
+		};
+		A1000214D000000001D0000 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				A10001091D000000001D0000 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		A1000215D000000001D0000 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				A1000111D000000001D0000 /* MessageBubbleView.swift */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		A1000162D000000001D0000 /* OpenChatbotTests */ = {
+			isa = PBXGroup;
+			children = (
+				A1000141D000000001D0000 /* CoreDataTests.swift */,
+			);
+			path = OpenChatbotTests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A1000201D000000001D0000 /* OpenChatbot */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1000220D000000001D0000 /* Build configuration list for PBXNativeTarget "OpenChatbot" */;
+			buildPhases = (
+				A1000221D000000001D0000 /* Sources */,
+				A1000203D000000001D0000 /* Frameworks */,
+				A1000222D000000001D0000 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = OpenChatbot;
+			productName = OpenChatbot;
+			productReference = A1000202D000000001D0000 /* OpenChatbot.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A1000151D000000001D0000 /* OpenChatbotTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1000223D000000001D0000 /* Build configuration list for PBXNativeTarget "OpenChatbotTests" */;
+			buildPhases = (
+				A1000152D000000001D0000 /* Sources */,
+				A1000161D000000001D0000 /* Frameworks */,
+				A1000153D000000001D0000 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A1000154D000000001D0000 /* PBXTargetDependency */,
+			);
+			name = OpenChatbotTests;
+			productName = OpenChatbotTests;
+			productReference = A1000160D000000001D0000 /* OpenChatbotTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A1000200D000000001D0000 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1540;
+				LastUpgradeCheck = 1540;
+				TargetAttributes = {
+					A1000201D000000001D0000 = {
+						CreatedOnToolsVersion = 15.4;
+					};
+					A1000151D000000001D0000 = {
+						CreatedOnToolsVersion = 15.4;
+						TestTargetID = A1000201D000000001D0000;
+					};
+				};
+			};
+			buildConfigurationList = A1000224D000000001D0000 /* Build configuration list for PBXProject "OpenChatbot" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A1000204D000000001D0000;
+			productRefGroup = A1000206D000000001D0000 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A1000201D000000001D0000 /* OpenChatbot */,
+				A1000151D000000001D0000 /* OpenChatbotTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A1000222D000000001D0000 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1000153D000000001D0000 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A1000221D000000001D0000 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10001001D000000001D0000 /* OpenChatbotApp.swift in Sources */,
+				A10001021D000000001D0000 /* ContentView.swift in Sources */,
+				A10001041D000000001D0000 /* ChatView.swift in Sources */,
+				A10001061D000000001D0000 /* HistoryView.swift in Sources */,
+				A10001081D000000001D0000 /* SettingsView.swift in Sources */,
+				A1000110D000000001D0000 /* MessageBubbleView.swift in Sources */,
+				A1000112D000000001D0000 /* Message.swift in Sources */,
+				A1000114D000000001D0000 /* Conversation.swift in Sources */,
+				A1000116D000000001D0000 /* APIKey.swift in Sources */,
+				A1000118D000000001D0000 /* CoreDataExtensions.swift in Sources */,
+				A1000120D000000001D0000 /* ChatViewModel.swift in Sources */,
+				A1000122D000000001D0000 /* HistoryViewModel.swift in Sources */,
+				A1000124D000000001D0000 /* SettingsViewModel.swift in Sources */,
+				A1000126D000000001D0000 /* PersistenceController.swift in Sources */,
+				A1000128D000000001D0000 /* DataService.swift in Sources */,
+				A1000130D000000001D0000 /* OpenChatbot.xcdatamodeld in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1000152D000000001D0000 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000140D000000001D0000 /* CoreDataTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A1000154D000000001D0000 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A1000201D000000001D0000 /* OpenChatbot */;
+			targetProxy = A1000150D000000001D0000 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		A1000225D000000001D0000 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		A1000226D000000001D0000 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		A1000227D000000001D0000 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.phucnt.openchatbot;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A1000228D000000001D0000 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.phucnt.openchatbot;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		A1000229D000000001D0000 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.phucnt.openchatbot.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OpenChatbot.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/OpenChatbot";
+			};
+			name = Debug;
+		};
+		A1000230D000000001D0000 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.phucnt.openchatbot.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OpenChatbot.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/OpenChatbot";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A1000220D000000001D0000 /* Build configuration list for PBXNativeTarget "OpenChatbot" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1000227D000000001D0000 /* Debug */,
+				A1000228D000000001D0000 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A1000223D000000001D0000 /* Build configuration list for PBXNativeTarget "OpenChatbotTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1000229D000000001D0000 /* Debug */,
+				A1000230D000000001D0000 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A1000224D000000001D0000 /* Build configuration list for PBXProject "OpenChatbot" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1000225D000000001D0000 /* Debug */,
+				A1000226D000000001D0000 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		A1000131D000000001D0000 /* OpenChatbot.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				A1000132D000000001D0000 /* OpenChatbot.xcdatamodel */,
+			);
+			currentVersion = A1000132D000000001D0000 /* OpenChatbot.xcdatamodel */;
+			path = OpenChatbot.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
+	};
+	rootObject = A1000200D000000001D0000 /* Project object */;
+} 

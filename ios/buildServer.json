@@ -1,0 +1,10 @@
+{
+  "kind": "xcode",
+  "projectPath": "./OpenChatbot.xcodeproj",
+  "schemeName": "OpenChatbot",
+  "buildSettings": {
+    "PLATFORM_NAME": "iphonesimulator",
+    "SDKROOT": "iphonesimulator",
+    "SWIFT_VERSION": "5.0"
+  }
+} 
