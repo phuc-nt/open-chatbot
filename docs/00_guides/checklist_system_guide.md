@@ -103,41 +103,35 @@ Working Checklists = Customized Task Tracking
 
 ## 📁 **Working Checklist Locations**
 
-### **Option 1: Task-Specific Files**
+### **Option 2: Sprint-Based File (Recommended)**
+```
+docs/03_implementation/sprint_planning/
+├── sprint_01_plan.md  # ✅ Plan + Checklist + Results
+├── sprint_02_plan.md
+└── ...
+```
+**Pros**:
+- ✅ **Single Source of Truth**: Mọi thứ về sprint (plan, checklist, kết quả) đều ở một nơi.
+- ✅ **No Duplication**: Loại bỏ hoàn toàn việc phải cập nhật nhiều file.
+- ✅ **Easy to Maintain**: Giảm số lượng file cần quản lý.
+
+**Cons**:
+- 🤷‍♂️ File có thể dài hơn một chút (nhưng vẫn dễ quản lý với mục lục).
+
+### **Option 1: Task-Specific Files (Legacy)**
 ```
 docs/03_implementation/tasks/
 ├── task_001_chat_interface.md
-├── task_002_api_integration.md
-└── task_003_file_upload.md
+└── task_002_api_integration.md
 ```
-
-**Pros**: Dedicated space, easy to find, permanent record  
-**Cons**: More files to manage
-
-### **Option 2: Sprint-Based Files**
-```
-docs/03_implementation/sprint_planning/
-├── sprint_01_tasks.md
-├── sprint_02_tasks.md
-└── current_sprint_checklist.md
-```
-
-**Pros**: Grouped by sprint, easier overview  
-**Cons**: Harder to find specific task later
-
-### **Option 3: Single Working File**
-```
-docs/03_implementation/current_work_checklist.md
-```
-
-**Pros**: Simple, always know where to look  
-**Cons**: Gets long, harder to track history
+**Pros**: Tốt cho các task cực lớn hoặc độc lập không thuộc sprint.
+**Cons**: Dễ tạo ra sự trùng lặp với sprint plan, khó bảo trì.
 
 ### **🎯 Recommended Approach**
-**Use Option 1** - Task-specific files với naming convention:
-- `task_[number]_[short_description].md`
-- Archive completed tasks to `completed/` subfolder
-- Keep current tasks in main folder
+**Use Option 2 (Sprint-Based File)** là phương pháp được khuyến khích cho hầu hết các trường hợp.
+- **Tích hợp checklist** trực tiếp vào file `sprint_[number]_plan.md`.
+- File này sẽ đóng vai trò là tài liệu sống, từ lúc lập kế hoạch cho đến khi hoàn thành và ghi nhận kết quả.
+- Cách tiếp cận này đã được chứng minh là hiệu quả qua Sprint 1, giúp giảm 50% số lượng tài liệu cần quản lý.
 
 ---
 

@@ -40,7 +40,7 @@
 
 ## 📋 **Active Documents**
 
-> 📖 **Sprint 1 details**: [Task 001 Sprint 01](tasks/task_001_sprint_01_foundation.md)  
+> 📖 **Sprint 1 details**: [Sprint 1 Plan](sprint_planning/sprint_01_plan.md)  
 > 📖 **Progress tracking**: [Progress Tracker](progress_tracker.md)  
 > 📖 **Sprint planning**: [Sprint Planning](sprint_planning/)
 

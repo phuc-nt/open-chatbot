@@ -46,7 +46,7 @@
 ## 📋 **Quick Reference**
 
 > 📖 **Complete setup**: [iOS App Development Guide](../00_guides/ios_app_development_guide.md)  
-> 📖 **Sprint 1 details**: [Task 001 Sprint 01](../03_implementation/tasks/task_001_sprint_01_foundation.md)  
+> 📖 **Sprint 1 details**: [Sprint 1 Plan](../03_implementation/sprint_planning/sprint_01_plan.md)  
 > 📖 **Project overview**: [Project Overview](project_overview.md)
 
 ### **Development Commands**

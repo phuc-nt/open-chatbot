@@ -66,7 +66,7 @@ ios/OpenChatbot/
 
 > 📖 **Complete setup guide**: [iOS App Development Guide](../docs/00_guides/ios_app_development_guide.md)  
 > 📖 **Development environment**: [Dev Environment Guide](../docs/02_development/dev_env_guide.md)  
-> 📖 **Sprint progress**: [Task 001 Sprint 01](../docs/03_implementation/tasks/task_001_sprint_01_foundation.md)
+> 📖 **Sprint progress**: [Sprint 1 Plan](../docs/03_implementation/sprint_planning/sprint_01_plan.md)
 
 ### **Key Features Implemented**
 - ✅ MVVM architecture với SwiftUI
