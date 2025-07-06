@@ -75,7 +75,7 @@ Quy trình làm việc chuẩn cho **mỗi task** từ planning đến completio
 
 ### **2. Progress Tracking**
 #### **Daily Updates**
-> 📖 **Documentation process**: [Documentation Maintenance Guide](documentation_maintenance_guide.md#daily-after-each-development-session)  
+> 📖 **Documentation process**: [Documentation Maintenance Guide](documentation_maintenance_guide.md#daily-after-each-development-session)
 > 📖 **Working checklists**: [Checklist System Guide](checklist_system_guide.md) - How to create và use task-specific checklists
 
 - [ ] **Update** `docs/00_context/current_status.md` với progress

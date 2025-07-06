@@ -21,7 +21,7 @@ docs/
 
 ## 🔄 **Maintenance Schedule**
 
-> 📖 **Task workflow integration**: [Task Management Guide](task_management_guide.md) - Complete task workflow including documentation steps  
+> 📖 **Task workflow integration**: [Task Management Guide](task_management_guide.md) - Complete task workflow including documentation steps
 > 📖 **Working checklists**: [Checklist System Guide](checklist_system_guide.md) - How to use checklists in practice
 
 ### **Daily (After Each Development Session)**
