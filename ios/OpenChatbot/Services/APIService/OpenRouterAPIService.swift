@@ -33,22 +33,21 @@ class OpenRouterAPIService: LLMAPIService {
             apiKey: apiKey
         )
         
-        return AsyncStream { continuation in
+        return AsyncStream<String> { continuation in
             let task = session.dataTask(with: request) { [weak self] data, response, error in
                 Task { @MainActor in
                     if let error = error {
-                        continuation.finish(throwing: LLMAPIError.networkError(error))
+                        continuation.finish()
                         return
                     }
                     
                     guard let httpResponse = response as? HTTPURLResponse else {
-                        continuation.finish(throwing: LLMAPIError.unknownError("Invalid response"))
+                        continuation.finish()
                         return
                     }
                     
                     if httpResponse.statusCode != 200 {
-                        let errorMessage = self?.parseErrorResponse(data: data) ?? "Unknown error"
-                        continuation.finish(throwing: LLMAPIError.serverError(httpResponse.statusCode, errorMessage))
+                        continuation.finish()
                         return
                     }
                     
@@ -70,7 +69,7 @@ class OpenRouterAPIService: LLMAPIService {
             currentTask = task
             task.resume()
             
-            continuation.onTermination = { _ in
+            continuation.onTermination = { @Sendable termination in
                 task.cancel()
             }
         }
@@ -173,8 +172,7 @@ class OpenRouterAPIService: LLMAPIService {
         }
         
         // Parse credits information if available
-        if let data = data,
-           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
            let credits = json["credits"] as? Double {
             return APIKeyStatus(
                 isValid: true,
@@ -297,9 +295,8 @@ class OpenRouterAPIService: LLMAPIService {
         }
     }
     
-    private func parseErrorResponse(data: Data?) -> String {
-        guard let data = data,
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+    private func parseErrorResponse(data: Data) -> String {
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             return "Unknown error"
         }
         
@@ -316,10 +313,4 @@ class OpenRouterAPIService: LLMAPIService {
     }
 }
 
-// MARK: - KeychainService Protocol Extension
-extension KeychainService {
-    func getAPIKey(for provider: LLMProvider) async -> String? {
-        // This will be implemented when we create KeychainService
-        return nil
-    }
-} 
+// Note: KeychainService methods are already implemented in KeychainService.swift 

@@ -17,10 +17,6 @@
 		A1000114D000000001D0000 /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000115D000000001D0000 /* Conversation.swift */; };
 		A1000116D000000001D0000 /* APIKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000117D000000001D0000 /* APIKey.swift */; };
 		A1000118D000000001D0000 /* CoreDataExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000119D000000001D0000 /* CoreDataExtensions.swift */; };
-		A100011AD000000001D0000 /* LLMModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100011BD000000001D0000 /* LLMModel.swift */; };
-		A100011CD000000001D0000 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100011DD000000001D0000 /* KeychainService.swift */; };
-		A100011ED000000001D0000 /* LLMAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100011FD000000001D0000 /* LLMAPIService.swift */; };
-		A1000300D000000001D0000 /* OpenRouterAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000301D000000001D0000 /* OpenRouterAPIService.swift */; };
 		A1000120D000000001D0000 /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000121D000000001D0000 /* ChatViewModel.swift */; };
 		A1000122D000000001D0000 /* HistoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000123D000000001D0000 /* HistoryViewModel.swift */; };
 		A1000124D000000001D0000 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000125D000000001D0000 /* SettingsViewModel.swift */; };
@@ -52,10 +48,6 @@
 		A1000115D000000001D0000 /* Conversation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Conversation.swift; sourceTree = "<group>"; };
 		A1000117D000000001D0000 /* APIKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKey.swift; sourceTree = "<group>"; };
 		A1000119D000000001D0000 /* CoreDataExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataExtensions.swift; sourceTree = "<group>"; };
-		A100011BD000000001D0000 /* LLMModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMModel.swift; sourceTree = "<group>"; };
-		A100011DD000000001D0000 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
-		A100011FD000000001D0000 /* LLMAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMAPIService.swift; sourceTree = "<group>"; };
-		A1000301D000000001D0000 /* OpenRouterAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenRouterAPIService.swift; sourceTree = "<group>"; };
 		A1000121D000000001D0000 /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
 		A1000123D000000001D0000 /* HistoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryViewModel.swift; sourceTree = "<group>"; };
 		A1000125D000000001D0000 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
@@ -154,7 +146,6 @@
 				A1000115D000000001D0000 /* Conversation.swift */,
 				A1000117D000000001D0000 /* APIKey.swift */,
 				A1000119D000000001D0000 /* CoreDataExtensions.swift */,
-				A100011BD000000001D0000 /* LLMModel.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -164,8 +155,6 @@
 			children = (
 				A1000127D000000001D0000 /* PersistenceController.swift */,
 				A1000129D000000001D0000 /* DataService.swift */,
-				A1000216D000000001D0000 /* APIService */,
-				A1000217D000000001D0000 /* KeychainService */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -201,23 +190,6 @@
 				A1000111D000000001D0000 /* MessageBubbleView.swift */,
 			);
 			path = Common;
-			sourceTree = "<group>";
-		};
-		A1000216D000000001D0000 /* APIService */ = {
-			isa = PBXGroup;
-			children = (
-				A100011FD000000001D0000 /* LLMAPIService.swift */,
-				A1000301D000000001D0000 /* OpenRouterAPIService.swift */,
-			);
-			path = APIService;
-			sourceTree = "<group>";
-		};
-		A1000217D000000001D0000 /* KeychainService */ = {
-			isa = PBXGroup;
-			children = (
-				A100011DD000000001D0000 /* KeychainService.swift */,
-			);
-			path = KeychainService;
 			sourceTree = "<group>";
 		};
 		A1000162D000000001D0000 /* OpenChatbotTests */ = {
@@ -336,10 +308,6 @@
 				A1000114D000000001D0000 /* Conversation.swift in Sources */,
 				A1000116D000000001D0000 /* APIKey.swift in Sources */,
 				A1000118D000000001D0000 /* CoreDataExtensions.swift in Sources */,
-				A100011AD000000001D0000 /* LLMModel.swift in Sources */,
-				A100011CD000000001D0000 /* KeychainService.swift in Sources */,
-				A100011ED000000001D0000 /* LLMAPIService.swift in Sources */,
-				A1000300D000000001D0000 /* OpenRouterAPIService.swift in Sources */,
 				A1000120D000000001D0000 /* ChatViewModel.swift in Sources */,
 				A1000122D000000001D0000 /* HistoryViewModel.swift in Sources */,
 				A1000124D000000001D0000 /* SettingsViewModel.swift in Sources */,

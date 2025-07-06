@@ -161,7 +161,7 @@ class KeychainService: ObservableObject {
     var isBiometricAuthenticationAvailable: Bool {
         let context = LAContext()
         var error: NSError?
-        return context.canEvaluatePolicy(.biometryCurrentSet, error: &error)
+        return context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
     }
     
     // MARK: - Private Helpers
@@ -210,9 +210,9 @@ enum KeychainError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .storageError(let status):
-            return "Failed to store API key: \(SecCopyErrorMessageString(status, nil) ?? "Unknown error")"
+            return "Failed to store API key: \(SecCopyErrorMessageString(status, nil) as String? ?? "Unknown error")"
         case .deletionError(let status):
-            return "Failed to delete API key: \(SecCopyErrorMessageString(status, nil) ?? "Unknown error")"
+            return "Failed to delete API key: \(SecCopyErrorMessageString(status, nil) as String? ?? "Unknown error")"
         case .biometricError(let error):
             return "Biometric authentication error: \(error.localizedDescription)"
         case .invalidData:
@@ -241,7 +241,7 @@ extension KeychainService {
     /// Request biometric authentication before accessing sensitive data
     func authenticateWithBiometrics() async throws -> Bool {
         let context = LAContext()
-        let policy = LAPolicy.biometryCurrentSet
+        let policy = LAPolicy.deviceOwnerAuthenticationWithBiometrics
         
         do {
             let result = try await context.evaluatePolicy(

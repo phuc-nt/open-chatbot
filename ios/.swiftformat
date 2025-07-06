@@ -37,7 +37,7 @@
 --exponentgrouping disabled
 --patternlet hoist
 --redundanttype inferred
---redundantbackticks false
+
 --redundantparens false
 --redundantget false
 --redundantfileprivate false
@@ -97,7 +97,7 @@
 --acronyms ID,URL,UUID,HTTP,API,JSON,XML,HTML,CSS,JS,SQL,UI,UX,GPS,GPS,CPU,GPU,RAM,SSD,HDD,USB,PDF,PNG,JPG,JPEG,GIF,SVG,MP3,MP4,ZIP,CSV,TSV,RSS,SDK,IDE,CLI,GUI,REST,SOAP,TCP,UDP,IP,DNS,SSL,TLS,SSH,FTP,SMTP,POP,IMAP,OAuth,JWT,CORS,CSRF,XSS,SQL,NoSQL,CRUD,MVC,MVP,MVVM,OOP,AOP,DDD,TDD,BDD,CI,CD,DevOps,AWS,GCP,Azure,iOS,macOS,tvOS,watchOS,Linux,Windows,Android
 
 # Rules to disable
---disable redundantSelf,redundantInit,redundantType,redundantReturn,redundantVoidReturnType,redundantNilInit,redundantLet,redundantPattern,redundantGet,redundantFileprivate,redundantExtensionACL,redundantObjc,redundantRawValues,redundantBackticks,redundantOptionalBinding,redundantParens,redundantClosure,redundantBreak
+--disable redundantSelf,redundantInit,redundantType,redundantReturn,redundantVoidReturnType,redundantNilInit,redundantLet,redundantPattern,redundantGet,redundantFileprivate,redundantExtensionACL,redundantObjc,redundantRawValues,redundantOptionalBinding,redundantParens,redundantClosure,redundantBreak
 
 # Rules to enable
 --enable isEmpty,sortedImports,duplicateImports,unusedArguments,trailingCommas,leadingDelimiters,wrapArguments,wrapParameters,wrapCollections,closingParentheses,wrapReturnType,wrapConditions,wrapTypealiases,functionAttributes,typeAttributes,variableAttributes,modifierOrder,shortOptionals,ranges,semicolons,commas,numberFormatting,hoistPatternLet,strongifiedSelf,yodaConditions,extensionAccessControl,markTypes,organizeDeclarations,blockComments,docComments,fileHeader,blankLinesAtStartOfScope,blankLinesAtEndOfScope,blankLinesBetweenScopes,blankLinesAroundMark,linebreakAtEndOfFile,spaceAroundBraces,spaceAroundBrackets,spaceAroundParens,spaceAroundComments,spaceAroundOperators,spaceAroundGenerics,spaceInsideBraces,spaceInsideBrackets,spaceInsideParens,spaceInsideComments,spaceInsideGenerics,consecutiveSpaces,consecutiveBlankLines,duplicateImports,sortedImports,unusedArguments,trailingCommas,leadingDelimiters,wrapArguments,wrapParameters,wrapCollections,closingParentheses,wrapReturnType,wrapConditions,wrapTypealiases,functionAttributes,typeAttributes,variableAttributes,modifierOrder,shortOptionals,ranges,semicolons,commas,numberFormatting,hoistPatternLet,strongifiedSelf,yodaConditions,extensionAccessControl,markTypes,organizeDeclarations,blockComments,docComments,fileHeader,blankLinesAtStartOfScope,blankLinesAtEndOfScope,blankLinesBetweenScopes,blankLinesAroundMark,linebreakAtEndOfFile,spaceAroundBraces,spaceAroundBrackets,spaceAroundParens,spaceAroundComments,spaceAroundOperators,spaceAroundGenerics,spaceInsideBraces,spaceInsideBrackets,spaceInsideParens,spaceInsideComments,spaceInsideGenerics,consecutiveSpaces,consecutiveBlankLines 
