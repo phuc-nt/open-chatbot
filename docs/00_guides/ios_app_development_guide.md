@@ -203,14 +203,228 @@ xcodebuild -project MyApp.xcodeproj -scheme MyApp -destination 'platform=iOS Sim
 "Tạo một list view với sample data"
 ```
 
+## Bước 7: Code Quality & Standards
+
+### 7.1 Cài đặt Code Quality Tools
+
+```bash
+# Install SwiftLint và SwiftFormat
+brew install swiftlint swiftformat
+```
+
+### 7.2 Tạo file cấu hình SwiftLint (.swiftlint.yml)
+
+```yaml
+# SwiftLint Configuration
+included:
+  - MyApp/
+
+excluded:
+  - .build/
+  - DerivedData/
+
+# Rule Configuration
+line_length:
+  warning: 120
+  error: 150
+
+function_body_length:
+  warning: 50
+  error: 100
+
+type_body_length:
+  warning: 200
+  error: 300
+
+# Naming Rules
+type_name:
+  min_length: 3
+  max_length: 40
+
+identifier_name:
+  min_length: 2
+  max_length: 40
+  excluded:
+    - id
+    - url
+    - api
+
+# Custom Reporter
+reporter: "xcode"
+```
+
+### 7.3 Tạo file cấu hình SwiftFormat (.swiftformat)
+
+```bash
+# SwiftFormat Configuration
+--exclude .build,DerivedData
+--indent 4
+--trimwhitespace always
+--wraparguments before-first
+--wrapparameters before-first
+--shortoptionals always
+--semicolons inline
+--commas inline
+--redundantself remove
+--redundantget remove
+--redundantinit remove
+```
+
+### 7.4 Tạo script format (scripts/format.sh)
+
+```bash
+#!/bin/bash
+
+# Code Quality Script
+set -e
+
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SOURCE_DIR="$PROJECT_DIR/MyApp"
+
+echo "🔧 Running Code Quality Checks"
+
+# SwiftFormat
+if command -v swiftformat &> /dev/null; then
+    echo "🎨 Running SwiftFormat..."
+    swiftformat --config .swiftformat "$SOURCE_DIR"
+    echo "✅ SwiftFormat completed"
+else
+    echo "❌ SwiftFormat not installed. Run: brew install swiftformat"
+fi
+
+# SwiftLint
+if command -v swiftlint &> /dev/null; then
+    echo "🔍 Running SwiftLint..."
+    swiftlint lint --config .swiftlint.yml
+    echo "✅ SwiftLint completed"
+else
+    echo "❌ SwiftLint not installed. Run: brew install swiftlint"
+fi
+```
+
+```bash
+# Cấp quyền thực thi
+chmod +x scripts/format.sh
+```
+
+## Bước 8: Coding Standards
+
+### 8.1 Architecture Guidelines - MVVM Pattern
+
+```swift
+// ✅ Good: Clear separation of concerns
+class ChatViewModel: ObservableObject {
+    @Published var messages: [Message] = []
+    private let dataService: DataService
+    
+    func sendMessage(_ content: String) {
+        // Business logic here
+    }
+}
+
+struct ChatView: View {
+    @StateObject private var viewModel = ChatViewModel()
+    
+    var body: some View {
+        // UI code only
+    }
+}
+```
+
+### 8.2 Naming Conventions
+
+```swift
+// ✅ Good: Descriptive camelCase
+let userMessage = "Hello"
+let isLoadingMessages = false
+func sendMessageToServer(_ message: String) { }
+
+// ❌ Bad: Unclear names
+let msg = "Hello"
+let loading = false
+func send(_ m: String) { }
+```
+
+### 8.3 SwiftUI Best Practices
+
+```swift
+// ✅ Good: Small, focused views
+struct ChatView: View {
+    var body: some View {
+        VStack {
+            MessageListView()
+            MessageInputView()
+        }
+    }
+}
+
+// ✅ Good: Proper state management
+struct ContentView: View {
+    @StateObject private var viewModel = ViewModel()
+    @State private var text = ""
+    @Environment(\.dismiss) private var dismiss
+}
+```
+
+### 8.4 Error Handling
+
+```swift
+// ✅ Good: Safe optional handling
+if let message = viewModel.selectedMessage {
+    presentMessageDetail(message)
+}
+
+guard let user = currentUser else {
+    showLoginScreen()
+    return
+}
+
+// ❌ Bad: Force unwrapping
+let message = viewModel.selectedMessage! // Dangerous
+```
+
+### 8.5 Code Quality Checklist
+
+#### Before Committing
+- [ ] Code follows MVVM pattern
+- [ ] SwiftLint warnings resolved
+- [ ] SwiftFormat applied
+- [ ] No force unwrapping (`!`) or `try!`
+- [ ] Proper error handling
+- [ ] Accessibility labels added
+- [ ] Documentation comments for public APIs
+
+#### Code Review
+- [ ] Code is readable and maintainable
+- [ ] Architecture patterns followed
+- [ ] Edge cases handled
+- [ ] Performance implications considered
+- [ ] Memory management (weak references)
+
+### 8.6 Running Quality Checks
+
+```bash
+# Run all quality checks
+./scripts/format.sh
+
+# Or run individually
+swiftformat --config .swiftformat MyApp/
+swiftlint lint --config .swiftlint.yml
+```
+
 ## Cấu trúc thư mục cuối cùng
 
 ```
 MyApp/
 ├── .cursorrules
+├── .swiftlint.yml
+├── .swiftformat
+├── .gitignore
 ├── buildServer.json
 ├── MyApp.xcodeproj/
 │   └── project.pbxproj
+├── scripts/
+│   └── format.sh
 └── MyApp/
     ├── Assets.xcassets/
     │   └── Contents.json
@@ -236,6 +450,11 @@ MyApp/
 - Restart Cursor
 - Kiểm tra Xcode command line tools: `xcode-select --install`
 
+### SwiftLint/SwiftFormat Issues
+- Verify tools installed: `brew list | grep swift`
+- Check config file paths
+- Run with verbose flag: `swiftlint lint --verbose`
+
 ## Tips và Best Practices
 
 1. **Sử dụng SwiftUI Preview** để xem giao diện real-time
@@ -244,9 +463,15 @@ MyApp/
 4. **Sử dụng proper state management** (@State, @Binding, @ObservedObject)
 5. **Code clean và có comment** để AI hiểu context tốt hơn
 6. **Test trên nhiều device sizes** sử dụng different simulators
+7. **Run quality checks thường xuyên** để maintain code standards
+8. **Use descriptive names** thay vì abbreviations
+9. **Keep functions small** (max 50 lines)
+10. **Document public APIs** với Swift DocC format
 
 ## Tài liệu tham khảo
 
 - [Apple SwiftUI Documentation](https://developer.apple.com/documentation/swiftui/)
 - [iOS Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/)
-- [SweetPad Extension](https://marketplace.visualstudio.com/items?itemName=sweetpad.sweetpad) 
+- [SweetPad Extension](https://marketplace.visualstudio.com/items?itemName=sweetpad.sweetpad)
+- [SwiftLint Rules](https://realm.github.io/SwiftLint/rule-directory.html)
+- [SwiftFormat Options](https://github.com/nicklockwood/SwiftFormat#options) 
