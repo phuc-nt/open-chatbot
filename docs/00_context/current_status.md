@@ -30,18 +30,22 @@
 - **Quality**: SwiftLint, SwiftFormat, comprehensive testing
 - **Architecture**: MVVM pattern với dependency injection ready
 
-## 🚀 **Ready for Sprint 2**
+## 🚀 **Sprint 2: STARTED** 🔄
 
-**Next Phase**: API Integration & Real-time Chat  
-**Estimated Start**: Ready immediately  
-**Blockers**: None - all foundation complete  
+**Phase**: API Integration & Real-time Chat **IN PROGRESS**  
+**Sprint**: Sprint 2 - Core Functionality  
+**Status**: **PLANNING COMPLETE** 📋  
+**Started**: 2025-01-06  
+**Branch**: `sprint-02-api-integration`
 
-### **Sprint 2 Priorities**
-1. **OpenRouter API Integration** - Multi-LLM support
-2. **Real-time Chat** - WebSocket/HTTP streaming
-3. **Message Persistence** - Core Data integration
-4. **Advanced UI** - Animations, typing indicators
-5. **API Key Management** - Secure storage với Keychain
+### **Sprint 2 Goals**
+1. **OpenRouter API Integration** - Multi-LLM support với authentication
+2. **API Key Management** - Secure Keychain storage với UI
+3. **Real-time Streaming** - WebSocket/SSE implementation  
+4. **Message Persistence** - Core Data integration
+5. **File Upload Foundation** - PDF và OCR processing
+
+> 📖 **Detailed plan**: [Sprint 2 Plan](../03_implementation/sprint_planning/sprint_02_plan.md)
 
 ## 📋 **Quick Reference**
 
