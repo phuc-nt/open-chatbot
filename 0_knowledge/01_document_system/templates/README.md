@@ -67,7 +67,7 @@ templates/
 
 ## 💡 Tips
 
-- **Luôn bắt đầu với file `docs/README.md`** - đây là điểm vào duy nhất
+- **Luôn bắt đầu với file `docs/START_POINT.md`** - đây là điểm vào duy nhất
 - **Cập nhật `current_status.md` hàng ngày** - chỉ mất 2 phút
 - **Tuân thủ `task_management_guide.md`** - đảm bảo quy trình nhất quán
 - **Sử dụng phương pháp phỏng vấn cho SRS** - hiệu quả hơn nhiều so với template tĩnh

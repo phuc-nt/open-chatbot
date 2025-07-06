@@ -93,7 +93,7 @@ Thay vì viết một tài liệu dài loằng ngoằng cho tất cả, tôi t�
 - **Developer mới (30 phút)**: Đủ để hiểu và bắt đầu contribute
 - **Project Manager (15 phút)**: Nắm được tiến độ và kế hoạch
 
-> 📖 **Xem thực tế**: [docs/README.md](../docs/README.md) - Cổng vào với các lộ trình rõ ràng
+> 📖 **Xem thực tế**: [docs/START_POINT.md](../docs/START_POINT.md) - Cổng vào với các lộ trình rõ ràng
 
 ### 2. Hệ Thống File Context
 
@@ -126,7 +126,7 @@ Tách biệt hai loại này giúp:
 
 ## 4 File Quan Trọng Nhất
 
-### 1. docs/README.md - "Bảo Vệ Cổng"
+### 1. docs/START_POINT.md - "Bảo Vệ Cổng"
 
 File này như người bảo vệ ở cổng công ty - chỉ đường cho mọi người đi đúng chỗ.
 
@@ -334,7 +334,7 @@ Biến hệ thống thành thói quen:
 
 Khi bắt đầu chat mới với AI, tôi chỉ cần gõ:
 ```
-"đọc docs/README.md để biết phải làm gì"
+"đọc docs/START_POINT.md để biết phải làm gì"
 ```
 
 AI sẽ tự động:

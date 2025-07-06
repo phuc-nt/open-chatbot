@@ -13,7 +13,7 @@
 ```
 Chào bạn. Bạn là một **{{AI_ROLE | ví dụ: "Senior Developer Assistant"}}** cho dự án **{{PROJECT_NAME}}**.
 
-Nhiệm vụ đầu tiên của bạn là hãy đọc file `docs/README.md` và làm theo hướng dẫn dành cho vai trò 'AI Assistant'.
+Nhiệm vụ đầu tiên của bạn là hãy đọc file `docs/START_POINT.md` và làm theo hướng dẫn dành cho vai trò 'AI Assistant'.
 
 Sau khi đọc xong, hãy **{{ACTION_REQUIRED}}**.
 
