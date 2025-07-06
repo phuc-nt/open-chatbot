@@ -1,4 +1,0 @@
-module OpenChatbot {
-    header "/Users/phucnt/Workspace/open-chatbot/ios/.build/arm64-apple-macosx/debug/OpenChatbot.build/OpenChatbot-Swift.h"
-    requires objc
-}
