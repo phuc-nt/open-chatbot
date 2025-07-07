@@ -12,8 +12,8 @@ struct HistoryView: View {
                 
                 // Conversations list
                 List {
-                    ForEach(viewModel.filteredConversations(searchText: searchText)) { conversation in
-                        ConversationRow(conversation: conversation)
+                    ForEach(viewModel.filteredConversations(searchText: searchText), id: \.id) { conversation in
+                        ConversationRow(conversation: conversation, viewModel: viewModel)
                             .onTapGesture {
                                 viewModel.selectConversation(conversation)
                             }
@@ -38,6 +38,12 @@ struct HistoryView: View {
                     }
                 }
             }
+            .onAppear {
+                viewModel.loadConversations()
+            }
+            .refreshable {
+                viewModel.refreshConversations()
+            }
         }
     }
 }
@@ -58,21 +64,30 @@ struct SearchBar: View {
 }
 
 struct ConversationRow: View {
-    let conversation: Conversation
+    let conversation: ConversationEntity
+    let viewModel: HistoryViewModel
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(conversation.title)
+            Text(viewModel.getConversationTitle(conversation))
                 .font(.headline)
             
-            Text(conversation.lastMessage ?? "No messages")
+            Text(viewModel.getConversationPreview(conversation))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .lineLimit(2)
             
-            Text(conversation.updatedAt, style: .relative)
-                .font(.caption)
-                .foregroundColor(.secondary)
+            HStack {
+                Text(viewModel.getFormattedDate(conversation))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                
+                Spacer()
+                
+                Text("\(viewModel.getMessageCount(conversation)) messages")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
         }
         .padding(.vertical, 4)
     }

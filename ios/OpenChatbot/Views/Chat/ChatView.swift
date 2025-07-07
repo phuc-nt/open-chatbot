@@ -67,7 +67,7 @@ struct ChatView: View {
                             showModelPicker = true
                         }
                         Button("Xóa Cuộc Trò Chuyện") {
-                            viewModel.clearConversation()
+                            viewModel.clearMessages()
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
@@ -82,7 +82,7 @@ struct ChatView: View {
     
     private var headerView: some View {
         VStack(spacing: 4) {
-            if let selectedModel = viewModel.selectedModel {
+            let selectedModel = viewModel.selectedModel
                 HStack {
                     Image(systemName: "cpu")
                         .foregroundColor(.blue)
@@ -99,7 +99,6 @@ struct ChatView: View {
                 .background(Color.blue.opacity(0.1))
                 .cornerRadius(8)
                 .padding(.horizontal)
-            }
         }
     }
     
@@ -112,7 +111,7 @@ struct ChatView: View {
             
             if viewModel.isStreaming {
                 Button(action: {
-                    viewModel.cancelStreaming()
+                    viewModel.cancelCurrentRequest()
                 }) {
                     Image(systemName: "stop.circle.fill")
                         .font(.title2)
@@ -141,7 +140,11 @@ struct ChatView: View {
         let trimmedMessage = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedMessage.isEmpty else { return }
         
-        viewModel.sendMessage(trimmedMessage)
+        // Set the input in viewModel and call sendMessage
+        viewModel.currentInput = trimmedMessage
+        Task {
+            await viewModel.sendMessage()
+        }
         messageText = ""
         
         // Hide keyboard
@@ -253,9 +256,9 @@ struct ModelPickerView: View {
                     ForEach(viewModel.availableModels.prefix(10), id: \.id) { model in
                         ModelRow(
                             model: model,
-                            isSelected: viewModel.selectedModel?.id == model.id
+                            isSelected: viewModel.selectedModel.id == model.id
                         ) {
-                            viewModel.selectModel(model)
+                            viewModel.selectedModel = model
                             dismiss()
                         }
                     }

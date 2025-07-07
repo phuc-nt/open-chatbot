@@ -1,68 +1,166 @@
 import Foundation
 import SwiftUI
+import CoreData
 
 @MainActor
 class HistoryViewModel: ObservableObject {
-    @Published var conversations: [Conversation] = []
-    @Published var selectedConversation: Conversation?
+    @Published var conversations: [ConversationEntity] = []
+    @Published var selectedConversation: ConversationEntity?
+    @Published var isLoading: Bool = false
+    @Published var errorMessage: String?
     
-    init() {
-        loadMockData()
+    private let dataService: DataService
+    
+    init(dataService: DataService = DataService()) {
+        self.dataService = dataService
+        loadConversations()
     }
     
-    func filteredConversations(searchText: String) -> [Conversation] {
-        if searchText.isEmpty {
-            return conversations.sorted { $0.updatedAt > $1.updatedAt }
-        } else {
-            return conversations.filter { conversation in
-                conversation.title.localizedCaseInsensitiveContains(searchText) ||
-                conversation.lastMessage?.localizedCaseInsensitiveContains(searchText) == true
-            }.sorted { $0.updatedAt > $1.updatedAt }
+    // MARK: - Public Methods
+    
+    /// Load conversations from Core Data
+    func loadConversations() {
+        isLoading = true
+        errorMessage = nil
+        
+        Task {
+            do {
+                let fetchedConversations = dataService.getAllConversations()
+                await MainActor.run {
+                    self.conversations = fetchedConversations
+                    self.isLoading = false
+                }
+            } catch {
+                await MainActor.run {
+                    self.errorMessage = "Failed to load conversations: \(error.localizedDescription)"
+                    self.isLoading = false
+                }
+            }
         }
     }
     
-    func selectConversation(_ conversation: Conversation) {
+    /// Filter conversations based on search text
+    func filteredConversations(searchText: String) -> [ConversationEntity] {
+        let sortedConversations = conversations.sorted { 
+            ($0.updatedAt ?? Date.distantPast) > ($1.updatedAt ?? Date.distantPast) 
+        }
+        
+        if searchText.isEmpty {
+            return sortedConversations
+        } else {
+            return sortedConversations.filter { conversation in
+                let title = conversation.title ?? ""
+                let titleMatches = title.localizedCaseInsensitiveContains(searchText)
+                
+                // Check if any message content matches
+                let messages = dataService.getMessagesForConversation(conversation)
+                let messageMatches = messages.contains { message in
+                    message.content.localizedCaseInsensitiveContains(searchText)
+                }
+                
+                return titleMatches || messageMatches
+            }
+        }
+    }
+    
+    /// Select a conversation
+    func selectConversation(_ conversation: ConversationEntity) {
         selectedConversation = conversation
     }
     
-    func createNewConversation() {
-        let newConversation = Conversation()
+    /// Create a new conversation
+    @discardableResult
+    func createNewConversation(title: String = "New Conversation") -> ConversationEntity {
+        let newConversation = dataService.createConversation(title: title)
         conversations.insert(newConversation, at: 0)
         selectedConversation = newConversation
+        return newConversation
     }
     
+    /// Delete conversations at specified offsets
     func deleteConversations(at offsets: IndexSet) {
-        conversations.remove(atOffsets: offsets)
-    }
-    
-    private func loadMockData() {
-        conversations = [
-            createMockConversation(title: "iOS Development Help", messages: [
-                "I need help with SwiftUI",
-                "SwiftUI is Apple's modern UI framework. What specific aspect would you like to learn?",
-                "How do I create custom views?",
-                "You can create custom views by conforming to the View protocol..."
-            ]),
-            createMockConversation(title: "API Integration", messages: [
-                "How do I integrate REST APIs in iOS?",
-                "There are several ways to integrate REST APIs in iOS. URLSession is the most common approach..."
-            ]),
-            createMockConversation(title: "Core Data Questions", messages: [
-                "I'm having trouble with Core Data",
-                "Core Data can be tricky. What specific issue are you facing?"
-            ])
-        ]
-    }
-    
-    private func createMockConversation(title: String, messages: [String]) -> Conversation {
-        var conversation = Conversation(title: title)
+        let conversationsToDelete = offsets.map { conversations[$0] }
         
-        for (index, messageContent) in messages.enumerated() {
-            let role: MessageRole = index % 2 == 0 ? .user : .assistant
-            let message = Message(content: messageContent, role: role, conversationId: conversation.id)
-            conversation.addMessage(message)
+        for conversation in conversationsToDelete {
+            dataService.deleteConversation(conversation)
         }
         
-        return conversation
+        conversations.remove(atOffsets: offsets)
+        
+        // Clear selection if selected conversation was deleted
+        if let selected = selectedConversation,
+           conversationsToDelete.contains(where: { $0.id == selected.id }) {
+            selectedConversation = nil
+        }
+    }
+    
+    /// Delete a specific conversation
+    func deleteConversation(_ conversation: ConversationEntity) {
+        dataService.deleteConversation(conversation)
+        conversations.removeAll { $0.id == conversation.id }
+        
+        // Clear selection if selected conversation was deleted
+        if selectedConversation?.id == conversation.id {
+            selectedConversation = nil
+        }
+    }
+    
+    /// Get conversation title with fallback
+    func getConversationTitle(_ conversation: ConversationEntity) -> String {
+        return conversation.title ?? "Untitled Conversation"
+    }
+    
+    /// Get conversation preview (last message content)
+    func getConversationPreview(_ conversation: ConversationEntity) -> String {
+        let messages = dataService.getMessagesForConversation(conversation)
+        guard let lastMessage = messages.last else {
+            return "No messages"
+        }
+        
+        let words = lastMessage.content.components(separatedBy: .whitespaces)
+        return words.prefix(10).joined(separator: " ")
+    }
+    
+    /// Get conversation message count
+    func getMessageCount(_ conversation: ConversationEntity) -> Int {
+        return dataService.getMessagesForConversation(conversation).count
+    }
+    
+    /// Refresh conversations (pull to refresh)
+    func refreshConversations() {
+        loadConversations()
+    }
+    
+    /// Search conversations
+    func searchConversations(query: String) -> [ConversationEntity] {
+        return filteredConversations(searchText: query)
+    }
+    
+    // MARK: - Helper Methods
+    
+    /// Check if there are any conversations
+    var hasConversations: Bool {
+        return !conversations.isEmpty
+    }
+    
+    /// Get formatted date for conversation
+    func getFormattedDate(_ conversation: ConversationEntity) -> String {
+        guard let date = conversation.updatedAt else { return "" }
+        
+        let formatter = DateFormatter()
+        let calendar = Calendar.current
+        
+        if calendar.isDateInToday(date) {
+            formatter.timeStyle = .short
+            return formatter.string(from: date)
+        } else if calendar.isDateInYesterday(date) {
+            return "Yesterday"
+        } else if calendar.component(.year, from: date) == calendar.component(.year, from: Date()) {
+            formatter.dateFormat = "MMM d"
+            return formatter.string(from: date)
+        } else {
+            formatter.dateFormat = "MMM d, yyyy"
+            return formatter.string(from: date)
+        }
     }
 } 

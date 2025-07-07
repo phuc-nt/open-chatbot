@@ -1,10 +1,10 @@
 import Foundation
 
 struct Message: Identifiable, Codable {
-    let id: UUID
+    var id: UUID
     var content: String
     let role: MessageRole
-    let timestamp: Date
+    var timestamp: Date
     let conversationId: UUID
     
     init(content: String, role: MessageRole, conversationId: UUID) {

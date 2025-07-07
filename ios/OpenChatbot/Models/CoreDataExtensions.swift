@@ -2,20 +2,16 @@ import CoreData
 import Foundation
 
 // MARK: - Core Data Entity Extensions
-// NOTE: These extensions will be uncommented after Core Data entities are generated
 
-/*
 /// Extension for ConversationEntity to provide convenience methods
 extension ConversationEntity {
     
     /// Convert ConversationEntity to Conversation model
     func toConversation() -> Conversation {
-        return Conversation(
-            id: self.id ?? UUID(),
-            title: self.title ?? "Untitled Conversation",
-            createdAt: self.createdAt ?? Date(),
-            updatedAt: self.updatedAt ?? Date()
-        )
+        var conversation = Conversation(title: self.title ?? "Untitled Conversation")
+        // Set the other properties manually
+        conversation.messages = self.messagesArray
+        return conversation
     }
     
     /// Create ConversationEntity from Conversation model
@@ -51,6 +47,22 @@ extension ConversationEntity {
         let preview = words.prefix(5).joined(separator: " ")
         return preview.isEmpty ? "No content" : preview
     }
+    
+    /// Fetch request for conversations with search term
+    static func fetchRequestWithSearch(searchTerm: String) -> NSFetchRequest<ConversationEntity> {
+        let request = fetchRequest()
+        request.predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchTerm)
+        request.sortDescriptors = [NSSortDescriptor(key: "updatedAt", ascending: false)]
+        return request
+    }
+    
+    /// Fetch request for recent conversations
+    static func fetchRequestRecent(limit: Int = 10) -> NSFetchRequest<ConversationEntity> {
+        let request = fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(key: "updatedAt", ascending: false)]
+        request.fetchLimit = limit
+        return request
+    }
 }
 
 /// Extension for MessageEntity to provide convenience methods
@@ -59,10 +71,8 @@ extension MessageEntity {
     /// Convert MessageEntity to Message model
     func toMessage() -> Message {
         return Message(
-            id: self.id ?? UUID(),
             content: self.content ?? "",
             role: MessageRole(rawValue: self.role ?? "user") ?? .user,
-            timestamp: self.timestamp ?? Date(),
             conversationId: self.conversationId ?? UUID()
         )
     }
@@ -95,86 +105,9 @@ extension MessageEntity {
         formatter.timeStyle = .short
         return formatter.string(from: timestamp ?? Date())
     }
-}
-
-/// Extension for APIKeyEntity to provide convenience methods
-extension APIKeyEntity {
-    
-    /// Convert APIKeyEntity to APIKey model
-    func toAPIKey() -> APIKey {
-        return APIKey(
-            id: self.id ?? UUID(),
-            name: self.name ?? "Unknown",
-            provider: APIProvider(rawValue: self.provider ?? "openai") ?? .openai,
-            createdAt: self.createdAt ?? Date()
-        )
-    }
-    
-    /// Create APIKeyEntity from APIKey model
-    static func from(_ apiKey: APIKey, keyData: Data, context: NSManagedObjectContext) -> APIKeyEntity {
-        let entity = APIKeyEntity(context: context)
-        entity.id = apiKey.id
-        entity.name = apiKey.name
-        entity.provider = apiKey.provider.rawValue
-        entity.keyData = keyData
-        entity.createdAt = apiKey.createdAt
-        return entity
-    }
-    
-    /// Get provider as enum
-    var providerEnum: APIProvider {
-        return APIProvider(rawValue: provider ?? "openai") ?? .openai
-    }
-    
-    /// Check if API key has data
-    var hasKeyData: Bool {
-        return keyData != nil && !keyData!.isEmpty
-    }
-    
-    /// Get formatted creation date
-    var formattedCreatedAt: String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return formatter.string(from: createdAt ?? Date())
-    }
-}
-
-// MARK: - Fetch Request Extensions
-
-extension ConversationEntity {
-    
-    /// Fetch request for all conversations
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<ConversationEntity> {
-        return NSFetchRequest<ConversationEntity>(entityName: "Conversation")
-    }
-    
-    /// Fetch request for conversations with search term
-    static func fetchRequest(searchTerm: String) -> NSFetchRequest<ConversationEntity> {
-        let request = fetchRequest()
-        request.predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchTerm)
-        request.sortDescriptors = [NSSortDescriptor(key: "updatedAt", ascending: false)]
-        return request
-    }
-    
-    /// Fetch request for recent conversations
-    static func fetchRequestRecent(limit: Int = 10) -> NSFetchRequest<ConversationEntity> {
-        let request = fetchRequest()
-        request.sortDescriptors = [NSSortDescriptor(key: "updatedAt", ascending: false)]
-        request.fetchLimit = limit
-        return request
-    }
-}
-
-extension MessageEntity {
-    
-    /// Fetch request for all messages
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<MessageEntity> {
-        return NSFetchRequest<MessageEntity>(entityName: "Message")
-    }
     
     /// Fetch request for messages in a conversation
-    static func fetchRequest(conversationId: UUID) -> NSFetchRequest<MessageEntity> {
+    static func fetchRequestForConversation(conversationId: UUID) -> NSFetchRequest<MessageEntity> {
         let request = fetchRequest()
         request.predicate = NSPredicate(format: "conversationId == %@", conversationId as CVarArg)
         request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
@@ -182,19 +115,45 @@ extension MessageEntity {
     }
 }
 
+/// Extension for APIKeyEntity to provide convenience methods
 extension APIKeyEntity {
     
-    /// Fetch request for all API keys
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<APIKeyEntity> {
-        return NSFetchRequest<APIKeyEntity>(entityName: "APIKey")
+    /// Convert APIKeyEntity to APIKey model (simplified - just name and provider type conversion)
+    func toSimpleAPIKey() -> (name: String, provider: String) {
+        return (
+            name: self.name ?? "",
+            provider: self.provider ?? "openrouter"
+        )
+    }
+    
+    /// Get provider as LLMProvider enum
+    var providerEnum: LLMProvider {
+        return LLMProvider(rawValue: provider ?? "openrouter") ?? .openrouter
+    }
+    
+    /// Check if key has data
+    var hasKeyData: Bool {
+        return keyData != nil && !(keyData?.isEmpty ?? true)
+    }
+    
+    /// Get masked key display
+    var maskedKey: String {
+        guard let data = keyData,
+              let key = String(data: data, encoding: .utf8),
+              key.count > 8 else {
+            return "••••••••"
+        }
+        
+        let prefix = String(key.prefix(4))
+        let suffix = String(key.suffix(4))
+        return "\(prefix)••••••••\(suffix)"
     }
     
     /// Fetch request for API keys by provider
-    static func fetchRequest(provider: APIProvider) -> NSFetchRequest<APIKeyEntity> {
+    static func fetchRequestForProvider(provider: String) -> NSFetchRequest<APIKeyEntity> {
         let request = fetchRequest()
-        request.predicate = NSPredicate(format: "provider == %@", provider.rawValue)
+        request.predicate = NSPredicate(format: "provider == %@", provider)
         request.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
         return request
     }
-}
-*/ 
+} 
