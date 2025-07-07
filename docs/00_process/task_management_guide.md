@@ -136,11 +136,27 @@ Quy trình làm việc chuẩn cho **mỗi task** từ planning đến completio
 - [ ] **Record** rationale for technical choices
 - [ ] **Note** future considerations
 
-### **3. Project Updates**
+### **3. Acceptance Testing**
+#### **Mục đích**
+- [ ] **Verify** that completed features meet all specified requirements from the sprint plan.
+- [ ] **Ensure** the end-user experience is correct, intuitive, and bug-free.
+- [ ] **Confirm** the application is stable and production-ready before merging or deploying.
+
+#### **Quy trình**
+- [ ] **Yêu cầu AI tạo Test Cases**: Sau khi các task chính của sprint hoàn thành, developer yêu cầu AI tạo test cases.
+  > **Prompt mẫu**: "Hãy tạo các acceptance test cases cho Sprint 2."
+- [ ] **Lưu trữ Test Cases**: AI sẽ tạo một file Markdown mới (ví dụ: `docs/03_implementation/sprint_02_acceptance_tests.md`) chứa bảng test case chi tiết.
+- [ ] **Thực hiện Test**: Developer thực hiện các test case theo file đã tạo trên simulator hoặc thiết bị thật.
+- [ ] **Báo cáo & Sửa lỗi**:
+  - Nếu một test case **Fail**, developer báo cáo ID của test case đó cho AI.
+  - AI tiến hành phân tích, debug và sửa lỗi.
+  - Quá trình lặp lại cho đến khi tất cả các test case trong file đều **Pass**.
+
+### **4. Project Updates**
 #### **Progress Documentation**
 - [ ] **Update** feature status trong backlog
-- [ ] **Mark** task as completed trong progress tracker
-- [ ] **Update** sprint progress
+- [ ] **Mark** task as completed trong `sprint_xx_plan.md`
+- [ ] **Update** `current_status.md` nếu có milestone lớn.
 - [ ] **Note** any scope changes
 
 #### **Communication**

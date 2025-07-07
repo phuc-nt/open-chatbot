@@ -1,72 +1,54 @@
-# iOS Chatbot Documentation
+# Bắt đầu từ đây - Hướng dẫn cho Project iOS Chatbot
 
-**START HERE** - Hướng dẫn đọc tài liệu cho **iOS Chatbot** project.
+Tài liệu này là điểm khởi đầu cho tất cả các vai trò tham gia vào dự án.
 
 ## 🎯 **Bạn Là Ai? → Đọc Gì Trước**
 
-### **🤖 AI Assistant**
-**Mục đích**: Hiểu project context nhanh chóng  
-**Đọc trước**: 
-1. [Project Overview](00_context/project_overview.md) - 2 phút
-2. [Current Status](00_context/current_status.md) - 1 phút  
-3. [.cursorrules](../.cursorrules) - 1 phút
+### **🤖 AI Assistant (Quy trình Onboarding của bạn)**
+**Mục đích**: Hiểu project context và quy trình làm việc một cách nhanh chóng.
+**Đọc theo thứ tự**:
+1.  **Hiểu Bối Cảnh (3 phút)**
+    - [Project Overview](00_context/project_overview.md)
+    - [Current Status](00_context/current_status.md)
+2.  **Hiểu Quy Tắc & Quy Trình (5 phút)**
+    - Đọc **toàn bộ** các tài liệu trong thư mục [**`docs/00_process`**](00_process/).
+    - Đọc file [`.cursorrules`](../.cursorrules).
+3.  **Hiểu Hướng Dẫn Kỹ thuật (5 phút)**
+    - [Hướng dẫn Cài đặt Môi trường](02_development/dev_env_guide.md)
+    - [Hướng dẫn Phát triển iOS](02_development/ios_app_development_guide.md)
 
-**Tổng thời gian**: 4 phút
+**Tổng thời gian**: ~13 phút. Sau khi hoàn thành, bạn đã sẵn sàng nhận task.
 
 ### **👨‍💻 Developer Mới**
-**Mục đích**: Onboard và bắt đầu contribute  
+**Mục đích**: Onboard và bắt đầu contribute.
 **Đọc theo thứ tự**:
-1. [Project Overview](00_context/project_overview.md) - Hiểu dự án
-2. [SRS v1](01_preparation/srs_v1.md) - Chi tiết requirements  
-3. [Dev Environment Guide](02_development/dev_env_guide.md) - Setup môi trường
-4. [Task Management Guide](00_guides/task_management_guide.md) - Workflow làm việc
+1. [Project Overview](00_context/project_overview.md) - Hiểu mục tiêu dự án.
+2. [Current Status](00_context/current_status.md) - Nắm tình hình mới nhất.
+3. [Hướng dẫn Cài đặt Môi trường](02_development/dev_env_guide.md) - Setup môi trường.
+4. [Hướng dẫn Phát triển iOS](02_development/ios_app_development_guide.md) - Hiểu workflow và kinh nghiệm.
+5. Xem qua các quy trình trong [**`docs/00_process`**](00_process/).
 
-**Tổng thời gian**: 30 phút
+**Tổng thời gian**: ~30 phút.
 
 ### **📋 Project Manager**
-**Mục đích**: Theo dõi progress và planning  
+**Mục đích**: Theo dõi tiến độ và lập kế hoạch.
 **Đọc trước**:
-1. [Current Status](00_context/current_status.md) - Tình trạng hiện tại
-2. [Feature Backlog](01_preparation/feature_backlog.md) - Priorities
-3. [Project Roadmap](01_preparation/project_roadmap.md) - Timeline
+1. [Current Status](00_context/current_status.md) - Tình trạng hiện tại.
+2. Kế hoạch của sprint hiện tại, ví dụ: [Sprint 2 Plan](03_implementation/sprint_planning/sprint_02_plan.md).
+3. [Feature Backlog](01_preparation/feature_backlog.md) - Các ưu tiên.
 
-**Tổng thời gian**: 15 phút
-
----
-
-## 📁 **Tài Liệu Theo Chủ Đề**
-
-### **🎯 Context & Overview**
-- [00_context/](00_context/) - Project overview, current status, reading guide
-
-### **📋 Planning & Requirements**  
-- [01_preparation/](01_preparation/) - SRS, feature backlog, roadmap, best practices
-
-### **🛠️ Development Setup**
-- [02_development/](02_development/) - Environment setup guide
-
-### **💻 Implementation**
-- [03_implementation/](03_implementation/) - Progress tracking, task checklists
-
-### **📋 Process Guides**
-- [00_guides/](00_guides/) - Task management, documentation maintenance, checklist system
+**Tổng thời gian**: ~15 phút.
 
 ---
 
-## ⚡ **Trước Khi Bắt Đầu Task**
+## 📁 **Cấu trúc Tài liệu**
 
-### **Bước 1: Hiểu Process**
-> 📖 **Đọc**: [Task Management Guide](00_guides/task_management_guide.md) - 10 phút
-
-### **Bước 2: Tạo Working Checklist**  
-> 📖 **Template**: [Checklist System Guide](00_guides/checklist_system_guide.md) - 5 phút
-
-### **Bước 3: Setup Environment**
-> 📖 **Setup**: [Dev Environment Guide](02_development/dev_env_guide.md) - 30 phút
-
-### **Bước 4: Bắt Đầu Task**
-> 📖 **Working Area**: [tasks/](03_implementation/tasks/) - Track progress
+- **`docs/00_context`**: Bối cảnh và tình trạng chung của dự án.
+- **`docs/00_process`**: **QUAN TRỌNG** - Các quy trình làm việc bắt buộc (quản lý task, tài liệu, checklist...).
+- **`docs/01_preparation`**: Yêu cầu, backlog, roadmap.
+- **`docs/02_development`**: Hướng dẫn kỹ thuật (setup môi trường, coding...).
+- **`docs/03_implementation`**: Chi tiết triển khai, kế hoạch sprint, và acceptance tests.
 
 ---
 
-**🚀 Ready to start? Follow your role's reading guide above!** 
+**🚀 Sẵn sàng bắt đầu? Hãy theo hướng dẫn dành cho vai trò của bạn ở trên!** 

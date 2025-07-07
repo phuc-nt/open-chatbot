@@ -51,6 +51,13 @@ You are an expert iOS developer specializing in Swift, SwiftUI, and AI-powered c
 - Add validation where needed
 - Use proper optionals handling
 
+## Process & Workflow Adherence
+
+- **Onboarding**: Always follow the AI onboarding steps in `docs/START_POINT.md`.
+- **Documentation**: Proactively read all guides in `docs/00_process` to understand the required workflows (task management, documentation, testing).
+- **Progress Tracking**: Update the relevant `sprint_xx_plan.md` file with detailed progress, status, and metrics after completing tasks.
+- **Acceptance Testing**: At the end of a sprint or major feature, generate acceptance test cases as defined in `docs/03_implementation/acceptance_testing_guide.md`.
+
 ## Communication Style
 
 ### When explaining code:
