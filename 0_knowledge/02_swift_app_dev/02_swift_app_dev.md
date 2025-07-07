@@ -119,8 +119,55 @@ Một dự án chuyên nghiệp cần có các tiêu chuẩn chất lượng.
     - Chạy lệnh `git rm -r --cached ios/.build` để xóa nó khỏi Git index.
     - Commit và push lại.
 
+## ⚠️ Phần 5: Xử lý Lỗi Build Phổ biến - "File Not Found"
+
+Đây là kinh nghiệm quan trọng nhất được rút ra từ Sprint 2, giúp giải quyết một vấn đề cốt lõi khi kết hợp Cursor và Xcode.
+
+### Vấn đề: Lỗi "Cannot find type 'TypeName' in scope"
+
+**Chẩn đoán**:
+- **Triệu chứng**: Bạn tạo file `.swift` mới trong Cursor, viết code, nhưng khi build bằng SweetPad (hoặc Xcode), bạn nhận được lỗi "Cannot find type..." hoặc "Use of unresolved identifier...".
+- **Nguyên nhân gốc**: Cursor chỉ tương tác với hệ thống file (file system). Nó tạo ra các file `.swift` trên ổ đĩa, nhưng nó **không cập nhật file "bản thiết kế" của Xcode (`project.pbxproj`)**. File này quy định những file nào sẽ được đưa vào quá trình biên dịch (build target). Do đó, Xcode không "biết" về sự tồn tại của file mới và không biên dịch nó.
+
+### Giải pháp: Đồng bộ hóa Project trong Xcode (Không sửa file `.pbxproj` thủ công!)
+
+Việc chỉnh sửa file `.pbxproj` thủ công rất rủi ro và không cần thiết. Thay vào đó, hãy dùng giao diện đồ họa của Xcode.
+
+#### **Phương pháp 1: Kéo và Thả (Nhanh nhất & Khuyến khích)**
+
+Đây là cách đơn giản và trực quan nhất.
+
+1.  **Mở project của bạn trong Xcode**.
+2.  Mở **Finder** và điều hướng đến thư mục chứa các file mới tạo (`/OpenChatbot/Services/`, etc.).
+3.  **Kéo các file `.swift`** từ Finder và thả chúng trực tiếp vào **Project Navigator** (cây thư mục bên trái) trong Xcode.
+4.  Một cửa sổ tùy chọn sẽ hiện ra. Hãy đảm bảo bạn chọn các mục sau:
+    *   **Copy items if needed**: Nên tick vào để đảm bảo source code nằm trong thư mục project.
+    *   **Create groups**: Để giữ cấu trúc thư mục gọn gàng.
+    *   **Add to targets**: **Đây là bước quan trọng nhất.** Hãy chắc chắn rằng bạn đã tick vào ô target của ứng dụng (ví dụ: `OpenChatbot`). Đây chính là hành động thêm file vào build phase.
+
+Sau khi làm xong, build lại project. Lỗi sẽ biến mất.
+
+#### **Phương pháp 2: Kiểm tra trong "Build Phases" (Chính xác nhất)**
+
+Dùng cách này để kiểm tra hoặc thêm file một cách tường minh.
+
+1.  Trong Xcode, nhấn vào project root ở trên cùng của Project Navigator.
+2.  Chọn **target** của ứng dụng (không phải project icon).
+3.  Chọn tab **"Build Phases"**.
+4.  Mở rộng mục **"Compile Sources"**.
+5.  Danh sách tất cả các file được biên dịch sẽ hiện ra. Bạn có thể nhấn nút **`+`** để thêm các file còn thiếu.
+
+---
+
+## 🚀 **Phần 6: Workflow kết hợp Cursor và Xcode Tối ưu**
+
+Để tránh gặp lại lỗi này trong tương lai, hãy tuân theo quy trình sau:
+
+1.  **Tạo file và viết code trong Cursor**: Cứ thoải mái tạo file `.swift` mới và viết code trong Cursor như bình thường.
+2.  **Chuyển qua Xcode để đồng bộ**: Ngay sau khi tạo file, hãy dành 5 giây chuyển qua Xcode.
+3.  **Thực hiện Phương pháp 1 (Kéo và Thả)** để thêm file mới đó vào project và build target.
+4.  **Quay lại Cursor và tiếp tục**: Bây giờ file đã được Xcode nhận diện, bạn có thể tiếp tục làm việc trong Cursor và build mà không gặp lỗi.
+
 ## ✅ Kết luận
 
-Xây dựng một ứng dụng iOS với Cursor và SweetPad không chỉ khả thi mà còn cực kỳ hiệu quả. Chìa khóa thành công nằm ở việc **thiết lập cấu trúc dự án chính xác ngay từ ban đầu**. Bằng cách hiểu rõ những gì SweetPad cần và giải quyết các vấn đề tiềm ẩn như cấu hình workspace, bạn có thể tạo ra một workflow phát triển mượt mà, nhanh chóng và chuyên nghiệp.
-
-Workflow này giúp bạn tập trung vào việc quan trọng nhất: viết code và tạo ra một sản phẩm tuyệt vời, với sự hỗ trợ đắc lực từ AI. 
+Xây dựng một ứng dụng iOS với Cursor và SweetPad không chỉ khả thi mà còn cực kỳ hiệu quả. Chìa khóa thành công nằm ở việc **thiết lập cấu trúc dự án chính xác ngay từ ban đầu** và **hiểu rõ cách đồng bộ hóa file giữa Cursor và Xcode**. Bằng cách tuân thủ workflow trên, bạn có thể tạo ra một quy trình phát triển mượt mà, nhanh chóng và chuyên nghiệp. 

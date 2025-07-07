@@ -66,6 +66,8 @@ Quy trình làm việc chuẩn cho **mỗi task** từ planning đến completio
 - [ ] **Write** code incrementally với frequent commits
 - [ ] **Use** descriptive commit messages
 - [ ] **Test** changes locally throughout development
+- [ ] **CRITICAL**: If creating new files, **add them to Xcode project target immediately** (drag & drop from Finder to Xcode). This prevents build failures
+  > 📖 **Lý do & Cách làm**: [Xem chi tiết tại đây](../0_knowledge/02_swift_app_dev/02_swift_app_dev.md#phần-5-xử-lý-lỗi-build-phổ-biến---file-not-found)
 
 #### **Documentation Updates**
 - [ ] **Update** inline code comments for complex logic

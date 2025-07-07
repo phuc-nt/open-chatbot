@@ -86,6 +86,7 @@ Working Checklists = Customized Task Tracking
 ```markdown
 ### DURING Task Progress
 - [x] Follow established coding standards (.cursorrules)
+- [x] **Add new files to Xcode Target**: If creating new `.swift` files, drag & drop them from Finder to Xcode's Project Navigator to prevent build errors.
 - [x] Write code incrementally với frequent commits
 - [ ] Use descriptive commit messages
 - [ ] Test changes locally throughout development
@@ -173,6 +174,7 @@ docs/03_implementation/tasks/
 ## DURING Task
 ### Development
 - [ ] Follow coding standards (.cursorrules)
+- [ ] **Add new files to Xcode Target**: If creating new `.swift` files, drag & drop them from Finder to Xcode's Project Navigator to prevent build errors.
 - [ ] Write code incrementally
 - [ ] Use descriptive commit messages
 - [ ] Test changes locally
