@@ -1,78 +1,6 @@
 import Foundation
 import Combine
 
-// Import required protocols and models
-// Note: These imports are implicit in the project structure
-
-// MARK: - Streaming Response Handler
-class StreamingResponseHandler: NSObject, URLSessionDataDelegate {
-    private let continuation: AsyncStream<String>.Continuation
-    private var buffer = ""
-    
-    init(continuation: AsyncStream<String>.Continuation) {
-        self.continuation = continuation
-        super.init()
-    }
-    
-    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-        guard let chunk = String(data: data, encoding: .utf8) else { return }
-        
-        // Append to buffer for proper SSE parsing
-        buffer += chunk
-        
-        // Process complete lines
-        while let lineEnd = buffer.firstIndex(of: "\n") {
-            let line = String(buffer[..<lineEnd]).trimmingCharacters(in: .whitespacesAndNewlines)
-            buffer = String(buffer[buffer.index(after: lineEnd)...])
-            
-            processSSELine(line)
-        }
-    }
-    
-    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didCompleteWithError error: Error?) {
-        // Process any remaining buffer
-        if !buffer.isEmpty {
-            let lines = buffer.components(separatedBy: .newlines)
-            for line in lines {
-                let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-                if !trimmed.isEmpty {
-                    processSSELine(trimmed)
-                }
-            }
-        }
-        
-        continuation.finish()
-    }
-    
-    private func processSSELine(_ line: String) {
-        // Skip empty lines and comments (OpenRouter comments like ": OPENROUTER PROCESSING")
-        if line.isEmpty || line.hasPrefix(":") {
-            return
-        }
-        
-        // Process SSE data lines
-        if line.hasPrefix("data: ") {
-            let dataString = String(line.dropFirst(6))
-            
-            // Check for end of stream
-            if dataString == "[DONE]" {
-                continuation.finish()
-                return
-            }
-            
-            // Parse JSON chunk
-            if let data = dataString.data(using: .utf8),
-               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let choices = json["choices"] as? [[String: Any]],
-               let firstChoice = choices.first,
-               let delta = firstChoice["delta"] as? [String: Any],
-               let content = delta["content"] as? String {
-                continuation.yield(content)
-            }
-        }
-    }
-}
-
 // MARK: - OpenRouter API Service Implementation
 @MainActor
 class OpenRouterAPIService: LLMAPIService {
@@ -80,6 +8,7 @@ class OpenRouterAPIService: LLMAPIService {
     private let session: URLSession
     private var currentTask: URLSessionDataTask?
     private let keychain: KeychainService
+    private var dataBuffer: String = ""
     
     init(keychain: KeychainService) {
         // Configure session for streaming
@@ -106,25 +35,52 @@ class OpenRouterAPIService: LLMAPIService {
         )
         
         return AsyncStream<String> { continuation in
-            Task { @MainActor in
-                // Create session with delegate for streaming
-                let config = URLSessionConfiguration.default
-                config.timeoutIntervalForRequest = 60
-                config.timeoutIntervalForResource = 300
-                
-                let handler = StreamingResponseHandler(continuation: continuation)
-                let delegateSession = URLSession(configuration: config, delegate: handler, delegateQueue: nil)
-                
-                let task = delegateSession.dataTask(with: request)
-                self.currentTask = task
-                
-                // Handle termination
-                continuation.onTermination = { @Sendable termination in
-                    task.cancel()
-                    delegateSession.finishTasksAndInvalidate()
+            // Reset buffer for new request
+            self.dataBuffer = ""
+            
+            let task = self.session.dataTask(with: request) { [weak self] data, response, error in
+                DispatchQueue.main.async {
+                    if let error = error {
+                        print("❌ Network error: \(error.localizedDescription)")
+                        continuation.finish()
+                        return
+                    }
+                    
+                    guard let httpResponse = response as? HTTPURLResponse else {
+                        print("❌ Invalid response type")
+                        continuation.finish()
+                        return
+                    }
+                    
+                    if httpResponse.statusCode != 200 {
+                        let errorData = data ?? Data()
+                        let errorMessage = self?.parseErrorResponse(data: errorData) ?? "Unknown error"
+                        print("❌ HTTP error \(httpResponse.statusCode): \(errorMessage)")
+                        continuation.finish()
+                        return
+                    }
+                    
+                    guard let data = data,
+                          let chunk = String(data: data, encoding: .utf8) else {
+                        print("❌ No data received or invalid encoding")
+                        continuation.finish()
+                        return
+                    }
+                    
+                    // Process streaming chunk with proper SSE parsing
+                    self?.processStreamingChunk(chunk) { content in
+                        continuation.yield(content)
+                    } completion: {
+                        continuation.finish()
+                    }
                 }
-                
-                task.resume()
+            }
+            
+            self.currentTask = task
+            task.resume()
+            
+            continuation.onTermination = { @Sendable termination in
+                task.cancel()
             }
         }
     }
@@ -309,6 +265,59 @@ class OpenRouterAPIService: LLMAPIService {
         request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
         
         return request
+    }
+    
+    private func processStreamingChunk(
+        _ chunk: String,
+        onContent: @escaping (String) -> Void,
+        completion: @escaping () -> Void
+    ) {
+        // Add new chunk to buffer
+        dataBuffer += chunk
+        
+        // Process complete lines from buffer
+        while let lineEnd = dataBuffer.firstIndex(of: "\n") {
+            let line = String(dataBuffer[..<lineEnd]).trimmingCharacters(in: .whitespacesAndNewlines)
+            dataBuffer.removeSubrange(...lineEnd)
+            
+            // Skip empty lines and comments (OpenRouter sends ": OPENROUTER PROCESSING" comments)
+            if line.isEmpty || line.hasPrefix(":") {
+                continue
+            }
+            
+            // Process SSE data lines
+            if line.hasPrefix("data: ") {
+                let dataString = String(line.dropFirst(6)) // Remove "data: " prefix
+                
+                // Check for end of stream
+                if dataString == "[DONE]" {
+                    completion()
+                    return
+                }
+                
+                // Parse JSON chunk according to OpenRouter format
+                guard let data = dataString.data(using: .utf8) else {
+                    print("⚠️ Failed to convert data string to UTF8")
+                    continue
+                }
+                
+                do {
+                    if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                        // OpenRouter format: {"choices":[{"delta":{"content":"text"}}]}
+                        if let choices = json["choices"] as? [[String: Any]],
+                           let firstChoice = choices.first,
+                           let delta = firstChoice["delta"] as? [String: Any],
+                           let content = delta["content"] as? String,
+                           !content.isEmpty {
+                            onContent(content)
+                        }
+                    }
+                } catch {
+                    print("⚠️ JSON parsing error: \(error.localizedDescription)")
+                    // Continue processing other lines even if one fails
+                }
+            }
+        }
     }
     
     private func parseErrorResponse(data: Data) -> String {
