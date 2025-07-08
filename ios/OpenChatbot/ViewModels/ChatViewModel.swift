@@ -244,7 +244,7 @@ class ChatViewModel: ObservableObject {
         do {
             let models = try await apiService.getAvailableModels()
             await MainActor.run {
-                self.availableModels = models.prefix(10).map { $0 } // Limit to 10 for performance
+                self.availableModels = models // Remove .prefix(10) limitation
                 if self.selectedModel == LLMModel.defaultModel {
                     self.selectedModel = self.getDefaultModel() ?? LLMModel.defaultModel
                 }

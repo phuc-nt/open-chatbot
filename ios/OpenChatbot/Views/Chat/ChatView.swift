@@ -248,44 +248,125 @@ struct ErrorBanner: View {
 struct ModelPickerView: View {
     @ObservedObject var viewModel: ChatViewModel
     @Environment(\.dismiss) private var dismiss
+    @State private var searchText = ""
+    
+    // Computed property for filtered models
+    private var filteredModels: [LLMModel] {
+        if searchText.isEmpty {
+            return viewModel.availableModels
+        } else {
+            return viewModel.availableModels.filter { model in
+                model.name.localizedCaseInsensitiveContains(searchText) ||
+                model.provider.displayName.localizedCaseInsensitiveContains(searchText) ||
+                (model.description?.localizedCaseInsensitiveContains(searchText) ?? false)
+            }
+        }
+    }
     
     var body: some View {
         NavigationView {
-            List {
-                Section("Available Models") {
-                    ForEach(viewModel.availableModels.prefix(10), id: \.id) { model in
-                        ModelRow(
-                            model: model,
-                            isSelected: viewModel.selectedModel.id == model.id
-                        ) {
-                            viewModel.selectedModel = model
-                            dismiss()
-                        }
-                    }
-                }
+            VStack {
+                // Search bar
+                SearchBar(text: $searchText)
+                    .padding(.horizontal)
                 
-                if viewModel.availableModels.isEmpty {
-                    Section {
-                        HStack {
-                            ProgressView()
-                                .scaleEffect(0.8)
-                            Text("Đang tải models...")
+                // Models list
+                List {
+                    if !filteredModels.isEmpty {
+                        Section {
+                            ForEach(filteredModels, id: \.id) { model in
+                                ModelRow(
+                                    model: model,
+                                    isSelected: viewModel.selectedModel.id == model.id
+                                ) {
+                                    viewModel.selectedModel = model
+                                    dismiss()
+                                }
+                            }
+                        } header: {
+                            Text("Available Models (\(filteredModels.count))")
+                                .font(.caption)
                                 .foregroundColor(.secondary)
                         }
-                        .padding()
+                    } else if viewModel.availableModels.isEmpty {
+                        Section {
+                            HStack {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                Text("Loading models...")
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding()
+                        }
+                    } else {
+                        Section {
+                            Text("No models found matching '\(searchText)'")
+                                .foregroundColor(.secondary)
+                                .italic()
+                                .padding()
+                        }
                     }
                 }
+                .listStyle(PlainListStyle())
             }
-            .navigationTitle("Chọn AI Model")
+            .navigationTitle("Select AI Model")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Đóng") {
+                    Button("Close") {
                         dismiss()
                     }
                 }
             }
         }
+    }
+}
+
+// MARK: - Search Bar Component
+struct SearchBar: View {
+    @Binding var text: String
+    @State private var isEditing = false
+    
+    var body: some View {
+        HStack {
+            HStack {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.secondary)
+                
+                TextField("Search models...", text: $text)
+                    .onTapGesture {
+                        isEditing = true
+                    }
+                
+                if !text.isEmpty {
+                    Button(action: {
+                        text = ""
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .background(Color(.systemGray6))
+            .cornerRadius(10)
+            
+            if isEditing {
+                Button("Cancel") {
+                    isEditing = false
+                    text = ""
+                    hideKeyboard()
+                }
+                .padding(.leading, 8)
+                .transition(.move(edge: .trailing))
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: isEditing)
+    }
+    
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 

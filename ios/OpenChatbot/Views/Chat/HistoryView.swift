@@ -8,7 +8,7 @@ struct HistoryView: View {
         NavigationView {
             VStack {
                 // Search bar
-                SearchBar(text: $searchText)
+                HistorySearchBar(text: $searchText)
                 
                 // Conversations list
                 List {
@@ -48,7 +48,7 @@ struct HistoryView: View {
     }
 }
 
-struct SearchBar: View {
+struct HistorySearchBar: View {
     @Binding var text: String
     
     var body: some View {
