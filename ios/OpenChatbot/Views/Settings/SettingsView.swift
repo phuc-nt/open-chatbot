@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @StateObject private var viewModel = SettingsViewModel()
+    @StateObject private var chatViewModel = ChatViewModel()
     @State private var showDeleteConfirmation = false
     @State private var keyToDelete: StoredAPIKey?
     
@@ -74,8 +75,22 @@ struct SettingsView: View {
                 
                 // App Settings Section
                 Section("App Settings") {
-                    NavigationLink("Default AI Model") {
+                    NavigationLink {
                         DefaultModelSettingView()
+                    } label: {
+                        HStack {
+                            Text("Default AI Model")
+                            Spacer()
+                            if let defaultModel = chatViewModel.getDefaultModel() {
+                                Text(defaultModel.name)
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(1)
+                            } else {
+                                Text("Not set")
+                                    .foregroundColor(.secondary)
+                                    .italic()
+                            }
+                        }
                     }
                     
                     Toggle("Dark Mode", isOn: $viewModel.isDarkMode)
@@ -143,6 +158,12 @@ struct SettingsView: View {
                 if let key = keyToDelete {
                     Text("Are you sure you want to delete the API key '\(key.displayName)'? This action cannot be undone.")
                 }
+            }
+        }
+        .onAppear {
+            // Load available models and refresh default model display
+            Task {
+                await chatViewModel.loadAvailableModels()
             }
         }
     }
@@ -321,17 +342,29 @@ struct DefaultModelSettingView: View {
     @State private var searchText = ""
     @State private var selectedDefaultModel: LLMModel?
     
-    // Computed property for filtered models
+    // Computed property for filtered models with default model first
     private var filteredModels: [LLMModel] {
+        let baseModels: [LLMModel]
         if searchText.isEmpty {
-            return chatViewModel.availableModels
+            baseModels = chatViewModel.availableModels
         } else {
-            return chatViewModel.availableModels.filter { model in
+            baseModels = chatViewModel.availableModels.filter { model in
                 model.name.localizedCaseInsensitiveContains(searchText) ||
                 model.provider.displayName.localizedCaseInsensitiveContains(searchText) ||
                 (model.description?.localizedCaseInsensitiveContains(searchText) ?? false)
             }
         }
+        
+        // Sort to put default model first
+        if let defaultModel = chatViewModel.getDefaultModel() {
+            var sortedModels = baseModels.filter { $0.id != defaultModel.id }
+            if baseModels.contains(where: { $0.id == defaultModel.id }) {
+                sortedModels.insert(defaultModel, at: 0)
+            }
+            return sortedModels
+        }
+        
+        return baseModels
     }
     
     var body: some View {

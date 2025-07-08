@@ -53,13 +53,38 @@ class ChatViewModel: ObservableObject {
     
     // MARK: - Conversation Management
     
-    /// Load existing conversation or create new one
+    /// Load most recent conversation or create new one
     private func loadOrCreateConversation() {
         if currentConversation == nil {
-            startNewConversation()
+            // Try to load most recent conversation first
+            if let recentConversation = dataService.getMostRecentConversation() {
+                loadRecentConversation(recentConversation)
+            } else {
+                // No existing conversations, create new one
+                startNewConversation()
+            }
         } else {
             loadMessagesForCurrentConversation()
         }
+    }
+    
+    /// Load the most recent conversation on app startup
+    private func loadRecentConversation(_ conversation: ConversationEntity) {
+        currentConversation = conversation
+        
+        // Load messages for this conversation
+        messages = dataService.getMessagesForConversation(conversation)
+        
+        // Load saved model for this conversation (if any)
+        if let savedModelID = conversation.selectedModelID,
+           let savedModel = availableModels.first(where: { $0.id == savedModelID }) {
+            selectedModel = savedModel
+        } else {
+            // Use default model if no saved model found
+            selectedModel = getDefaultModel() ?? LLMModel.defaultModel
+        }
+        
+        print("✅ Loaded recent conversation: \(conversation.title ?? "Untitled"), Model: \(selectedModel.name)")
     }
     
     /// Load messages for current conversation
@@ -304,7 +329,7 @@ class ChatViewModel: ObservableObject {
         dataService.saveContext()
     }
     
-    private func loadAvailableModels() async {
+    func loadAvailableModels() async {
         do {
             let models = try await apiService.getAvailableModels()
             await MainActor.run {

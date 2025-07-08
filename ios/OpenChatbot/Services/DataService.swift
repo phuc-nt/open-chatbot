@@ -40,6 +40,21 @@ class DataService: ObservableObject {
         }
     }
     
+    /// Get most recent conversation
+    func getMostRecentConversation() -> ConversationEntity? {
+        let request = ConversationEntity.fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(key: "updatedAt", ascending: false)]
+        request.fetchLimit = 1
+        
+        do {
+            let conversations = try persistenceController.viewContext.fetch(request)
+            return conversations.first
+        } catch {
+            print("Error fetching most recent conversation: \(error)")
+            return nil
+        }
+    }
+    
     /// Update conversation
     func updateConversation(_ conversation: ConversationEntity, title: String) {
         conversation.title = title
