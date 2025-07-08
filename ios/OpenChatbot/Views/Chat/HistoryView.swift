@@ -3,38 +3,51 @@ import SwiftUI
 struct HistoryView: View {
     @StateObject private var viewModel = HistoryViewModel()
     @State private var searchText = ""
+    @EnvironmentObject var appState: AppState
     
     var body: some View {
         NavigationView {
-            VStack {
-                // Search bar
-                HistorySearchBar(text: $searchText)
-                
-                // Conversations list
-                List {
-                    ForEach(viewModel.filteredConversations(searchText: searchText), id: \.id) { conversation in
-                        ConversationRow(conversation: conversation, viewModel: viewModel)
+            Form {
+                // Search Section
+                Section {
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.secondary)
+                        
+                        TextField("Search conversations...", text: $searchText)
                     }
-                    .onDelete(perform: viewModel.deleteConversations)
                 }
-                .listStyle(PlainListStyle())
                 
-                if viewModel.conversations.isEmpty {
-                    Spacer()
-                    Text("No conversations yet")
-                        .foregroundColor(.secondary)
-                        .font(.title2)
-                    Spacer()
+                // Conversations Section
+                if !viewModel.conversations.isEmpty {
+                    Section("Recent Conversations") {
+                        ForEach(viewModel.filteredConversations(searchText: searchText), id: \.id) { conversation in
+                            ConversationRow(conversation: conversation, viewModel: viewModel, appState: appState)
+                        }
+                        .onDelete(perform: viewModel.deleteConversations)
+                    }
+                } else {
+                    Section {
+                        VStack(spacing: 16) {
+                            Image(systemName: "message.badge")
+                                .font(.system(size: 50))
+                                .foregroundColor(.secondary.opacity(0.6))
+                            
+                            Text("No conversations yet")
+                                .font(.title2)
+                                .foregroundColor(.secondary)
+                            
+                            Text("Start a new conversation in the Chat tab")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 40)
+                    }
                 }
             }
             .navigationTitle("History")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("New Chat") {
-                        viewModel.createNewConversation()
-                    }
-                }
-            }
             .onAppear {
                 viewModel.loadConversations()
             }
@@ -45,24 +58,12 @@ struct HistoryView: View {
     }
 }
 
-struct HistorySearchBar: View {
-    @Binding var text: String
-    
-    var body: some View {
-        HStack {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(.secondary)
-            
-            TextField("Search conversations...", text: $text)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-        }
-        .padding()
-    }
-}
+
 
 struct ConversationRow: View {
     let conversation: ConversationEntity
     let viewModel: HistoryViewModel
+    let appState: AppState
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -88,16 +89,10 @@ struct ConversationRow: View {
         }
         .padding(.vertical, 4)
         .onTapGesture {
-            // Store selected conversation ID in UserDefaults
-            UserDefaults.standard.set(conversation.id?.uuidString, forKey: "selectedConversationID")
-            
-            // Send notification to ChatView to load this conversation
-            NotificationCenter.default.post(
-                name: NSNotification.Name("LoadConversation"),
-                object: conversation
-            )
-            
-            // TODO: Switch to Chat tab (implement later)
+            // Switch to Chat tab and load this conversation
+            if let conversationID = conversation.id?.uuidString {
+                appState.switchToChatTab(withConversation: conversationID)
+            }
         }
     }
 }

@@ -14,6 +14,10 @@ class ChatViewModel: ObservableObject {
     @Published var selectedModel: LLMModel = LLMModel.defaultModel
     @Published var availableModels: [LLMModel] = []
     
+    // UserDefaults keys for persistence
+    private let selectedModelKey = "selectedModel"
+    private let defaultModelKey = "defaultModel"
+    
     private let apiService: LLMAPIService
     private let dataService: DataService
     private let persistenceController: PersistenceController
@@ -52,10 +56,16 @@ class ChatViewModel: ObservableObject {
     /// Load existing conversation or create new one
     private func loadOrCreateConversation() {
         if currentConversation == nil {
-            createNewConversation()
+            startNewConversation()
         } else {
             loadMessagesForCurrentConversation()
         }
+    }
+    
+    /// Load messages for current conversation
+    private func loadMessagesForCurrentConversation() {
+        guard let conversation = currentConversation else { return }
+        messages = dataService.getMessagesForConversation(conversation)
     }
     
     /// Create a new conversation
@@ -64,16 +74,47 @@ class ChatViewModel: ObservableObject {
         messages = []
     }
     
-    /// Load a specific conversation
-    func loadConversation(_ conversation: ConversationEntity) {
-        currentConversation = conversation
-        loadMessagesForCurrentConversation()
+    /// Load existing conversation by UUID
+    func loadConversationByID(conversationID: UUID) {
+        // Find conversation in Core Data by ID
+        let context = PersistenceController.shared.container.viewContext
+        let request: NSFetchRequest<ConversationEntity> = ConversationEntity.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", conversationID as CVarArg)
+        
+        do {
+            let conversations = try context.fetch(request)
+            if let conversation = conversations.first {
+                currentConversation = conversation
+                messages = dataService.getMessagesForConversation(conversation)
+                
+                // Load saved model for this conversation (if any)
+                if let savedModelID = conversation.selectedModelID,
+                   let savedModel = availableModels.first(where: { $0.id == savedModelID }) {
+                    selectedModel = savedModel
+                } else {
+                    // Use default model if no saved model found
+                    selectedModel = getDefaultModel() ?? LLMModel.defaultModel
+                }
+                
+                print("✅ Loaded conversation: \(conversation.title ?? "Untitled"), Model: \(selectedModel.name)")
+            }
+        } catch {
+            print("❌ Error loading conversation by ID: \(error)")
+        }
     }
     
-    /// Load messages for current conversation
-    private func loadMessagesForCurrentConversation() {
-        guard let conversation = currentConversation else { return }
-        messages = dataService.getMessagesForConversation(conversation)
+    /// Start new conversation
+    func startNewConversation() {
+        // Create new conversation using DataService
+        currentConversation = dataService.createConversation()
+        
+        // Clear messages
+        messages = []
+        
+        // Use default model for new conversations
+        selectedModel = getDefaultModel() ?? LLMModel.defaultModel
+        
+        print("✅ Started new conversation with model: \(selectedModel.name)")
     }
     
     /// Update conversation title based on first message
@@ -101,7 +142,7 @@ class ChatViewModel: ObservableObject {
         
         // Ensure we have a conversation
         if currentConversation == nil {
-            createNewConversation()
+            currentConversation = dataService.createConversation(title: "New Conversation")
         }
         
         guard let conversation = currentConversation else {
@@ -281,21 +322,89 @@ class ChatViewModel: ObservableObject {
         }
     }
     
-    private func getDefaultModel() -> LLMModel? {
-        // Return first available model or a default one
-        return availableModels.first ?? LLMModel(
-            id: "openai/gpt-4o-mini",
-            name: "GPT-4o Mini",
-            provider: .openrouter,
-            contextLength: 128000,
-            pricing: ModelPricing(
-                inputTokens: 0.15,
-                outputTokens: 0.60,
-                imageInputs: nil
-            ),
-            description: "Lightweight and affordable GPT-4 model",
-            capabilities: .advanced
-        )
+    // MARK: - Model Persistence Methods
+    
+    /// Save selected model to UserDefaults
+    private func saveSelectedModel() {
+        let modelData = [
+            "id": selectedModel.id,
+            "name": selectedModel.name,
+            "provider": selectedModel.provider.rawValue
+        ]
+        UserDefaults.standard.set(modelData, forKey: selectedModelKey)
+    }
+    
+    /// Restore selected model from UserDefaults
+    private func restoreSelectedModel() async {
+        guard let modelData = UserDefaults.standard.dictionary(forKey: selectedModelKey),
+              let id = modelData["id"] as? String,
+              let name = modelData["name"] as? String,
+              let providerRaw = modelData["provider"] as? String,
+              let provider = LLMProvider(rawValue: providerRaw) else {
+            // No saved model, use default
+            await MainActor.run {
+                self.selectedModel = self.getDefaultModel() ?? LLMModel.defaultModel
+            }
+            return
+        }
+        
+        // Find the model in available models or create from saved data
+        await MainActor.run {
+            if let savedModel = availableModels.first(where: { $0.id == id }) {
+                self.selectedModel = savedModel
+            } else {
+                // Create model from saved data (in case it's no longer available)
+                self.selectedModel = LLMModel(
+                    id: id,
+                    name: name,
+                    provider: provider,
+                    contextLength: 128000,
+                    pricing: ModelPricing(inputTokens: 0.0, outputTokens: 0.0, imageInputs: nil),
+                    description: "Previously selected model",
+                    capabilities: .basic
+                )
+            }
+        }
+    }
+    
+    /// Get user's default model preference
+    func getDefaultModel() -> LLMModel? {
+        guard let modelData = UserDefaults.standard.dictionary(forKey: defaultModelKey),
+              let id = modelData["id"] as? String,
+              let name = modelData["name"] as? String,
+              let providerRaw = modelData["provider"] as? String,
+              let provider = LLMProvider(rawValue: providerRaw) else {
+            // Return first available model as fallback
+            return availableModels.first ?? LLMModel.defaultModel
+        }
+        
+        // Find the default model in available models
+        return availableModels.first(where: { $0.id == id }) ?? availableModels.first ?? LLMModel.defaultModel
+    }
+    
+    /// Set default model
+    func setDefaultModel(_ model: LLMModel) {
+        let modelData = [
+            "id": model.id,
+            "name": model.name,
+            "provider": model.provider.rawValue
+        ]
+        UserDefaults.standard.set(modelData, forKey: defaultModelKey)
+    }
+    
+    /// Update selected model and save to conversation
+    func updateSelectedModel(_ model: LLMModel) {
+        selectedModel = model
+        
+        // Save to UserDefaults (global preference)
+        saveSelectedModel()
+        
+        // Save to current conversation (if exists)
+        if let conversation = currentConversation {
+            conversation.selectedModelID = model.id
+            dataService.saveContext()
+            print("✅ Saved model \(model.name) to conversation: \(conversation.title ?? "Untitled")")
+        }
     }
     
     private func handleError(_ message: String) async {

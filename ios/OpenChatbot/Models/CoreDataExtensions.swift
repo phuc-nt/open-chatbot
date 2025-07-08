@@ -11,6 +11,7 @@ extension ConversationEntity {
         var conversation = Conversation(title: self.title ?? "Untitled Conversation")
         // Set the other properties manually
         conversation.messages = self.messagesArray
+        // Note: selectedModelID is handled in ChatViewModel when loading conversation
         return conversation
     }
     
@@ -21,7 +22,19 @@ extension ConversationEntity {
         entity.title = conversation.title
         entity.createdAt = conversation.createdAt
         entity.updatedAt = conversation.updatedAt
+        entity.selectedModelID = nil // Will be set when model is selected
         return entity
+    }
+    
+    /// Update selected model ID
+    func updateSelectedModel(_ modelID: String) {
+        self.selectedModelID = modelID
+        self.updatedAt = Date()
+    }
+    
+    /// Get selected model ID
+    var selectedModel: String? {
+        return selectedModelID
     }
     
     /// Get messages as Swift models

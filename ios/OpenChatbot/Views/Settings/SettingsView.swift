@@ -74,6 +74,10 @@ struct SettingsView: View {
                 
                 // App Settings Section
                 Section("App Settings") {
+                    NavigationLink("Default AI Model") {
+                        DefaultModelSettingView()
+                    }
+                    
                     Toggle("Dark Mode", isOn: $viewModel.isDarkMode)
                     Toggle("Enable Notifications", isOn: $viewModel.notificationsEnabled)
                 }
@@ -307,6 +311,132 @@ struct AddAPIKeyView: View {
         case .groq: return "bolt"
         case .xai: return "sparkle"
         }
+    }
+}
+
+// MARK: - Default Model Setting View
+struct DefaultModelSettingView: View {
+    @StateObject private var chatViewModel = ChatViewModel()
+    @Environment(\.dismiss) private var dismiss
+    @State private var searchText = ""
+    @State private var selectedDefaultModel: LLMModel?
+    
+    // Computed property for filtered models
+    private var filteredModels: [LLMModel] {
+        if searchText.isEmpty {
+            return chatViewModel.availableModels
+        } else {
+            return chatViewModel.availableModels.filter { model in
+                model.name.localizedCaseInsensitiveContains(searchText) ||
+                model.provider.displayName.localizedCaseInsensitiveContains(searchText) ||
+                (model.description?.localizedCaseInsensitiveContains(searchText) ?? false)
+            }
+        }
+    }
+    
+    var body: some View {
+        Form {
+            Section {
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.secondary)
+                    
+                    TextField("Search models...", text: $searchText)
+                }
+            }
+            
+            if !filteredModels.isEmpty {
+                Section {
+                    ForEach(filteredModels, id: \.id) { model in
+                        DefaultModelRow(
+                            model: model,
+                            isSelected: selectedDefaultModel?.id == model.id
+                        ) {
+                            // Set the selected model and save it
+                            selectedDefaultModel = model
+                            chatViewModel.setDefaultModel(model)
+                            
+                            // Small delay for visual feedback, then dismiss
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                dismiss()
+                            }
+                        }
+                    }
+                } header: {
+                    Text("Available Models (\(filteredModels.count))")
+                } footer: {
+                    Text("The default model will be used for new conversations. You can always change it later in each conversation.")
+                }
+            } else if chatViewModel.availableModels.isEmpty {
+                Section {
+                    HStack {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                        Text("Loading models...")
+                            .foregroundColor(.secondary)
+                    }
+                    .padding()
+                }
+            } else {
+                Section {
+                    Text("No models found matching '\(searchText)'")
+                        .foregroundColor(.secondary)
+                        .italic()
+                }
+            }
+        }
+        .navigationTitle("Default AI Model")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            // Load current default model
+            selectedDefaultModel = chatViewModel.getDefaultModel()
+        }
+    }
+}
+
+struct DefaultModelRow: View {
+    let model: LLMModel
+    let isSelected: Bool
+    let onSelect: () -> Void
+    
+    var body: some View {
+        Button(action: onSelect) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(model.name)
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    HStack {
+                        Text(model.provider.displayName)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        if isSelected {
+                            Text("• Default")
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                        }
+                    }
+                    
+                    if let description = model.description {
+                        Text(description)
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .lineLimit(2)
+                    }
+                }
+                
+                Spacer()
+                
+                if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.blue)
+                }
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 

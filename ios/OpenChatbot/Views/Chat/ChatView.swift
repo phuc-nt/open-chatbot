@@ -4,6 +4,7 @@ struct ChatView: View {
     @StateObject private var viewModel = ChatViewModel()
     @State private var messageText = ""
     @State private var showModelPicker = false
+    @EnvironmentObject var appState: AppState
     
     var body: some View {
         NavigationView {
@@ -61,6 +62,12 @@ struct ChatView: View {
             .navigationTitle("🤖 OpenChatbot")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("New Chat") {
+                        viewModel.createNewConversation()
+                    }
+                }
+                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
                         Button("Chọn Model") {
@@ -77,9 +84,12 @@ struct ChatView: View {
             .sheet(isPresented: $showModelPicker) {
                 ModelPickerView(viewModel: viewModel)
             }
-            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("LoadConversation"))) { notification in
-                if let conversation = notification.object as? ConversationEntity {
-                    viewModel.loadConversation(conversation)
+            .onChange(of: appState.selectedConversationID) { conversationID in
+                if let id = conversationID, let uuid = UUID(uuidString: id) {
+                    // Load conversation by ID when coming from History tab
+                    viewModel.loadConversationByID(conversationID: uuid)
+                    // Clear the selected conversation ID to avoid reloading
+                    appState.selectedConversationID = nil
                 }
             }
         }
@@ -278,7 +288,7 @@ struct ModelPickerView: View {
                                     model: model,
                                     isSelected: viewModel.selectedModel.id == model.id
                                 ) {
-                                    viewModel.selectedModel = model
+                                    viewModel.updateSelectedModel(model)
                                     dismiss()
                                 }
                             }
