@@ -1,10 +1,19 @@
 import SwiftUI
 
 struct ChatView: View {
-    @StateObject private var viewModel = ChatViewModel()
+    @ObservedObject var viewModel: ChatViewModel
     @State private var messageText = ""
     @State private var showModelPicker = false
     @EnvironmentObject var appState: AppState
+    
+    // Default initializer for when no viewModel is provided (like in previews)
+    init(viewModel: ChatViewModel? = nil) {
+        if let viewModel = viewModel {
+            self.viewModel = viewModel
+        } else {
+            self.viewModel = ChatViewModel()
+        }
+    }
     
     var body: some View {
         NavigationView {
@@ -414,5 +423,6 @@ struct ModelRow: View {
 }
 
 #Preview {
-    ChatView()
+    ChatView(viewModel: nil)
+        .environmentObject(AppState())
 } 

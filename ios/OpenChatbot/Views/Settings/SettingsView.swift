@@ -2,9 +2,19 @@ import SwiftUI
 
 struct SettingsView: View {
     @StateObject private var viewModel = SettingsViewModel()
-    @StateObject private var chatViewModel = ChatViewModel()
+    @ObservedObject var chatViewModel: ChatViewModel
     @State private var showDeleteConfirmation = false
     @State private var keyToDelete: StoredAPIKey?
+    @State private var refreshTrigger = 0  // Used to force UI refresh
+    
+    // Default initializer for when no chatViewModel is provided (like in previews)
+    init(chatViewModel: ChatViewModel? = nil) {
+        if let chatViewModel = chatViewModel {
+            self.chatViewModel = chatViewModel
+        } else {
+            self.chatViewModel = ChatViewModel()
+        }
+    }
     
     var body: some View {
         NavigationView {
@@ -81,14 +91,17 @@ struct SettingsView: View {
                         HStack {
                             Text("Default AI Model")
                             Spacer()
+                            // Use refreshTrigger to force UI update
                             if let defaultModel = chatViewModel.getDefaultModel() {
                                 Text(defaultModel.name)
                                     .foregroundColor(.secondary)
                                     .lineLimit(1)
+                                    .id("default-model-\(refreshTrigger)")
                             } else {
                                 Text("Not set")
                                     .foregroundColor(.secondary)
                                     .italic()
+                                    .id("no-model-\(refreshTrigger)")
                             }
                         }
                     }
@@ -162,6 +175,13 @@ struct SettingsView: View {
         }
         .onAppear {
             // Load available models and refresh default model display
+            Task {
+                await chatViewModel.loadAvailableModels()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: ChatViewModel.defaultModelDidChangeNotification)) { _ in
+            // Force UI refresh when default model changes
+            refreshTrigger += 1
             Task {
                 await chatViewModel.loadAvailableModels()
             }
@@ -388,6 +408,8 @@ struct DefaultModelSettingView: View {
                             // Set the selected model and save it
                             selectedDefaultModel = model
                             chatViewModel.setDefaultModel(model)
+                            
+                            // setDefaultModel already posts the notification
                             
                             // Small delay for visual feedback, then dismiss
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {

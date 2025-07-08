@@ -18,6 +18,9 @@ class ChatViewModel: ObservableObject {
     private let selectedModelKey = "selectedModel"
     private let defaultModelKey = "defaultModel"
     
+    // Notification names for model updates
+    static let defaultModelDidChangeNotification = Notification.Name("DefaultModelDidChange")
+    
     private let apiService: LLMAPIService
     private let dataService: DataService
     private let persistenceController: PersistenceController
@@ -44,11 +47,27 @@ class ChatViewModel: ObservableObject {
         Task {
             await loadAvailableModels()
         }
+        
+        // Listen for default model changes
+        NotificationCenter.default.addObserver(
+            forName: ChatViewModel.defaultModelDidChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            if let newDefaultModel = notification.object as? LLMModel {
+                // Update current selected model if we're in a new conversation
+                if self?.currentConversation == nil || self?.messages.isEmpty == true {
+                    self?.selectedModel = newDefaultModel
+                    print("✅ Updated selected model to new default: \(newDefaultModel.name)")
+                }
+            }
+        }
     }
     
     deinit {
-        // Clean up streaming task on dealloc
+        // Clean up streaming task and notification observers
         streamingTask?.cancel()
+        NotificationCenter.default.removeObserver(self)
     }
     
     // MARK: - Conversation Management
@@ -407,14 +426,19 @@ class ChatViewModel: ObservableObject {
         return availableModels.first(where: { $0.id == id }) ?? availableModels.first ?? LLMModel.defaultModel
     }
     
-    /// Set default model
+    /// Set default model for new conversations
     func setDefaultModel(_ model: LLMModel) {
-        let modelData = [
-            "id": model.id,
-            "name": model.name,
-            "provider": model.provider.rawValue
-        ]
-        UserDefaults.standard.set(modelData, forKey: defaultModelKey)
+        let encoder = JSONEncoder()
+        if let encoded = try? encoder.encode(model) {
+            UserDefaults.standard.set(encoded, forKey: defaultModelKey)
+            print("✅ Set default model: \(model.name)")
+            
+            // Broadcast default model change
+            NotificationCenter.default.post(
+                name: ChatViewModel.defaultModelDidChangeNotification,
+                object: model
+            )
+        }
     }
     
     /// Update selected model and save to conversation

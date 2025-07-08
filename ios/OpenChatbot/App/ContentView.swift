@@ -13,10 +13,11 @@ class AppState: ObservableObject {
 
 struct ContentView: View {
     @StateObject private var appState = AppState()
+    @StateObject private var sharedChatViewModel = ChatViewModel()
     
     var body: some View {
         TabView(selection: $appState.selectedTab) {
-            ChatView()
+            ChatView(viewModel: sharedChatViewModel)
                 .tabItem {
                     Image(systemName: "message")
                     Text("Chat")
@@ -32,7 +33,7 @@ struct ContentView: View {
                 .tag(1)
                 .environmentObject(appState)
             
-            SettingsView()
+            SettingsView(chatViewModel: sharedChatViewModel)
                 .tabItem {
                     Image(systemName: "gearshape")
                     Text("Settings")
