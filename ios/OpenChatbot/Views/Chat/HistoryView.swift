@@ -14,9 +14,6 @@ struct HistoryView: View {
                 List {
                     ForEach(viewModel.filteredConversations(searchText: searchText), id: \.id) { conversation in
                         ConversationRow(conversation: conversation, viewModel: viewModel)
-                            .onTapGesture {
-                                viewModel.selectConversation(conversation)
-                            }
                     }
                     .onDelete(perform: viewModel.deleteConversations)
                 }
@@ -90,6 +87,18 @@ struct ConversationRow: View {
             }
         }
         .padding(.vertical, 4)
+        .onTapGesture {
+            // Store selected conversation ID in UserDefaults
+            UserDefaults.standard.set(conversation.id?.uuidString, forKey: "selectedConversationID")
+            
+            // Send notification to ChatView to load this conversation
+            NotificationCenter.default.post(
+                name: NSNotification.Name("LoadConversation"),
+                object: conversation
+            )
+            
+            // TODO: Switch to Chat tab (implement later)
+        }
     }
 }
 

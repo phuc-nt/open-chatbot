@@ -97,6 +97,7 @@ class ChatViewModel: ObservableObject {
         let userMessageContent = currentInput
         currentInput = ""
         isLoading = true
+        isStreaming = true  // Start streaming indicator
         
         // Ensure we have a conversation
         if currentConversation == nil {
@@ -105,6 +106,7 @@ class ChatViewModel: ObservableObject {
         
         guard let conversation = currentConversation else {
             isLoading = false
+            isStreaming = false
             return
         }
         
@@ -127,17 +129,10 @@ class ChatViewModel: ObservableObject {
         
         do {
             var assistantResponse = ""
-            let assistantMessage = Message(
-                content: "",
-                role: .assistant,
-                conversationId: conversation.id ?? UUID()
-            )
-            
-            // Add assistant message placeholder
-            messages.append(assistantMessage)
+            var assistantMessageCreated = false
             
             // Convert messages to ChatMessage format for API
-            let chatMessages = messages.dropLast().compactMap { message -> ChatMessage? in
+            let chatMessages = messages.compactMap { message -> ChatMessage? in
                 guard message.role != .system else { return nil }
                 let apiRole: ChatMessage.MessageRole = message.role == .user ? .user : .assistant
                 return ChatMessage(role: apiRole, content: message.content)
@@ -148,44 +143,74 @@ class ChatViewModel: ObservableObject {
             
             for try await chunk in stream {
                 assistantResponse += chunk
-                // Update the last message (assistant message) in real-time
-                if let lastIndex = messages.lastIndex(where: { $0.role == .assistant }) {
-                    var updatedMessage = Message(
+                
+                // Stop typing indicator on first chunk
+                if isStreaming {
+                    await MainActor.run {
+                        isStreaming = false
+                    }
+                }
+                
+                // Create assistant message only when we have content
+                if !assistantMessageCreated {
+                    let assistantMessage = Message(
                         content: assistantResponse,
                         role: .assistant,
                         conversationId: conversation.id ?? UUID()
                     )
-                    updatedMessage.id = messages[lastIndex].id
-                    updatedMessage.timestamp = messages[lastIndex].timestamp
-                    messages[lastIndex] = updatedMessage
+                    
+                    await MainActor.run {
+                        messages.append(assistantMessage)
+                        assistantMessageCreated = true
+                    }
+                } else {
+                    // Update existing assistant message
+                    await MainActor.run {
+                        if let lastIndex = messages.lastIndex(where: { $0.role == .assistant }) {
+                            var updatedMessage = Message(
+                                content: assistantResponse,
+                                role: .assistant,
+                                conversationId: conversation.id ?? UUID()
+                            )
+                            updatedMessage.id = messages[lastIndex].id
+                            updatedMessage.timestamp = messages[lastIndex].timestamp
+                            
+                            // Update with smooth animation
+                            withAnimation(.easeOut(duration: 0.1)) {
+                                messages[lastIndex] = updatedMessage
+                            }
+                        }
+                    }
                 }
+                
+                // Small delay for smoother character-by-character effect
+                try? await Task.sleep(nanoseconds: 50_000_000) // 0.05 seconds
             }
             
             // Save final assistant message to Core Data
-            let finalAssistantMessage = Message(
-                content: assistantResponse,
-                role: .assistant,
-                conversationId: conversation.id ?? UUID()
-            )
-            
-            dataService.addMessage(finalAssistantMessage, to: conversation)
-            
-            // Update local array with final message
-            if let lastIndex = messages.lastIndex(where: { $0.role == .assistant }) {
-                messages[lastIndex] = finalAssistantMessage
+            if assistantMessageCreated {
+                let finalAssistantMessage = Message(
+                    content: assistantResponse,
+                    role: .assistant,
+                    conversationId: conversation.id ?? UUID()
+                )
+                
+                dataService.addMessage(finalAssistantMessage, to: conversation)
+                
+                // Update local array with final message
+                if let lastIndex = messages.lastIndex(where: { $0.role == .assistant }) {
+                    messages[lastIndex] = finalAssistantMessage
+                }
             }
             
         } catch {
-            // Remove the placeholder assistant message on error
-            if messages.last?.role == .assistant && messages.last?.content.isEmpty == true {
-                messages.removeLast()
-            }
-            
+            // No need to remove placeholder since we don't create it upfront
             print("Error sending message: \(error)")
-            // TODO: Show error to user
+            await handleError("Failed to send message: \(error.localizedDescription)")
         }
         
         isLoading = false
+        isStreaming = false  // Stop streaming indicator (backup)
     }
     
     /// Clear all messages in current conversation
@@ -208,11 +233,9 @@ class ChatViewModel: ObservableObject {
     func cancelCurrentRequest() {
         apiService.cancelCurrentRequest()
         isLoading = false
+        isStreaming = false  // Stop streaming indicator
         
-        // Remove placeholder assistant message if exists
-        if messages.last?.role == .assistant && messages.last?.content.isEmpty == true {
-            messages.removeLast()
-        }
+        // No need to remove placeholder since we don't create empty ones anymore
     }
     
     // MARK: - Helper Methods

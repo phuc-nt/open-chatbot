@@ -77,6 +77,11 @@ struct ChatView: View {
             .sheet(isPresented: $showModelPicker) {
                 ModelPickerView(viewModel: viewModel)
             }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("LoadConversation"))) { notification in
+                if let conversation = notification.object as? ConversationEntity {
+                    viewModel.loadConversation(conversation)
+                }
+            }
         }
     }
     
@@ -191,29 +196,23 @@ struct TypingIndicator: View {
     
     var body: some View {
         HStack(spacing: 4) {
-            Image(systemName: "cpu")
-                .foregroundColor(.blue)
-                .font(.caption)
-            
-            HStack(spacing: 4) {
-                ForEach(0..<3) { index in
-                    Circle()
-                        .fill(Color.gray)
-                        .frame(width: 6, height: 6)
-                        .scaleEffect(animationOffset == CGFloat(index) ? 1.2 : 0.8)
-                        .animation(
-                            Animation.easeInOut(duration: 0.6)
-                                .repeatForever()
-                                .delay(Double(index) * 0.2),
-                            value: animationOffset
-                        )
-                }
+            ForEach(0..<3) { index in
+                Circle()
+                    .fill(Color.gray)
+                    .frame(width: 6, height: 6)
+                    .scaleEffect(animationOffset == CGFloat(index) ? 1.2 : 0.8)
+                    .animation(
+                        Animation.easeInOut(duration: 0.6)
+                            .repeatForever()
+                            .delay(Double(index) * 0.2),
+                        value: animationOffset
+                    )
             }
-            .padding(.vertical, 8)
-            .padding(.horizontal, 12)
-            .background(Color(.systemGray6))
-            .cornerRadius(12)
         }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
         .onAppear {
             animationOffset = 2
         }
