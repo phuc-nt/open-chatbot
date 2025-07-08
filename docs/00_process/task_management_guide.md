@@ -103,6 +103,7 @@ Quy trình làm việc chuẩn cho **mỗi task** từ planning đến completio
 - [ ] **Run** full test suite
 - [ ] **Test** edge cases và error scenarios
 - [ ] **Verify** integration với existing features
+- [ ] **CRITICAL**: Khi test trên thiết bị thật, tuân thủ theo **[Quy trình Build & Deploy chính thức](../02_development/ios_app_development_guide.md#phần-7-quy-trình-build-run-test-official)** để đảm bảo bạn đang chạy code mới nhất.
 
 ---
 
