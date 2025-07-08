@@ -29,6 +29,7 @@ Phát triển một **chatbot iOS native** mã nguồn mở, hỗ trợ đa LLM 
 **FR-002: Chuyển đổi Model**
 - Chuyển đổi nhanh giữa các model khác nhau trong cùng một conversation
 - Hiển thị danh sách model có sẵn từ mỗi provider
+- **Lưu trữ model đã chọn**: Tự động lưu và khôi phục model được sử dụng cho từng cuộc hội thoại.
 - **Cost tracking**: Theo dõi chi phí theo từng model và conversation[3][4]
 
 ### 2.2 Giao Diện Chat và Tương Tác
@@ -61,6 +62,7 @@ Phát triển một **chatbot iOS native** mã nguồn mở, hỗ trợ đa LLM 
 - Tạo assistant tùy chỉnh với **system prompt** riêng[11][12]
 - **Role-play characters** với personality khác nhau
 - Template prompt có sẵn cho các use case phổ biến
+- **Cài đặt model mặc định**: Cho phép người dùng chọn một model mặc định cho tất cả các cuộc hội thoại mới.
 - **Model parameters**: temperature, max tokens, top-p, frequency penalty
 
 **FR-008: Knowledge Base**
@@ -122,6 +124,8 @@ Phát triển một **chatbot iOS native** mã nguồn mở, hỗ trợ đa LLM 
 - **Accessibility support** (VoiceOver, Dynamic Type)
 - **Haptic feedback** cho user interactions
 - **Error handling** với user-friendly messages
+- **Khởi động thông minh**: Tự động mở lại cuộc hội thoại gần nhất khi khởi động ứng dụng để đảm bảo tính liên tục.
+- **Đồng bộ hóa trạng thái real-time**: Trạng thái ứng dụng (ví dụ: model đã chọn) được đồng bộ hóa ngay lập tức trên tất cả các tab, mang lại trải nghiệm liền mạch.
 
 ### 3.4 Tương Thích (Compatibility)
 **NFR-005: Platform Support**

@@ -155,15 +155,20 @@
 
 3. **Professional UI/UX**:
    - Modern iOS chat interface với smooth scrolling
-   - Model picker với real-time validation
+   - Model picker với real-time validation và search
    - Error banners với user-friendly messages
    - Typing indicators và streaming feedback
+   - **Đồng bộ hóa trạng thái real-time**: Các thay đổi (ví dụ: default model) được phản ánh ngay lập tức trên tất cả các tab.
+   - **Khởi động thông minh**: App tự động mở cuộc hội thoại gần nhất, mang lại trải nghiệm liền mạch.
+   - **Giao diện nhất quán**: Cải thiện layout của tab History để nhất quán với các màn hình khác.
 
 4. **Technical Excellence**:
    - Protocol-oriented architecture for extensibility
    - Modern Swift async/await throughout với proper actor isolation
    - Memory-safe streaming với automatic cleanup
    - Professional iOS guidelines compliance
+   - **Kiến trúc State Management hợp nhất**: Refactor để sử dụng một `ChatViewModel` được chia sẻ, đảm bảo dữ liệu nhất quán trên toàn bộ ứng dụng và loại bỏ các lần tìm nạp dữ liệu thừa.
+   - **Persistence nâng cao**: Lưu trữ model đã chọn cho từng cuộc hội thoại và cho phép người dùng đặt model mặc định toàn cục.
 
 ---
 
