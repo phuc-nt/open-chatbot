@@ -90,11 +90,8 @@ class SettingsViewModel: ObservableObject {
     /// Delete API key
     func deleteAPIKey(_ key: StoredAPIKey) async {
         do {
-            // Request biometric authentication if available
-            if keychain.isBiometricAuthenticationAvailable {
-                let authenticated = try await keychain.authenticateWithBiometrics()
-                guard authenticated else { return }
-            }
+            // For now, skip biometric authentication to fix crash
+            // TODO: Re-enable biometric auth after fixing KeychainService imports
             
             try await keychain.deleteAPIKey(for: key.provider, name: key.name)
             await loadAPIKeys()

@@ -1,6 +1,7 @@
 import Foundation
 import Security
 import CryptoKit
+import LocalAuthentication
 
 // MARK: - Keychain Service for Secure API Key Storage
 @MainActor
@@ -233,9 +234,6 @@ enum KeychainError: LocalizedError {
         }
     }
 }
-
-// MARK: - Import Required Frameworks
-import LocalAuthentication
 
 extension KeychainService {
     /// Request biometric authentication before accessing sensitive data
