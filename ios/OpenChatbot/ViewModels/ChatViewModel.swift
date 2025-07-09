@@ -413,32 +413,47 @@ class ChatViewModel: ObservableObject {
     
     /// Get user's default model preference
     func getDefaultModel() -> LLMModel? {
+        // Try to get from UserDefaults using consistent format
         guard let modelData = UserDefaults.standard.dictionary(forKey: defaultModelKey),
               let id = modelData["id"] as? String,
               let name = modelData["name"] as? String,
               let providerRaw = modelData["provider"] as? String,
               let provider = LLMProvider(rawValue: providerRaw) else {
+            print("⚠️ No default model found in UserDefaults")
             // Return first available model as fallback
             return availableModels.first ?? LLMModel.defaultModel
         }
         
+        print("📱 Found default model in UserDefaults: \(name)")
+        
         // Find the default model in available models
-        return availableModels.first(where: { $0.id == id }) ?? availableModels.first ?? LLMModel.defaultModel
+        if let foundModel = availableModels.first(where: { $0.id == id }) {
+            print("✅ Default model found in available models: \(foundModel.name)")
+            return foundModel
+        } else {
+            print("⚠️ Default model not found in available models, using fallback")
+            return availableModels.first ?? LLMModel.defaultModel
+        }
     }
     
     /// Set default model for new conversations
     func setDefaultModel(_ model: LLMModel) {
-        let encoder = JSONEncoder()
-        if let encoded = try? encoder.encode(model) {
-            UserDefaults.standard.set(encoded, forKey: defaultModelKey)
-            print("✅ Set default model: \(model.name)")
-            
-            // Broadcast default model change
-            NotificationCenter.default.post(
-                name: ChatViewModel.defaultModelDidChangeNotification,
-                object: model
-            )
-        }
+        // Use consistent dictionary format (same as getDefaultModel)
+        let modelData = [
+            "id": model.id,
+            "name": model.name,
+            "provider": model.provider.rawValue
+        ]
+        UserDefaults.standard.set(modelData, forKey: defaultModelKey)
+        UserDefaults.standard.synchronize() // Force immediate sync
+        
+        print("✅ Set default model: \(model.name) (ID: \(model.id))")
+        
+        // Broadcast default model change
+        NotificationCenter.default.post(
+            name: ChatViewModel.defaultModelDidChangeNotification,
+            object: model
+        )
     }
     
     /// Update selected model and save to conversation

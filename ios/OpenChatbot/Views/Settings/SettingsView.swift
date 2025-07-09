@@ -87,6 +87,7 @@ struct SettingsView: View {
                 Section("App Settings") {
                     NavigationLink {
                         DefaultModelSettingView()
+                            .environmentObject(chatViewModel)
                     } label: {
                         HStack {
                             Text("Default AI Model")
@@ -357,7 +358,7 @@ struct AddAPIKeyView: View {
 
 // MARK: - Default Model Setting View
 struct DefaultModelSettingView: View {
-    @StateObject private var chatViewModel = ChatViewModel()
+    @EnvironmentObject private var chatViewModel: ChatViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var searchText = ""
     @State private var selectedDefaultModel: LLMModel?
@@ -403,16 +404,16 @@ struct DefaultModelSettingView: View {
                     ForEach(filteredModels, id: \.id) { model in
                         DefaultModelRow(
                             model: model,
-                            isSelected: selectedDefaultModel?.id == model.id
+                            isSelected: chatViewModel.getDefaultModel()?.id == model.id
                         ) {
                             // Set the selected model and save it
                             selectedDefaultModel = model
                             chatViewModel.setDefaultModel(model)
                             
-                            // setDefaultModel already posts the notification
+                            print("🔄 Setting default model: \(model.name)")
                             
                             // Small delay for visual feedback, then dismiss
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                                 dismiss()
                             }
                         }
@@ -445,6 +446,15 @@ struct DefaultModelSettingView: View {
         .onAppear {
             // Load current default model
             selectedDefaultModel = chatViewModel.getDefaultModel()
+            
+            // Load available models if not already loaded
+            if chatViewModel.availableModels.isEmpty {
+                Task {
+                    await chatViewModel.loadAvailableModels()
+                    // Update selected default model after models are loaded
+                    selectedDefaultModel = chatViewModel.getDefaultModel()
+                }
+            }
         }
     }
 }

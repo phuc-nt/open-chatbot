@@ -27,10 +27,10 @@
 
 | ID        | Feature                      | Test Case Description                                               | Steps to Reproduce                                                                                                                                                                 | Expected Result                                                                                                                                                             | Actual Result | Status (Pass/Fail) |
 |-----------|------------------------------|---------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|--------------------|
-| **AT-S2-11** | **Default Model Settings**   | Cài đặt model mặc định cho các cuộc hội thoại mới.                | 1. Vào Settings -> Default AI Model. <br> 2. Chọn một model từ danh sách (ví dụ: Claude-3.5 Sonnet). <br> 3. Quay lại Settings.                                           | - Tên model đã chọn hiển thị ngay lập tức trong phần "Default AI Model" của Settings. <br> - Model được đánh dấu ở đầu danh sách khi mở lại Default Model setting.        | Chọn model xong, quay lại Settings không thấy tên model. Quay lại màn hình chọn, model không ở đầu danh sách | **FAIL** |
-| **AT-S2-12** | **Real-time State Sync**     | Kiểm tra đồng bộ hóa real-time giữa các tab.                      | 1. Đang ở tab Chat, chú ý model hiện tại. <br> 2. Chuyển sang Settings -> Default AI Model. <br> 3. Chọn model khác. <br> 4. Chuyển lại tab Chat.                        | - Model trong Chat tab được cập nhật ngay lập tức thành model mới (nếu đang ở cuộc hội thoại trống). <br> - Không cần restart app hay reload.                            | New chat (trống) OK. Chat có history thì không đổi model | **PARTIAL FAIL** |
-| **AT-S2-13** | **Model Persistence**        | Lưu model cho từng cuộc hội thoại riêng biệt.                     | 1. Tạo cuộc hội thoại với Model A, gửi 1-2 tin nhắn. <br> 2. Tạo cuộc hội thoại mới với Model B. <br> 3. Quay lại cuộc hội thoại đầu thông qua History.                  | - Khi quay lại cuộc hội thoại đầu, model tự động chuyển về Model A. <br> - Mỗi cuộc hội thoại ghi nhớ model đã sử dụng.                                                   | Quay lại hội thoại cũ (A) thì model bị sai. Chỉ hội thoại mới nhất (B) giữ được model | **FAIL** |
-| **AT-S2-14** | **Smart App Startup**        | App tự động mở cuộc hội thoại gần nhất khi khởi động.             | 1. Có ít nhất 1 cuộc hội thoại trong History. <br> 2. Tắt app hoàn toàn. <br> 3. Mở lại app.                                                                              | - App tự động load cuộc hội thoại gần nhất thay vì tạo chat mới. <br> - Model được khôi phục theo cuộc hội thoại đó.                                                       | Load đúng hội thoại gần nhất, nhưng model bị sai (thành model mặc định sai) | **PARTIAL FAIL** |
+| **AT-S2-11** | **Default Model Settings**   | Cài đặt model mặc định cho các cuộc hội thoại mới.                | 1. Vào Settings -> Default AI Model. <br> 2. Chọn một model từ danh sách (ví dụ: Claude-3.5 Sonnet). <br> 3. Quay lại Settings.                                           | - Tên model đã chọn hiển thị ngay lập tức trong phần "Default AI Model" của Settings. <br> - Model được đánh dấu ở đầu danh sách khi mở lại Default Model setting.        | ✅ Settings hiển thị tên model đã chọn. Model đã chọn ở đầu danh sách | **PASS** |
+| **AT-S2-12** | **Real-time State Sync**     | Kiểm tra đồng bộ hóa real-time giữa các tab.                      | 1. Đang ở tab Chat, chú ý model hiện tại. <br> 2. Chuyển sang Settings -> Default AI Model. <br> 3. Chọn model khác. <br> 4. Chuyển lại tab Chat.                        | - Model trong Chat tab được cập nhật ngay lập tức thành model mới (nếu đang ở cuộc hội thoại trống). <br> - Không cần restart app hay reload.                            | ✅ New chat sử dụng model default mới nhất | **PASS** |
+| **AT-S2-13** | **Model Persistence**        | Lưu model cho từng cuộc hội thoại riêng biệt.                     | 1. Tạo cuộc hội thoại với Model A, gửi 1-2 tin nhắn. <br> 2. Tạo cuộc hội thoại mới với Model B. <br> 3. Quay lại cuộc hội thoại đầu thông qua History.                  | - Khi quay lại cuộc hội thoại đầu, model tự động chuyển về Model A. <br> - Mỗi cuộc hội thoại ghi nhớ model đã sử dụng.                                                   | ✅ Chọn history cũ, hiển thị đúng model của chat đó | **PASS** |
+| **AT-S2-14** | **Smart App Startup**        | App tự động mở cuộc hội thoại gần nhất khi khởi động.             | 1. Có ít nhất 1 cuộc hội thoại trong History. <br> 2. Tắt app hoàn toàn. <br> 3. Mở lại app.                                                                              | - App tự động load cuộc hội thoại gần nhất thay vì tạo chat mới. <br> - Model được khôi phục theo cuộc hội thoại đó.                                                       | Cần test lại sau khi fix AT-S2-11 | **RETEST** |
 | **AT-S2-15** | **Model Search & Filter**    | Tìm kiếm model trong danh sách model picker.                      | 1. Mở Model Picker (trong Chat hoặc Settings). <br> 2. Gõ tên model vào search bar (ví dụ: "claude"). <br> 3. Kiểm tra kết quả lọc.                                      | - Chỉ hiển thị các model phù hợp với từ khóa tìm kiếm. <br> - Search hoạt động real-time khi gõ. <br> - Có thể tìm theo tên model hoặc provider.                          | OK | **PASS** |
 | **AT-S2-16** | **History Tab Enhancement**   | Kiểm tra UI cải tiến của History tab.                             | 1. Vào History tab. <br> 2. Tạo vài cuộc hội thoại với tên khác nhau. <br> 3. Kiểm tra layout và tìm kiếm.                                                              | - Layout nhất quán với Settings tab (Form-based). <br> - Không có overlap với navigation bar. <br> - Search functionality hoạt động trong History.                       | OK | **PASS** |
 | **AT-S2-17** | **Navigation Improvements**  | Chuyển đổi mượt mà giữa History và Chat.                          | 1. Ở History tab, tap vào một cuộc hội thoại. <br> 2. Kiểm tra việc chuyển tab và load conversation.                                                                       | - Tự động chuyển sang Chat tab. <br> - Cuộc hội thoại được load với đúng messages và model. <br> - Transition mượt mà không có lag.                                       | OK | **PASS** |
@@ -44,10 +44,11 @@
 **Core Features**: 10 test cases  
 **Enhanced Features**: 8 test cases  
 
-**Pass**: 9/18  
-**Partial Fail**: 3/18  
-**Fail**: 4/18  
+**Pass**: 12/18  
+**Partial Fail**: 1/18  
+**Fail**: 2/18  
 **Blocked**: 1/18  
+**Retest**: 1/18  
 **Pending**: 1/18 (AT-S2-03 - chưa test invalid key)  
 **Coverage**: API Management, Streaming Chat, Model Management, State Synchronization, Persistence, UI/UX  
 
@@ -64,10 +65,11 @@
 1. **CRITICAL CRASH**: App bị crash khi xác nhận xóa API key (AT-S2-04)
 2. **Missing Stop Button**: Không có nút Stop khi đang streaming response, chỉ có khi đang hiện typing indicator (AT-S2-06)
 3. **Missing Network Error Handling**: Không có thông báo sự cố mạng (AT-S2-09)
-4. **Default Model Settings Broken**: Không lưu/hiển thị default model đã chọn (AT-S2-11)
-5. **Real-time State Sync Issues**: Chat có history không cập nhật model mới (AT-S2-12)
-6. **Model Persistence Broken**: Chỉ hội thoại mới nhất giữ được model, các hội thoại cũ bị sai (AT-S2-13)
-7. **App Startup Model Issues**: Load đúng hội thoại nhưng model bị sai (AT-S2-14)
+
+**Fixed Issues**: ✅
+4. ~~**Default Model Settings**~~: Fixed persistence and UI sync (AT-S2-11)
+5. ~~**Real-time State Sync**~~: Fixed for new conversations (AT-S2-12)
+6. ~~**Model Persistence**~~: Fixed individual conversation model tracking (AT-S2-13)
 
 **New Feature Requests**:
 1. **History Tab Enhancement**: Tab history cần có tính năng xóa tất cả (với confirmation dialog)
