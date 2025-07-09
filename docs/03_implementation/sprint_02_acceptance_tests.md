@@ -15,7 +15,7 @@
 | **AT-S2-03** | **API Key Management**       | Thêm một API key không hợp lệ và kiểm tra lỗi.                       | 1. Vào Settings -> API Keys -> OpenRouter. <br> 2. Thêm một API key **không hợp lệ** (ví dụ: "123"). <br> 3. Nhấn "Test Connection".                                                | - Thông báo lỗi "Invalid API Key" hoặc tương tự hiển thị. <br> - Trạng thái của key vẫn là "Invalid".                                                                        | Chưa test (cần test sau) | **PENDING** |
 | **AT-S2-04** | **API Key Management**       | Xóa một API key.                                                    | 1. Vào Settings -> API Keys -> OpenRouter. <br> 2. Vuốt sang trái trên một key đã thêm. <br> 3. Nhấn nút "Delete".                                                                   | - Key bị xóa khỏi danh sách.                                                                                                                                                | App bị crash khi xác nhận xóa | **FAIL** |
 | **AT-S2-05** | **Streaming Chat**           | Gửi một tin nhắn và nhận phản hồi streaming thành công.               | 1. Quay lại màn hình Chat. <br> 2. Đảm bảo đã có API key hợp lệ và đã chọn một model (ví dụ: GPT-4o Mini). <br> 3. Gõ "Hello, how are you?" và gửi.                             | - Tin nhắn của người dùng hiển thị ngay lập tức. <br> - Typing indicator của assistant xuất hiện. <br> - Phản hồi của assistant hiển thị dần dần từng chữ/từ một cách mượt mà.      | New chat thành công, chọn model được, chat được, AI phản hồi, có Typing indicator, có hiệu ứng streaming | **PASS** |
-| **AT-S2-06** | **Streaming Chat**           | Dừng một yêu cầu streaming đang diễn ra.                             | 1. Gửi một câu hỏi dài để đảm bảo có thời gian streaming (ví dụ: "Hãy kể một câu chuyện ngắn về một con tàu vũ trụ"). <br> 2. Trong khi assistant đang trả lời, nhấn nút "Stop". | - Quá trình streaming dừng lại ngay lập tức. <br> - Typing indicator biến mất. <br> - Nút "Stop" chuyển lại thành nút "Send".                                                      | ✅ Có hiện stop button màu đỏ khi streaming. ❌ Nhưng ấn stop không dừng được stream, AI vẫn trả lời đến hết | **FAIL** |
+| **AT-S2-06** | **Streaming Chat**           | Dừng một yêu cầu streaming đang diễn ra.                             | 1. Gửi một câu hỏi dài để đảm bảo có thời gian streaming (ví dụ: "Hãy kể một câu chuyện ngắn về một con tàu vũ trụ"). <br> 2. Trong khi assistant đang trả lời, nhấn nút "Stop". | - Quá trình streaming dừng lại ngay lập tức. <br> - Typing indicator biến mất. <br> - Nút "Stop" chuyển lại thành nút "Send".                                                      | ✅ Stop button hiển thị và hoạt động đúng, dừng streaming ngay lập tức | **PASS** |
 | **AT-S2-07** | **Streaming Chat**           | Xử lý lỗi khi không có API key hợp lệ.                                | 1. Xóa tất cả API key hợp lệ trong Settings. <br> 2. Quay lại màn hình Chat. <br> 3. Gửi một tin nhắn.                                                                           | - Một banner lỗi hiển thị ở đầu màn hình với thông báo "API Key not found or invalid." hoặc tương tự. <br> - Tin nhắn không được gửi đi.                                     | Không thể test vì chưa xóa được key (AT-S2-04 fail) | **BLOCKED** |
 | **AT-S2-08** | **Model Selection**          | Chuyển đổi model trong khi chat.                                     | 1. Mở menu (dấu ba chấm ở góc trên bên phải). <br> 2. Chọn "Chọn Model". <br> 3. Chọn một model khác với model hiện tại. <br> 4. Gửi một tin nhắn mới.                          | - Tên model mới được hiển thị trên header của màn hình Chat. <br> - Phản hồi được trả về từ model mới đã chọn (có thể kiểm tra bằng cách hỏi "Bạn là model nào?").            | Đổi model thành công, xác nhận đúng model mới | **PASS** |
 | **AT-S2-09** | **Error Handling**           | Xử lý lỗi khi không có kết nối mạng.                                  | 1. Tắt Wi-Fi và Dữ liệu di động trên thiết bị/simulator. <br> 2. Gửi một tin nhắn trong Chat.                                                                               | - Banner lỗi hiển thị với thông báo về sự cố mạng (ví dụ: "The Internet connection appears to be offline.").                                                               | ✅ Đã thấy thông báo lỗi khi tắt mạng | **PASS** |
@@ -35,20 +35,21 @@
 | **AT-S2-16** | **History Tab Enhancement**   | Kiểm tra UI cải tiến của History tab.                             | 1. Vào History tab. <br> 2. Tạo vài cuộc hội thoại với tên khác nhau. <br> 3. Kiểm tra layout và tìm kiếm.                                                              | - Layout nhất quán với Settings tab (Form-based). <br> - Không có overlap với navigation bar. <br> - Search functionality hoạt động trong History.                       | OK | **PASS** |
 | **AT-S2-17** | **Navigation Improvements**  | Chuyển đổi mượt mà giữa History và Chat.                          | 1. Ở History tab, tap vào một cuộc hội thoại. <br> 2. Kiểm tra việc chuyển tab và load conversation.                                                                       | - Tự động chuyển sang Chat tab. <br> - Cuộc hội thoại được load với đúng messages và model. <br> - Transition mượt mà không có lag.                                       | OK | **PASS** |
 | **AT-S2-18** | **New Chat Button**          | Tạo cuộc hội thoại mới từ Chat tab.                               | 1. Ở Chat tab, nhấn nút "New Chat" (top-left). <br> 2. Kiểm tra reset state.                                                                                              | - Messages được clear. <br> - Model chuyển về default model. <br> - Sẵn sàng cho cuộc hội thoại mới.                                                                      | OK | **PASS** |
+| **AT-S2-19** | **Typing Indicator Logic**   | Typing indicator chỉ hiển thị khi chờ response, không hiện khi streaming | 1. Gửi tin nhắn trong Chat. <br> 2. Quan sát typing indicator khi chờ AI response. <br> 3. Quan sát khi AI bắt đầu streaming response.                                  | - Typing indicator (🔵🔵🔵) hiển thị ngay khi gửi tin nhắn. <br> - Typing indicator biến mất khi AI bắt đầu stream response. <br> - Stop button hiển thị thay thế khi streaming. | ✅ Typing indicator hiển thị đúng timing, biến mật khi bắt đầu stream | **PASS** |
 
 ---
 
 ## 📊 **Test Execution Summary**
 
-**Total Test Cases**: 18  
+**Total Test Cases**: 19  
 **Core Features**: 10 test cases  
-**Enhanced Features**: 8 test cases  
+**Enhanced Features**: 9 test cases  
 
-**Pass**: 13/18  
-**Fail**: 3/18  
-**Blocked**: 1/18  
-**Retest**: 1/18  
-**Pending**: 1/18 (AT-S2-03 - chưa test invalid key)  
+**Pass**: 15/19  
+**Fail**: 2/19  
+**Blocked**: 1/19  
+**Retest**: 1/19  
+**Pending**: 1/19 (AT-S2-03 - chưa test invalid key)  
 **Coverage**: API Management, Streaming Chat, Model Management, State Synchronization, Persistence, UI/UX  
 
 ---
@@ -62,14 +63,15 @@
 
 **Issues Found**:
 1. **CRITICAL CRASH**: App bị crash khi xác nhận xóa API key (AT-S2-04) 🔴 DEFERRED
-2. **Stop Button Logic**: Có hiện stop button nhưng ấn không dừng được streaming (AT-S2-06) 🔴 NEEDS FIX
 
 **Fixed Issues**: ✅
-3. ~~**Network Error Handling**~~: Fixed - đã thấy thông báo lỗi khi tắt mạng (AT-S2-09)
-4. ~~**Default Model Settings**~~: Fixed persistence and UI sync (AT-S2-11)
-5. ~~**Real-time State Sync**~~: Fixed for new conversations (AT-S2-12)
-6. ~~**Model Persistence**~~: Fixed individual conversation model tracking (AT-S2-13)
-7. ~~**Clear All State Reset**~~: Fixed - không còn crash, tự động tạo new chat sau clear all ✅
+2. ~~**Stop Button Logic**~~: Fixed - Stop button hoạt động đúng, dừng streaming ngay lập tức (AT-S2-06) ✅
+3. ~~**Typing Indicator Logic**~~: Fixed - Typing indicator chỉ hiển thị khi chờ response, biến mất khi streaming (AT-S2-19) ✅
+4. ~~**Network Error Handling**~~: Fixed - đã thấy thông báo lỗi khi tắt mạng (AT-S2-09) ✅
+5. ~~**Default Model Settings**~~: Fixed persistence and UI sync (AT-S2-11) ✅
+6. ~~**Real-time State Sync**~~: Fixed for new conversations (AT-S2-12) ✅
+7. ~~**Model Persistence**~~: Fixed individual conversation model tracking (AT-S2-13) ✅
+8. ~~**Clear All State Reset**~~: Fixed - không còn crash, tự động tạo new chat sau clear all ✅
 
 **New Feature Requests**:
 1. ~~**History Tab Enhancement**~~: ✅ COMPLETED - Đã thêm Clear All functionality với confirmation dialog

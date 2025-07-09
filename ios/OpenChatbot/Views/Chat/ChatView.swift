@@ -30,14 +30,14 @@ struct ChatView: View {
                                     .id(message.id)
                             }
                             
-                            // Streaming indicator
-                            if viewModel.isStreaming {
+                            // Typing indicator (only when loading but not streaming)
+                            if viewModel.isLoading && !viewModel.isStreaming {
                                 HStack {
                                     TypingIndicator()
                                     Spacer()
                                 }
                                 .padding(.horizontal)
-                                .id("streaming")
+                                .id("typing")
                             }
                         }
                         .padding()
@@ -49,10 +49,10 @@ struct ChatView: View {
                             }
                         }
                     }
-                    .onChange(of: viewModel.isStreaming) { isStreaming in
-                        if isStreaming {
+                    .onChange(of: viewModel.isLoading) { isLoading in
+                        if isLoading && !viewModel.isStreaming {
                             withAnimation(.easeOut(duration: 0.3)) {
-                                proxy.scrollTo("streaming", anchor: .bottom)
+                                proxy.scrollTo("typing", anchor: .bottom)
                             }
                         }
                     }

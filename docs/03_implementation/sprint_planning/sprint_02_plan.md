@@ -469,9 +469,9 @@ class OpenRouterAPIService: LLMAPIService {
 
 ### **🎯 Sprint 2 Completion Summary**
 
-**Total Tasks Completed**: 95% ✅  
+**Total Tasks Completed**: 98% ✅  
 **Final App Status**: Ready for Production Beta  
-**Test Coverage**: 13/18 test cases PASS (72% success rate)
+**Test Coverage**: 15/19 test cases PASS (79% success rate)
 
 #### **✅ Major Achievements**
 
@@ -499,24 +499,32 @@ class OpenRouterAPIService: LLMAPIService {
    - Navigation improvements
    - UI/UX enhancements
 
-#### **🔴 Critical Issues (2 remaining)**
+#### **🔴 Critical Issues (1 remaining)**
 
 1. **AT-S2-04: API Key Deletion Crash** 🔴 DEFERRED
    - Critical security issue
    - Blocks testing of error scenarios
    - Recommended for immediate fix in maintenance sprint
 
-2. **AT-S2-06: Stop Button Logic** 🔴 PARTIAL
+#### **✅ Recently Fixed Issues**
+
+1. **AT-S2-06: Stop Button Logic** ✅ FIXED
    - UI shows stop button correctly ✅
-   - Logic doesn't actually stop streaming ❌
-   - AsyncStream cancellation needs improvement
+   - Logic now properly stops streaming ✅
+   - Task-based cancellation implemented successfully
+
+2. **AT-S2-19: Typing Indicator Logic** ✅ FIXED
+   - Typing indicator now shows only when waiting for response ✅
+   - Disappears correctly when streaming starts ✅
+   - Improved user experience with proper timing
 
 #### **📊 Acceptance Test Results**
 
-**PASS (13/18)**:
+**PASS (15/19)**:
 - AT-S2-01: Add API key ✅
 - AT-S2-02: Test connection ✅  
 - AT-S2-05: Streaming chat ✅
+- AT-S2-06: Stop streaming logic ✅
 - AT-S2-08: Model selection ✅
 - AT-S2-09: Network error handling ✅
 - AT-S2-10: UI/UX scrolling ✅
@@ -527,13 +535,13 @@ class OpenRouterAPIService: LLMAPIService {
 - AT-S2-16: History UI ✅
 - AT-S2-17: Navigation ✅
 - AT-S2-18: New chat button ✅
+- AT-S2-19: Typing indicator logic ✅
 
-**FAIL (3/18)**:
+**FAIL (2/19)**:
 - AT-S2-04: Delete API key (crash) 🔴
-- AT-S2-06: Stop streaming (logic) 🔴
 - AT-S2-14: App startup (needs retest)
 
-**OTHER (2/18)**:
+**OTHER (2/19)**:
 - AT-S2-03: Invalid key test (pending)
 - AT-S2-07: No API key error (blocked by AT-S2-04)
 
@@ -572,13 +580,14 @@ class OpenRouterAPIService: LLMAPIService {
 - User experience: Professional grade
 - Security: Production ready
 - Performance: Optimal
-- Test coverage: 72% pass rate
+- Test coverage: 79% pass rate
 
 ### **🚀 Recommended Next Steps**
 
 1. **Immediate (Hot Fixes)**:
-   - Fix stop button cancellation logic (1-2 hours)
-   - Investigate API key deletion crash (2-4 hours)
+   - ~~Fix stop button cancellation logic~~ ✅ COMPLETED
+   - ~~Fix typing indicator timing~~ ✅ COMPLETED
+   - Investigate API key deletion crash (2-4 hours) - REMAINING
 
 2. **Sprint 3 Preparation**:
    - Advanced features (file upload, export)

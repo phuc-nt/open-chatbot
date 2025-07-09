@@ -10,6 +10,7 @@ class OpenRouterAPIService: LLMAPIService {
     private let keychain: KeychainService
     private var dataBuffer: String = ""
     private var isCancelled: Bool = false
+    private var currentStreamContinuation: AsyncStream<String>.Continuation?
     
     init(keychain: KeychainService) {
         // Configure session for streaming
@@ -39,6 +40,7 @@ class OpenRouterAPIService: LLMAPIService {
             // Reset buffer and cancellation flag for new request
             self.dataBuffer = ""
             self.isCancelled = false
+            self.currentStreamContinuation = continuation
             
             let task = self.session.dataTask(with: request) { [weak self] data, response, error in
                 DispatchQueue.main.async {
@@ -224,6 +226,13 @@ class OpenRouterAPIService: LLMAPIService {
             isCancelled = true
             currentTask?.cancel()
             currentTask = nil
+            
+            // Force finish the AsyncStream immediately
+            if let continuation = currentStreamContinuation {
+                print("🛑 Force finishing AsyncStream")
+                continuation.finish()
+                currentStreamContinuation = nil
+            }
         }
     }
     
@@ -291,11 +300,25 @@ class OpenRouterAPIService: LLMAPIService {
         onContent: @escaping (String) -> Void,
         completion: @escaping () -> Void
     ) {
+        // Check cancellation first before processing
+        if isCancelled {
+            print("🛑 Streaming cancelled during chunk processing")
+            completion()
+            return
+        }
+        
         // Add new chunk to buffer
         dataBuffer += chunk
         
         // Process complete lines from buffer
         while let lineEnd = dataBuffer.firstIndex(of: "\n") {
+            // Check cancellation for each line processed
+            if isCancelled {
+                print("🛑 Streaming cancelled during line processing")
+                completion()
+                return
+            }
+            
             let line = String(dataBuffer[..<lineEnd]).trimmingCharacters(in: .whitespacesAndNewlines)
             dataBuffer.removeSubrange(...lineEnd)
             
@@ -328,6 +351,14 @@ class OpenRouterAPIService: LLMAPIService {
                            let delta = firstChoice["delta"] as? [String: Any],
                            let content = delta["content"] as? String,
                            !content.isEmpty {
+                            
+                            // Final check before yielding content
+                            if isCancelled {
+                                print("🛑 Streaming cancelled before yielding content")
+                                completion()
+                                return
+                            }
+                            
                             onContent(content)
                         }
                     }

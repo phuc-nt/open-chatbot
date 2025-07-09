@@ -26,6 +26,7 @@ class ChatViewModel: ObservableObject {
     private let persistenceController: PersistenceController
     private var currentStreamingMessage: Message?
     private var streamingTask: Task<Void, Never>?  // Memory management cho streaming tasks
+    private var currentStreamTask: Task<Void, Never>?  // Task for current streaming operation
     
     init(apiService: LLMAPIService? = nil, 
          dataService: DataService = DataService(),
@@ -208,10 +209,13 @@ class ChatViewModel: ObservableObject {
     func sendMessage() async {
         guard !currentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         
+        // Cancel any existing streaming task
+        currentStreamTask?.cancel()
+        
         let userMessageContent = currentInput
         currentInput = ""
         isLoading = true
-        isStreaming = true  // Start streaming indicator
+        isStreaming = false  // Start with typing indicator only
         
         // Ensure we have a conversation
         if currentConversation == nil {
@@ -241,21 +245,28 @@ class ChatViewModel: ObservableObject {
             updateConversationTitle()
         }
         
-        do {
-            var assistantResponse = ""
-            var assistantMessageCreated = false
-            
-            // Convert messages to ChatMessage format for API
-            let chatMessages = messages.compactMap { message -> ChatMessage? in
-                guard message.role != .system else { return nil }
-                let apiRole: ChatMessage.MessageRole = message.role == .user ? .user : .assistant
-                return ChatMessage(role: apiRole, content: message.content)
-            }
-            
-            // Stream response from API
-            let stream = try await apiService.sendMessage(userMessageContent, model: selectedModel, conversation: chatMessages.isEmpty ? nil : chatMessages)
-            
-            for try await chunk in stream {
+        // Create a cancellable task for streaming
+        currentStreamTask = Task { @MainActor in
+            do {
+                var assistantResponse = ""
+                var assistantMessageCreated = false
+                
+                // Convert messages to ChatMessage format for API
+                let chatMessages = messages.compactMap { message -> ChatMessage? in
+                    guard message.role != .system else { return nil }
+                    let apiRole: ChatMessage.MessageRole = message.role == .user ? .user : .assistant
+                    return ChatMessage(role: apiRole, content: message.content)
+                }
+                
+                // Stream response from API
+                let stream = try await apiService.sendMessage(userMessageContent, model: selectedModel, conversation: chatMessages.isEmpty ? nil : chatMessages)
+                
+                for try await chunk in stream {
+                    // Check if task was cancelled
+                    if Task.isCancelled {
+                        print("🛑 Streaming task was cancelled")
+                        break
+                    }
                 // Check for error messages from API service
                 if chunk.hasPrefix("__NETWORK_ERROR__:") {
                     let errorMsg = String(chunk.dropFirst("__NETWORK_ERROR__:".count)).trimmingCharacters(in: .whitespaces)
@@ -269,6 +280,12 @@ class ChatViewModel: ObservableObject {
                     let errorMsg = String(chunk.dropFirst("__ERROR__:".count)).trimmingCharacters(in: .whitespaces)
                     await handleError("❌ Lỗi: \(errorMsg)")
                     return
+                }
+                
+                // Switch from loading to streaming when we receive first chunk
+                if isLoading {
+                    isLoading = false
+                    isStreaming = true
                 }
                 
                 assistantResponse += chunk
@@ -326,15 +343,19 @@ class ChatViewModel: ObservableObject {
                 }
             }
             
-        } catch {
-            // No need to remove placeholder since we don't create it upfront
-            print("Error sending message: \(error)")
-            await handleError("Failed to send message: \(error.localizedDescription)")
+            } catch {
+                // No need to remove placeholder since we don't create it upfront
+                print("Error sending message: \(error)")
+                await handleError("Failed to send message: \(error.localizedDescription)")
+            }
+            
+            isLoading = false
+            isStreaming = false  // Stop streaming indicator (backup)
+            print("✅ Streaming completed, isStreaming = false")
         }
         
-        isLoading = false
-        isStreaming = false  // Stop streaming indicator (backup)
-        print("✅ Streaming completed, isStreaming = false")
+        // Wait for task completion
+        await currentStreamTask?.value
     }
     
     /// Clear all messages in current conversation
@@ -356,7 +377,14 @@ class ChatViewModel: ObservableObject {
     /// Cancel current request
     func cancelCurrentRequest() {
         print("🛑 Stop button pressed, canceling streaming")
+        
+        // Cancel the streaming task first
+        currentStreamTask?.cancel()
+        currentStreamTask = nil
+        
+        // Then cancel API request
         apiService.cancelCurrentRequest()
+        
         isLoading = false
         isStreaming = false  // Stop streaming indicator
         print("✅ Streaming canceled, isStreaming = false")
