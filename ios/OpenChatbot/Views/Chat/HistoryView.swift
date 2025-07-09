@@ -3,6 +3,7 @@ import SwiftUI
 struct HistoryView: View {
     @StateObject private var viewModel = HistoryViewModel()
     @State private var searchText = ""
+    @State private var showClearAllConfirmation = false
     @EnvironmentObject var appState: AppState
     
     var body: some View {
@@ -48,6 +49,28 @@ struct HistoryView: View {
                 }
             }
             .navigationTitle("History")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if !viewModel.conversations.isEmpty {
+                        Button("Clear All") {
+                            showClearAllConfirmation = true
+                        }
+                        .foregroundColor(.red)
+                    }
+                }
+            }
+            .confirmationDialog(
+                "Clear All Conversations",
+                isPresented: $showClearAllConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Clear All", role: .destructive) {
+                    viewModel.clearAllConversations()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This will permanently delete all conversation history. This action cannot be undone.")
+            }
             .onAppear {
                 viewModel.loadConversations()
             }

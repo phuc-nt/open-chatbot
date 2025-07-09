@@ -9,6 +9,7 @@ class OpenRouterAPIService: LLMAPIService {
     private var currentTask: URLSessionDataTask?
     private let keychain: KeychainService
     private var dataBuffer: String = ""
+    private var isCancelled: Bool = false
     
     init(keychain: KeychainService) {
         // Configure session for streaming
@@ -35,27 +36,41 @@ class OpenRouterAPIService: LLMAPIService {
         )
         
         return AsyncStream<String> { continuation in
-            // Reset buffer for new request
+            // Reset buffer and cancellation flag for new request
             self.dataBuffer = ""
+            self.isCancelled = false
             
             let task = self.session.dataTask(with: request) { [weak self] data, response, error in
                 DispatchQueue.main.async {
+                    guard let self = self else { return }
+                    
+                    // Check if request was cancelled
+                    if self.isCancelled {
+                        print("🛑 Request was cancelled by user")
+                        continuation.finish()
+                        return
+                    }
+                    
                     if let error = error {
                         print("❌ Network error: \(error.localizedDescription)")
+                        // Set error flag for ChatViewModel to handle
+                        continuation.yield("__NETWORK_ERROR__: \(error.localizedDescription)")
                         continuation.finish()
                         return
                     }
                     
                     guard let httpResponse = response as? HTTPURLResponse else {
                         print("❌ Invalid response type")
+                        continuation.yield("__ERROR__: Invalid response type")
                         continuation.finish()
                         return
                     }
                     
                     if httpResponse.statusCode != 200 {
                         let errorData = data ?? Data()
-                        let errorMessage = self?.parseErrorResponse(data: errorData) ?? "Unknown error"
+                        let errorMessage = self.parseErrorResponse(data: errorData)
                         print("❌ HTTP error \(httpResponse.statusCode): \(errorMessage)")
+                        continuation.yield("__HTTP_ERROR__\(httpResponse.statusCode): \(errorMessage)")
                         continuation.finish()
                         return
                     }
@@ -67,12 +82,12 @@ class OpenRouterAPIService: LLMAPIService {
                         return
                     }
                     
-                    // Process streaming chunk with proper SSE parsing
-                    self?.processStreamingChunk(chunk) { content in
-                        continuation.yield(content)
-                    } completion: {
-                        continuation.finish()
-                    }
+                                            // Process streaming chunk with proper SSE parsing
+                        self.processStreamingChunk(chunk) { content in
+                            continuation.yield(content)
+                        } completion: {
+                            continuation.finish()
+                        }
                 }
             }
             
@@ -203,9 +218,13 @@ class OpenRouterAPIService: LLMAPIService {
     }
     
     // MARK: - Cancel Current Request
-    func cancelCurrentRequest() {
-        currentTask?.cancel()
-        currentTask = nil
+    nonisolated func cancelCurrentRequest() {
+        print("🛑 Setting cancellation flag and canceling current task")
+        Task { @MainActor in
+            isCancelled = true
+            currentTask?.cancel()
+            currentTask = nil
+        }
     }
     
     // MARK: - Private Helper Methods

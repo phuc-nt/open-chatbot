@@ -15,10 +15,10 @@
 | **AT-S2-03** | **API Key Management**       | Thêm một API key không hợp lệ và kiểm tra lỗi.                       | 1. Vào Settings -> API Keys -> OpenRouter. <br> 2. Thêm một API key **không hợp lệ** (ví dụ: "123"). <br> 3. Nhấn "Test Connection".                                                | - Thông báo lỗi "Invalid API Key" hoặc tương tự hiển thị. <br> - Trạng thái của key vẫn là "Invalid".                                                                        | Chưa test (cần test sau) | **PENDING** |
 | **AT-S2-04** | **API Key Management**       | Xóa một API key.                                                    | 1. Vào Settings -> API Keys -> OpenRouter. <br> 2. Vuốt sang trái trên một key đã thêm. <br> 3. Nhấn nút "Delete".                                                                   | - Key bị xóa khỏi danh sách.                                                                                                                                                | App bị crash khi xác nhận xóa | **FAIL** |
 | **AT-S2-05** | **Streaming Chat**           | Gửi một tin nhắn và nhận phản hồi streaming thành công.               | 1. Quay lại màn hình Chat. <br> 2. Đảm bảo đã có API key hợp lệ và đã chọn một model (ví dụ: GPT-4o Mini). <br> 3. Gõ "Hello, how are you?" và gửi.                             | - Tin nhắn của người dùng hiển thị ngay lập tức. <br> - Typing indicator của assistant xuất hiện. <br> - Phản hồi của assistant hiển thị dần dần từng chữ/từ một cách mượt mà.      | New chat thành công, chọn model được, chat được, AI phản hồi, có Typing indicator, có hiệu ứng streaming | **PASS** |
-| **AT-S2-06** | **Streaming Chat**           | Dừng một yêu cầu streaming đang diễn ra.                             | 1. Gửi một câu hỏi dài để đảm bảo có thời gian streaming (ví dụ: "Hãy kể một câu chuyện ngắn về một con tàu vũ trụ"). <br> 2. Trong khi assistant đang trả lời, nhấn nút "Stop". | - Quá trình streaming dừng lại ngay lập tức. <br> - Typing indicator biến mất. <br> - Nút "Stop" chuyển lại thành nút "Send".                                                      | Khi có Typing indicator thì ấn stop được và thành công. Nhưng khi đang streaming thì không có nút stop | **PARTIAL FAIL** |
+| **AT-S2-06** | **Streaming Chat**           | Dừng một yêu cầu streaming đang diễn ra.                             | 1. Gửi một câu hỏi dài để đảm bảo có thời gian streaming (ví dụ: "Hãy kể một câu chuyện ngắn về một con tàu vũ trụ"). <br> 2. Trong khi assistant đang trả lời, nhấn nút "Stop". | - Quá trình streaming dừng lại ngay lập tức. <br> - Typing indicator biến mất. <br> - Nút "Stop" chuyển lại thành nút "Send".                                                      | ✅ Có hiện stop button màu đỏ khi streaming. ❌ Nhưng ấn stop không dừng được stream, AI vẫn trả lời đến hết | **FAIL** |
 | **AT-S2-07** | **Streaming Chat**           | Xử lý lỗi khi không có API key hợp lệ.                                | 1. Xóa tất cả API key hợp lệ trong Settings. <br> 2. Quay lại màn hình Chat. <br> 3. Gửi một tin nhắn.                                                                           | - Một banner lỗi hiển thị ở đầu màn hình với thông báo "API Key not found or invalid." hoặc tương tự. <br> - Tin nhắn không được gửi đi.                                     | Không thể test vì chưa xóa được key (AT-S2-04 fail) | **BLOCKED** |
 | **AT-S2-08** | **Model Selection**          | Chuyển đổi model trong khi chat.                                     | 1. Mở menu (dấu ba chấm ở góc trên bên phải). <br> 2. Chọn "Chọn Model". <br> 3. Chọn một model khác với model hiện tại. <br> 4. Gửi một tin nhắn mới.                          | - Tên model mới được hiển thị trên header của màn hình Chat. <br> - Phản hồi được trả về từ model mới đã chọn (có thể kiểm tra bằng cách hỏi "Bạn là model nào?").            | Đổi model thành công, xác nhận đúng model mới | **PASS** |
-| **AT-S2-09** | **Error Handling**           | Xử lý lỗi khi không có kết nối mạng.                                  | 1. Tắt Wi-Fi và Dữ liệu di động trên thiết bị/simulator. <br> 2. Gửi một tin nhắn trong Chat.                                                                               | - Banner lỗi hiển thị với thông báo về sự cố mạng (ví dụ: "The Internet connection appears to be offline.").                                                               | Không có thông báo sự cố mạng | **FAIL** |
+| **AT-S2-09** | **Error Handling**           | Xử lý lỗi khi không có kết nối mạng.                                  | 1. Tắt Wi-Fi và Dữ liệu di động trên thiết bị/simulator. <br> 2. Gửi một tin nhắn trong Chat.                                                                               | - Banner lỗi hiển thị với thông báo về sự cố mạng (ví dụ: "The Internet connection appears to be offline.").                                                               | ✅ Đã thấy thông báo lỗi khi tắt mạng | **PASS** |
 | **AT-S2-10** | **UI/UX**                    | Kiểm tra hiển thị và cuộn trong danh sách tin nhắn.                 | 1. Gửi nhiều tin nhắn qua lại để danh sách dài hơn màn hình. <br> 2. Quan sát và cuộn danh sách.                                                                           | - Danh sách tin nhắn cuộn mượt mà. <br> - Tin nhắn mới nhất luôn được tự động cuộn xuống để xem. <br> - Message bubble của user và assistant có màu và vị trí khác nhau.       | Mọi thứ đều ổn | **PASS** |
 
 ---
@@ -44,9 +44,8 @@
 **Core Features**: 10 test cases  
 **Enhanced Features**: 8 test cases  
 
-**Pass**: 12/18  
-**Partial Fail**: 1/18  
-**Fail**: 2/18  
+**Pass**: 13/18  
+**Fail**: 3/18  
 **Blocked**: 1/18  
 **Retest**: 1/18  
 **Pending**: 1/18 (AT-S2-03 - chưa test invalid key)  
@@ -62,17 +61,18 @@
 **iOS Version**: ___________________  
 
 **Issues Found**:
-1. **CRITICAL CRASH**: App bị crash khi xác nhận xóa API key (AT-S2-04)
-2. **Missing Stop Button**: Không có nút Stop khi đang streaming response, chỉ có khi đang hiện typing indicator (AT-S2-06)
-3. **Missing Network Error Handling**: Không có thông báo sự cố mạng (AT-S2-09)
+1. **CRITICAL CRASH**: App bị crash khi xác nhận xóa API key (AT-S2-04) 🔴 DEFERRED
+2. **Stop Button Logic**: Có hiện stop button nhưng ấn không dừng được streaming (AT-S2-06) 🔴 NEEDS FIX
 
 **Fixed Issues**: ✅
+3. ~~**Network Error Handling**~~: Fixed - đã thấy thông báo lỗi khi tắt mạng (AT-S2-09)
 4. ~~**Default Model Settings**~~: Fixed persistence and UI sync (AT-S2-11)
 5. ~~**Real-time State Sync**~~: Fixed for new conversations (AT-S2-12)
 6. ~~**Model Persistence**~~: Fixed individual conversation model tracking (AT-S2-13)
+7. ~~**Clear All State Reset**~~: Fixed - không còn crash, tự động tạo new chat sau clear all ✅
 
 **New Feature Requests**:
-1. **History Tab Enhancement**: Tab history cần có tính năng xóa tất cả (với confirmation dialog)
+1. ~~**History Tab Enhancement**~~: ✅ COMPLETED - Đã thêm Clear All functionality với confirmation dialog
 
 **Recommendations**:
 1. ________________________________

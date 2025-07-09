@@ -62,6 +62,16 @@ class ChatViewModel: ObservableObject {
                 }
             }
         }
+        
+        // Listen for history clear events
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("AllConversationsCleared"),
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            print("📞 Received AllConversationsCleared notification, resetting ChatViewModel")
+            self?.resetToNewConversation()
+        }
     }
     
     deinit {
@@ -161,6 +171,25 @@ class ChatViewModel: ObservableObject {
         print("✅ Started new conversation with model: \(selectedModel.name)")
     }
     
+    /// Reset to new conversation (called when all history is cleared)
+    func resetToNewConversation() {
+        // Clear current state
+        currentConversation = nil
+        messages = []
+        currentInput = ""
+        errorMessage = nil
+        isLoading = false
+        isStreaming = false
+        
+        // Cancel any ongoing requests
+        apiService.cancelCurrentRequest()
+        
+        // Start fresh conversation
+        startNewConversation()
+        
+        print("🔄 Reset to new conversation after history clear")
+    }
+    
     /// Update conversation title based on first message
     private func updateConversationTitle() {
         guard let conversation = currentConversation,
@@ -227,14 +256,22 @@ class ChatViewModel: ObservableObject {
             let stream = try await apiService.sendMessage(userMessageContent, model: selectedModel, conversation: chatMessages.isEmpty ? nil : chatMessages)
             
             for try await chunk in stream {
-                assistantResponse += chunk
-                
-                // Stop typing indicator on first chunk
-                if isStreaming {
-                    await MainActor.run {
-                        isStreaming = false
-                    }
+                // Check for error messages from API service
+                if chunk.hasPrefix("__NETWORK_ERROR__:") {
+                    let errorMsg = String(chunk.dropFirst("__NETWORK_ERROR__:".count)).trimmingCharacters(in: .whitespaces)
+                    await handleError("🌐 Lỗi kết nối mạng: \(errorMsg)")
+                    return
+                } else if chunk.hasPrefix("__HTTP_ERROR__") {
+                    let errorMsg = String(chunk.dropFirst("__HTTP_ERROR__".count))
+                    await handleError("🚨 Lỗi từ server: \(errorMsg)")
+                    return
+                } else if chunk.hasPrefix("__ERROR__:") {
+                    let errorMsg = String(chunk.dropFirst("__ERROR__:".count)).trimmingCharacters(in: .whitespaces)
+                    await handleError("❌ Lỗi: \(errorMsg)")
+                    return
                 }
+                
+                assistantResponse += chunk
                 
                 // Create assistant message only when we have content
                 if !assistantMessageCreated {
@@ -247,6 +284,7 @@ class ChatViewModel: ObservableObject {
                     await MainActor.run {
                         messages.append(assistantMessage)
                         assistantMessageCreated = true
+                        print("🔄 Streaming started, isStreaming = \(isStreaming)")
                     }
                 } else {
                     // Update existing assistant message
@@ -296,6 +334,7 @@ class ChatViewModel: ObservableObject {
         
         isLoading = false
         isStreaming = false  // Stop streaming indicator (backup)
+        print("✅ Streaming completed, isStreaming = false")
     }
     
     /// Clear all messages in current conversation
@@ -316,9 +355,11 @@ class ChatViewModel: ObservableObject {
     
     /// Cancel current request
     func cancelCurrentRequest() {
+        print("🛑 Stop button pressed, canceling streaming")
         apiService.cancelCurrentRequest()
         isLoading = false
         isStreaming = false  // Stop streaming indicator
+        print("✅ Streaming canceled, isStreaming = false")
         
         // No need to remove placeholder since we don't create empty ones anymore
     }

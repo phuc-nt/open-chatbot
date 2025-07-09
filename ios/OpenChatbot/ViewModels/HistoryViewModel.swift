@@ -105,6 +105,26 @@ class HistoryViewModel: ObservableObject {
         }
     }
     
+    /// Clear all conversations
+    func clearAllConversations() {
+        isLoading = true
+        errorMessage = nil
+        
+        // Delete all conversations from Core Data
+        for conversation in conversations {
+            dataService.deleteConversation(conversation)
+        }
+        
+        // Clear local array
+        conversations.removeAll()
+        selectedConversation = nil
+        
+        // Notify ChatViewModel to reset its state
+        NotificationCenter.default.post(name: Notification.Name("AllConversationsCleared"), object: nil)
+        
+        isLoading = false
+    }
+    
     /// Get conversation title with fallback
     func getConversationTitle(_ conversation: ConversationEntity) -> String {
         return conversation.title ?? "Untitled Conversation"
