@@ -10,7 +10,7 @@ Hướng dẫn cách sử dụng **checklist system** hiệu quả trong develop
 ## 🔄 **Two-Tier Checklist System**
 
 ### **📋 Tier 1: Master Guides (Templates)**
-**Location**: `docs/00_guides/`  
+**Location**: `docs/00_process/`  
 **Purpose**: Reference templates và complete processes
 
 ```
@@ -66,12 +66,12 @@ Working Checklists = Customized Task Tracking
 ### **Step 2: Customize for Specific Task**
 #### **Add Task-Specific Items**
 ```markdown
-### Chat Interface Specific
-- [ ] Design message bubble UI components
-- [ ] Implement message input field
-- [ ] Add send button functionality
-- [ ] Test keyboard handling
-- [ ] Verify accessibility features
+### LangChain Memory Integration Specific (Phase 1 Example)
+- [ ] Install LangChain Swift package dependencies
+- [ ] Design ConversationBufferMemory bridge service
+- [ ] Implement memory persistence với Core Data
+- [ ] Test context window management (4k-32k tokens)
+- [ ] Verify streaming memory updates
 ```
 
 #### **Remove Irrelevant Items**
@@ -94,10 +94,10 @@ Working Checklists = Customized Task Tracking
 
 #### **Add Notes for Context**
 ```markdown
-- [x] Design message bubble UI components
-  *Note: Used SwiftUI Card style với rounded corners*
-- [x] Implement message input field
-  *Note: Added character limit of 1000 chars*
+- [x] Design ConversationBufferMemory bridge service
+  *Note: Created LangChainMemoryService protocol với Core Data integration*
+- [x] Implement memory persistence với Core Data
+  *Note: Extended Message entity với context fields, added memory compression*
 ```
 
 ---
@@ -140,16 +140,17 @@ docs/03_implementation/tasks/
 
 ### **Feature Development Template**
 ```markdown
-# Task: [Feature Name]
-**Type**: Feature Development
+# Task: [LangChain Feature Name]
+**Type**: AI Agent Feature Development  
+**Phase**: [Phase 1-6 from roadmap]
 **Priority**: P0/P1/P2
 **Sprint**: [Sprint Number]
-**Estimated**: [Small/Medium/Large]
+**Estimated**: [1d-4d from Feature Backlog v2.0]
 **Started**: [Date]
 **Completed**: [Date]
 
 ## Objective
-[What needs to be accomplished]
+[What LangChain/LangGraph capability needs to be integrated]
 
 ## Success Criteria
 - [ ] [Specific measurable outcome 1]

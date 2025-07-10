@@ -155,10 +155,10 @@ Quy trình làm việc chuẩn cho **mỗi task** từ planning đến completio
 
 ### **4. Project Updates**
 #### **Progress Documentation**
-- [ ] **Update** feature status trong backlog
+- [ ] **Update** feature status trong Feature Backlog v2.0
 - [ ] **Mark** task as completed trong `sprint_xx_plan.md`
-- [ ] **Update** `current_status.md` nếu có milestone lớn.
-- [ ] **Note** any scope changes
+- [ ] **Update** `current_status.md` nếu có phase milestone hoặc major achievement
+- [ ] **Note** any scope changes affects roadmap phases
 
 #### **Communication**
 - [ ] **Share** significant learnings với team
@@ -170,12 +170,12 @@ Quy trình làm việc chuẩn cho **mỗi task** từ planning đến completio
 
 ## 🔧 **Task-Specific Workflows**
 
-### **Feature Development Tasks**
+### **LangChain/AI Agent Feature Tasks**
 #### **Additional Steps**
-- [ ] **Create** feature documentation
-- [ ] **Update** user guides nếu cần
-- [ ] **Plan** feature rollout strategy
-- [ ] **Consider** feature flags nếu applicable
+- [ ] **Document** LangChain/LangGraph integration approach
+- [ ] **Update** technical guide với new patterns
+- [ ] **Plan** progressive feature rollout for AI capabilities
+- [ ] **Consider** feature compatibility với existing chat foundation
 
 ### **Bug Fix Tasks**
 #### **Additional Steps**

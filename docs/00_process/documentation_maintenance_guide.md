@@ -10,12 +10,11 @@ Hướng dẫn maintain toàn bộ documentation system để đảm bảo:
 ## 📁 **Documentation Structure Overview**
 ```
 docs/
-├── documentation_maintenance_guide.md  # 📋 This file
-├── README.md                          # 📖 Docs overview
-├── 00_context/                        # 🎯 Quick context
-├── 01_preparation/                     # 📋 Planning docs
-├── 02_development/                     # 🛠️ Setup & architecture
-├── 03_implementation/                  # 💻 Development docs
+├── 00_context/                        # 🎯 Quick context (project overview, current status)
+├── 00_process/                        # 📋 Workflow guides (this file)
+├── 01_preparation/                     # 📋 Planning docs (roadmap, SRS, backlog)
+├── 02_development/                     # 🛠️ Setup & architecture guides
+├── 03_implementation/                  # 💻 Sprint plans & progress tracking
 └── 04_troubleshooting/                 # 🔧 Issues & releases
 ```
 
@@ -31,16 +30,16 @@ docs/
 - [ ] **Check** current_status.md không exceed 2 pages
 
 #### Implementation Docs (03_implementation/)
-- [ ] **Update** `progress_tracker.md` với daily progress
+- [ ] **Update** sprint plan files (sprint_xx_plan.md) với daily progress
 - [ ] **Add** coding session notes nếu có significant learnings
-- [ ] **Update** sprint status nếu có task completion
+- [ ] **Update** sprint status và acceptance test results nếu có task completion
 
 ### **Weekly (End of Sprint)**
 #### All Folders Review
 - [ ] **Review** tất cả README files cho duplication
 - [ ] **Validate** all internal links work correctly
 - [ ] **Check** file sizes - context files max 2 pages
-- [ ] **Update** project_roadmap.md với actual vs planned progress
+- [ ] **Update** Product Roadmap v2.0 với actual vs planned progress across phases
 
 #### Quality Checks
 - [ ] **Scan** for duplicate content across files
@@ -79,19 +78,19 @@ docs/
 - [ ] Reading guide reflects current structure
 
 ### **01_preparation/ - Planning Documents**
-**Purpose**: Complete planning và requirements
+**Purpose**: Complete planning và requirements (v2.0 AI Agent Platform)
 
 **Maintenance Rules**:
-- **Update frequency**: When requirements change
-- **Version control**: Update version numbers trong SRS
-- **Consistency**: Feature names consistent across all docs
-- **Completeness**: All decisions documented với reasoning
+- **Update frequency**: When phase/requirements change
+- **Version control**: Update version numbers trong SRS v2.0
+- **Consistency**: Feature names consistent across roadmap, SRS, backlog
+- **Completeness**: All LangChain/LangGraph decisions documented với technology mapping
 
 **Quality Checklist**:
-- [ ] SRS reflects current project scope
-- [ ] Feature backlog priorities current
-- [ ] Roadmap dates realistic based on progress
-- [ ] Best practices updated với new learnings
+- [ ] Product Roadmap v2.0 reflects 18-week AI Agent evolution
+- [ ] SRS v2.0 has updated functional requirements với technology stack
+- [ ] Feature Backlog v2.0 has sprint-ready tasks với effort estimation
+- [ ] Archive/ folder contains legacy documents properly organized
 
 ### **02_development/ - Setup & Architecture**
 **Purpose**: Technical setup và architectural decisions
@@ -109,19 +108,19 @@ docs/
 - [ ] No broken installation links
 
 ### **03_implementation/ - Development Documentation**
-**Purpose**: Active development tracking và coding docs
+**Purpose**: Sprint planning, progress tracking, và acceptance testing
 
 **Maintenance Rules**:
-- **Update frequency**: Daily progress, weekly summaries
-- **Organization**: Archive completed sprint docs
-- **Metrics**: Track velocity và quality metrics
-- [ ] Session notes capture key learnings
+- **Update frequency**: Daily progress updates trong sprint plans
+- **Organization**: Keep active sprint plan current, archive completed sprints
+- **Metrics**: Track velocity, quality metrics, acceptance test results
+- **Session notes**: Capture key learnings trong sprint retrospectives
 
 **Quality Checklist**:
-- [ ] Progress tracker reflects actual status
-- [ ] Sprint docs archived when complete
-- [ ] Coding sessions documented với outcomes
-- [ ] Architecture docs updated với code changes
+- [ ] Active sprint plan reflects current status và blockers
+- [ ] Completed sprint docs archived với lessons learned
+- [ ] Acceptance test results documented với pass/fail status
+- [ ] Architecture decisions captured trong sprint plans
 
 ### **04_troubleshooting/ - Issues & Releases**
 **Purpose**: Problem solving và release management
