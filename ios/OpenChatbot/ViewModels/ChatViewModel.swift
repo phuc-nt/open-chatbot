@@ -25,6 +25,7 @@ class ChatViewModel: ObservableObject {
     private let dataService: DataService
     private let persistenceController: PersistenceController
     private let memoryService: MemoryService  // 🧠 Memory service for context-aware conversations
+    private let memoryPersistenceService: MemoryPersistenceService // 💾 Memory persistence across sessions
     private var currentStreamingMessage: Message?
     private var streamingTask: Task<Void, Never>?  // Memory management cho streaming tasks
     private var currentStreamTask: Task<Void, Never>?  // Task for current streaming operation
@@ -32,7 +33,8 @@ class ChatViewModel: ObservableObject {
     init(apiService: LLMAPIService? = nil, 
          dataService: DataService = DataService(),
          persistenceController: PersistenceController = .shared,
-         memoryService: MemoryService? = nil) {
+         memoryService: MemoryService? = nil,
+         memoryPersistenceService: MemoryPersistenceService? = nil) {
         // Use dependency injection or create default service
         if let service = apiService {
             self.apiService = service
@@ -48,6 +50,13 @@ class ChatViewModel: ObservableObject {
             self.memoryService = memory
         } else {
             self.memoryService = MemoryService(dataService: dataService)
+        }
+        
+        // Initialize memory persistence service
+        if let persistence = memoryPersistenceService {
+            self.memoryPersistenceService = persistence
+        } else {
+            self.memoryPersistenceService = MemoryPersistenceService()
         }
         
         // Initialize with a new conversation or load existing one
@@ -160,9 +169,14 @@ class ChatViewModel: ObservableObject {
                     selectedModel = getDefaultModel() ?? LLMModel.defaultModel
                 }
                 
-                // Load memory for this conversation
+                // Ensure memory continuity for this conversation
                 Task {
-                    _ = await memoryService.getMemoryForConversation(conversationID)
+                    let hasContinuity = await memoryPersistenceService.ensureMemoryContinuity(for: conversationID)
+                    if hasContinuity {
+                        print("💾 Memory continuity ensured for conversation")
+                    } else {
+                        print("⚠️ No previous memory found for conversation")
+                    }
                 }
                 
                 print("✅ Loaded conversation: \(conversation.title ?? "Untitled"), Model: \(selectedModel.name)")

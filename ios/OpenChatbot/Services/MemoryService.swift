@@ -86,6 +86,12 @@ class MemoryService: ObservableObject {
         print("🧠 Cleared memory for conversation \(conversationId)")
     }
     
+    /// Cache loaded memory for conversation (used by persistence service)
+    func cacheLoadedMemory(_ memory: ConversationMemory, for conversationId: UUID) async {
+        memoryCache[conversationId] = memory
+        print("💾 Cached loaded memory for conversation \(conversationId)")
+    }
+    
     /// Get memory statistics
     func getMemoryStats(for conversationId: UUID) async -> MemoryStats {
         let memory = await getMemoryForConversation(conversationId)

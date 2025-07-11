@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import CoreData
 import UIKit
 
 /// Service responsible for memory persistence across app sessions
@@ -179,38 +180,87 @@ class MemoryPersistenceService: ObservableObject {
     }
     
     private func getConversationsWithMemory() async throws -> [UUID] {
-        // Mock implementation - in real app this would query Core Data
-        return []
+        // Query Core Data for conversations that have memory data
+        let persistenceController = PersistenceController.shared
+        let context = persistenceController.container.viewContext
+        
+        return await context.perform {
+            let request: NSFetchRequest<ConversationEntity> = ConversationEntity.fetchRequest()
+            request.predicate = NSPredicate(format: "memoryData != nil")
+            
+            do {
+                let conversations = try context.fetch(request)
+                return conversations.compactMap { $0.id }
+            } catch {
+                print("❌ Failed to fetch conversations with memory: \(error)")
+                return []
+            }
+        }
     }
     
     private func cacheMemoryInService(_ memory: ConversationMemory, conversationId: UUID) async {
-        // This would call MemoryService to cache the memory
-        // await memoryService.cacheMemory(memory, for: conversationId)
+        // Cache the memory in MemoryService for immediate access
+        await memoryService.cacheLoadedMemory(memory, for: conversationId)
+        print("💾 Cached memory for conversation \(conversationId): \(memory.messageCount) messages")
     }
     
     private func isMemoryCached(_ conversationId: UUID) async -> Bool {
         // Check if memory is cached in MemoryService
-        return false
+        let memory = await memoryService.getMemoryForConversation(conversationId)
+        return memory.messageCount > 0 // Consider it cached if it has messages
     }
     
     private func getCachedMemory(_ conversationId: UUID) async -> ConversationMemory? {
         // Get cached memory from MemoryService
-        return nil
+        return await memoryService.getMemoryForConversation(conversationId)
     }
     
     private func getCachedConversationIds() async -> [UUID] {
-        // Get all cached conversation IDs from MemoryService
+        // For now, we'll need to track this in MemoryService
+        // This is a simplified implementation
         return []
     }
     
     private func getStaleConversations() async throws -> [UUID] {
         // Get conversations with stale memory (older than 24 hours)
-        return []
+        let persistenceController = PersistenceController.shared
+        let context = persistenceController.container.viewContext
+        let cutoffDate = Date().addingTimeInterval(-24 * 60 * 60) // 24 hours ago
+        
+        return await context.perform {
+            let request: NSFetchRequest<ConversationEntity> = ConversationEntity.fetchRequest()
+            request.predicate = NSPredicate(format: "memoryLastUpdated != nil AND memoryLastUpdated < %@", cutoffDate as NSDate)
+            
+            do {
+                let conversations = try context.fetch(request)
+                return conversations.compactMap { $0.id }
+            } catch {
+                print("❌ Failed to fetch stale conversations: \(error)")
+                return []
+            }
+        }
     }
     
     private func getTotalMemoryStats() async throws -> (conversations: Int, totalMessages: Int, totalTokens: Int)? {
         // Get total memory statistics from Core Data
-        return nil
+        let persistenceController = PersistenceController.shared
+        let context = persistenceController.container.viewContext
+        
+        return await context.perform {
+            let request: NSFetchRequest<ConversationEntity> = ConversationEntity.fetchRequest()
+            request.predicate = NSPredicate(format: "memoryData != nil")
+            
+            do {
+                let conversations = try context.fetch(request)
+                let totalMessages = conversations.reduce(0) { $0 + ($1.value(forKey: "memoryMessageCount") as? Int ?? 0) }
+                let totalTokens = conversations.reduce(0) { $0 + ($1.value(forKey: "memoryTokenCount") as? Int ?? 0) }
+                
+                return (conversations: conversations.count, totalMessages: totalMessages, totalTokens: totalTokens)
+            } catch {
+                print("❌ Failed to get total memory stats: \(error)")
+                return nil
+            }
+        }
     }
     
     private func updateTotalMemorySize(_ memory: ConversationMemory) {
