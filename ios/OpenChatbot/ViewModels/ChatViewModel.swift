@@ -160,6 +160,11 @@ class ChatViewModel: ObservableObject {
                     selectedModel = getDefaultModel() ?? LLMModel.defaultModel
                 }
                 
+                // Load memory for this conversation
+                Task {
+                    _ = await memoryService.getMemoryForConversation(conversationID)
+                }
+                
                 print("✅ Loaded conversation: \(conversation.title ?? "Untitled"), Model: \(selectedModel.name)")
             }
         } catch {
@@ -246,6 +251,13 @@ class ChatViewModel: ObservableObject {
         
         dataService.addMessage(userMessage, to: conversation)
         
+        // Add user message to memory system for context-aware responses
+        do {
+            await memoryService.addMessageToMemory(userMessage, conversationId: conversation.id ?? UUID())
+        } catch {
+            handleMemoryError(error, context: "adding user message to memory")
+        }
+        
         // Update local messages array
         messages.append(userMessage)
         
@@ -260,14 +272,27 @@ class ChatViewModel: ObservableObject {
                 var assistantResponse = ""
                 var assistantMessageCreated = false
                 
-                // Convert messages to ChatMessage format for API
-                let chatMessages = messages.compactMap { message -> ChatMessage? in
+                // Get context-aware messages from memory system
+                let contextMessages: [Message]
+                do {
+                    contextMessages = await memoryService.getContextForAPICall(
+                        conversationId: conversation.id ?? UUID(),
+                        maxTokens: selectedModel.contextLength
+                    )
+                } catch {
+                    handleMemoryError(error, context: "getting context for API call")
+                    // Fallback to current messages if memory fails
+                    contextMessages = messages
+                }
+                
+                // Convert context messages to ChatMessage format for API
+                let chatMessages = contextMessages.compactMap { message -> ChatMessage? in
                     guard message.role != .system else { return nil }
                     let apiRole: ChatMessage.MessageRole = message.role == .user ? .user : .assistant
                     return ChatMessage(role: apiRole, content: message.content)
                 }
                 
-                // Stream response from API
+                // Stream response from API with memory context
                 let stream = try await apiService.sendMessage(userMessageContent, model: selectedModel, conversation: chatMessages.isEmpty ? nil : chatMessages)
                 
                 for try await chunk in stream {
@@ -336,7 +361,7 @@ class ChatViewModel: ObservableObject {
                 try? await Task.sleep(nanoseconds: 50_000_000) // 0.05 seconds
             }
             
-            // Save final assistant message to Core Data
+            // Save final assistant message to Core Data and memory system
             if assistantMessageCreated {
                 let finalAssistantMessage = Message(
                     content: assistantResponse,
@@ -345,6 +370,13 @@ class ChatViewModel: ObservableObject {
                 )
                 
                 dataService.addMessage(finalAssistantMessage, to: conversation)
+                
+                // Add assistant response to memory system for future context
+                do {
+                    await memoryService.addMessageToMemory(finalAssistantMessage, conversationId: conversation.id ?? UUID())
+                } catch {
+                    handleMemoryError(error, context: "adding assistant message to memory")
+                }
                 
                 // Update local array with final message
                 if let lastIndex = messages.lastIndex(where: { $0.role == .assistant }) {
@@ -555,5 +587,12 @@ class ChatViewModel: ObservableObject {
             self.isLoading = false
             self.isStreaming = false
         }
+    }
+    
+    /// Handle memory-related errors gracefully
+    private func handleMemoryError(_ error: Error, context: String) {
+        print("🧠 Memory Error in \(context): \(error.localizedDescription)")
+        // Continue with conversation even if memory fails
+        // This ensures the chat remains functional
     }
 } 
