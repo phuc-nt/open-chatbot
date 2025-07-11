@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		485395BA2E2140B40078EE38 /* MemoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395B92E2140B40078EE38 /* MemoryService.swift */; };
+		485395BC2E214D040078EE38 /* MemoryCoreDataBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395BB2E214D040078EE38 /* MemoryCoreDataBridge.swift */; };
+		485395BE2E214D170078EE38 /* MemoryPersistenceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395BD2E214D170078EE38 /* MemoryPersistenceService.swift */; };
+		485395C02E214D320078EE38 /* LangChainMemoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395BF2E214D320078EE38 /* LangChainMemoryService.swift */; };
+		485395C22E214D3F0078EE38 /* MemoryIntegrationDemo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395C12E214D3F0078EE38 /* MemoryIntegrationDemo.swift */; };
+		485395C42E214D5C0078EE38 /* ConversationMemoryExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395C32E214D5C0078EE38 /* ConversationMemoryExtensions.swift */; };
+		485395C72E214D850078EE38 /* MemoryIntegrationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395C52E214D850078EE38 /* MemoryIntegrationTest.swift */; };
+		485395C82E214D850078EE38 /* MemoryServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395C62E214D850078EE38 /* MemoryServiceTests.swift */; };
 		A10001001D000000001D0000 /* OpenChatbotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001011D000000001D0000 /* OpenChatbotApp.swift */; };
 		A10001021D000000001D0000 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001031D000000001D0000 /* ContentView.swift */; };
 		A10001041D000000001D0000 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001051D000000001D0000 /* ChatView.swift */; };
@@ -41,6 +49,14 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		485395B92E2140B40078EE38 /* MemoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryService.swift; sourceTree = "<group>"; };
+		485395BB2E214D040078EE38 /* MemoryCoreDataBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryCoreDataBridge.swift; sourceTree = "<group>"; };
+		485395BD2E214D170078EE38 /* MemoryPersistenceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryPersistenceService.swift; sourceTree = "<group>"; };
+		485395BF2E214D320078EE38 /* LangChainMemoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LangChainMemoryService.swift; sourceTree = "<group>"; };
+		485395C12E214D3F0078EE38 /* MemoryIntegrationDemo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryIntegrationDemo.swift; sourceTree = "<group>"; };
+		485395C32E214D5C0078EE38 /* ConversationMemoryExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationMemoryExtensions.swift; sourceTree = "<group>"; };
+		485395C52E214D850078EE38 /* MemoryIntegrationTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MemoryIntegrationTest.swift; path = OpenChatbot/Tests/MemoryIntegrationTest.swift; sourceTree = SOURCE_ROOT; };
+		485395C62E214D850078EE38 /* MemoryServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MemoryServiceTests.swift; path = OpenChatbot/Tests/MemoryServiceTests.swift; sourceTree = SOURCE_ROOT; };
 		A10001011D000000001D0000 /* OpenChatbotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenChatbotApp.swift; sourceTree = "<group>"; };
 		A10001031D000000001D0000 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A10001051D000000001D0000 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
@@ -89,6 +105,8 @@
 			isa = PBXGroup;
 			children = (
 				A1000141D000000001D0000 /* CoreDataTests.swift */,
+				485395C52E214D850078EE38 /* MemoryIntegrationTest.swift */,
+				485395C62E214D850078EE38 /* MemoryServiceTests.swift */,
 			);
 			path = OpenChatbotTests;
 			sourceTree = "<group>";
@@ -162,6 +180,7 @@
 				A1000117D000000001D0000 /* APIKey.swift */,
 				A1000119D000000001D0000 /* CoreDataExtensions.swift */,
 				A100011BD000000001D0000 /* LLMModel.swift */,
+				485395C32E214D5C0078EE38 /* ConversationMemoryExtensions.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -173,6 +192,11 @@
 				A1000129D000000001D0000 /* DataService.swift */,
 				A1000216D000000001D0000 /* APIService */,
 				A1000217D000000001D0000 /* KeychainService */,
+				485395B92E2140B40078EE38 /* MemoryService.swift */,
+				485395BB2E214D040078EE38 /* MemoryCoreDataBridge.swift */,
+				485395BD2E214D170078EE38 /* MemoryPersistenceService.swift */,
+				485395BF2E214D320078EE38 /* LangChainMemoryService.swift */,
+				485395C12E214D3F0078EE38 /* MemoryIntegrationDemo.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -326,6 +350,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1000140D000000001D0000 /* CoreDataTests.swift in Sources */,
+				485395C72E214D850078EE38 /* MemoryIntegrationTest.swift in Sources */,
+				485395C82E214D850078EE38 /* MemoryServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -339,20 +365,26 @@
 				A10001061D000000001D0000 /* HistoryView.swift in Sources */,
 				A10001081D000000001D0000 /* SettingsView.swift in Sources */,
 				A1000110D000000001D0000 /* MessageBubbleView.swift in Sources */,
+				485395C02E214D320078EE38 /* LangChainMemoryService.swift in Sources */,
 				A1000112D000000001D0000 /* Message.swift in Sources */,
 				A1000114D000000001D0000 /* Conversation.swift in Sources */,
 				A1000116D000000001D0000 /* APIKey.swift in Sources */,
 				A1000118D000000001D0000 /* CoreDataExtensions.swift in Sources */,
+				485395C42E214D5C0078EE38 /* ConversationMemoryExtensions.swift in Sources */,
 				A100011AD000000001D0000 /* LLMModel.swift in Sources */,
 				A100011CD000000001D0000 /* KeychainService.swift in Sources */,
+				485395BA2E2140B40078EE38 /* MemoryService.swift in Sources */,
 				A100011ED000000001D0000 /* LLMAPIService.swift in Sources */,
 				A1000300D000000001D0000 /* OpenRouterAPIService.swift in Sources */,
 				A1000120D000000001D0000 /* ChatViewModel.swift in Sources */,
+				485395BC2E214D040078EE38 /* MemoryCoreDataBridge.swift in Sources */,
 				A1000122D000000001D0000 /* HistoryViewModel.swift in Sources */,
 				A1000124D000000001D0000 /* SettingsViewModel.swift in Sources */,
 				A1000126D000000001D0000 /* PersistenceController.swift in Sources */,
 				A1000128D000000001D0000 /* DataService.swift in Sources */,
+				485395C22E214D3F0078EE38 /* MemoryIntegrationDemo.swift in Sources */,
 				A1000130D000000001D0000 /* OpenChatbot.xcdatamodeld in Sources */,
+				485395BE2E214D170078EE38 /* MemoryPersistenceService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

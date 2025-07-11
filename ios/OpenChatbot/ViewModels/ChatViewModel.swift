@@ -24,13 +24,15 @@ class ChatViewModel: ObservableObject {
     private let apiService: LLMAPIService
     private let dataService: DataService
     private let persistenceController: PersistenceController
+    private let memoryService: MemoryService  // 🧠 Memory service for context-aware conversations
     private var currentStreamingMessage: Message?
     private var streamingTask: Task<Void, Never>?  // Memory management cho streaming tasks
     private var currentStreamTask: Task<Void, Never>?  // Task for current streaming operation
     
     init(apiService: LLMAPIService? = nil, 
          dataService: DataService = DataService(),
-         persistenceController: PersistenceController = .shared) {
+         persistenceController: PersistenceController = .shared,
+         memoryService: MemoryService? = nil) {
         // Use dependency injection or create default service
         if let service = apiService {
             self.apiService = service
@@ -40,6 +42,13 @@ class ChatViewModel: ObservableObject {
         }
         self.dataService = dataService
         self.persistenceController = persistenceController
+        
+        // Initialize memory service
+        if let memory = memoryService {
+            self.memoryService = memory
+        } else {
+            self.memoryService = MemoryService(dataService: dataService)
+        }
         
         // Initialize with a new conversation or load existing one
         loadOrCreateConversation()
