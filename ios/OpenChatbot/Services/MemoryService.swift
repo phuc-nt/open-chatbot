@@ -22,15 +22,25 @@ class MemoryService: ObservableObject {
     // MARK: - Private Properties
     private let dataService: DataService
     private let memoryCoreDataBridge: MemoryCoreDataBridge
+    private let summaryMemoryService: ConversationSummaryMemoryService
     private var memoryCache: [UUID: ConversationMemory] = [:]
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Initialization
-    init(dataService: DataService = DataService(), 
-         memoryCoreDataBridge: MemoryCoreDataBridge? = nil) {
+    init(dataService: DataService = DataService(),
+         memoryCoreDataBridge: MemoryCoreDataBridge? = nil,
+         apiService: LLMAPIService? = nil) {
         self.dataService = dataService
         self.memoryCoreDataBridge = memoryCoreDataBridge ?? MemoryCoreDataBridge()
+        
+        // Initialize ConversationSummaryMemoryService with lazy initialization
+        let defaultAPIService = apiService ?? OpenRouterAPIService(keychain: KeychainService())
+        self.summaryMemoryService = ConversationSummaryMemoryService(apiService: defaultAPIService)
+        
         setupMemorySystem()
+        
+        // Set the memory service reference after initialization
+        summaryMemoryService.setMemoryService(self)
     }
     
     // MARK: - Public Methods
@@ -206,4 +216,75 @@ class ConversationMemory: ObservableObject {
         let totalChars = messages.reduce(0) { $0 + $1.content.count }
         return totalChars / 4 // Rough estimation
     }
-} 
+}
+
+// MARK: - AdvancedLangChainMemoryService Implementation
+
+extension MemoryService: AdvancedLangChainMemoryService {
+    
+    /// Compress memory using summarization - similar to ConversationSummaryMemory
+    func compressMemory(for conversationId: UUID, targetTokens: Int) async -> Bool {
+        do {
+            return try await summaryMemoryService.compressMemory(for: conversationId, targetTokens: targetTokens)
+        } catch {
+            print("🧠 Memory compression failed: \(error.localizedDescription)")
+            return false
+        }
+    }
+    
+    /// Get memory summary for conversation
+    func getMemorySummary(for conversationId: UUID) async -> String? {
+        return await summaryMemoryService.getMemorySummary(for: conversationId)
+    }
+    
+    /// Set memory compression threshold
+    func setCompressionThreshold(_ threshold: Int) {
+        summaryMemoryService.setCompressionThreshold(threshold)
+    }
+    
+    /// Get relevance score for context
+    func getContextRelevanceScore(for conversationId: UUID, query: String) async -> Float {
+        let memory = await getMemoryForConversation(conversationId)
+        
+        // Simple relevance scoring based on keyword matching
+        let queryWords = query.lowercased().components(separatedBy: CharacterSet.whitespacesAndNewlines)
+        var totalScore: Float = 0.0
+        var messageCount = 0
+        
+        for message in memory.messages {
+            let messageWords = message.content.lowercased().components(separatedBy: CharacterSet.whitespacesAndNewlines)
+            let matchingWords = queryWords.filter { queryWord in
+                messageWords.contains { messageWord in
+                    messageWord.contains(queryWord) || queryWord.contains(messageWord)
+                }
+            }
+            
+            let relevanceScore = Float(matchingWords.count) / Float(queryWords.count)
+            totalScore += relevanceScore
+            messageCount += 1
+        }
+        
+        return messageCount > 0 ? totalScore / Float(messageCount) : 0.0
+    }
+    
+    /// Check if conversation needs compression
+    func shouldCompressMemory(for conversationId: UUID) async -> Bool {
+        return await summaryMemoryService.needsCompression(for: conversationId)
+    }
+    
+    /// Get compression statistics
+    func getCompressionStatistics(for conversationId: UUID) async -> String {
+        if let stats = await summaryMemoryService.getCompressionStats(for: conversationId) {
+            return """
+            Compression Stats:
+            - Original: \(stats.originalTokens) tokens
+            - Compressed: \(stats.compressedTokens) tokens
+            - Ratio: \(String(format: "%.1f", stats.compressionPercentage))% reduction
+            - Messages: \(stats.messageCount) summarized
+            - Last compressed: \(stats.lastCompressed.formatted())
+            """
+        } else {
+            return "No compression applied yet"
+        }
+    }
+}
