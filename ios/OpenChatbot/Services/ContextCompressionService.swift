@@ -29,7 +29,7 @@ class ContextCompressionService: ObservableObject {
     // MARK: - Public Methods
     
     /// Compress context using importance-based algorithm
-    func compressContextWithImportanceScoring(
+    func compressContext(
         for conversationId: UUID,
         targetTokens: Int,
         preserveRecentCount: Int = 6

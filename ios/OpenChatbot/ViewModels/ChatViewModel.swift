@@ -26,6 +26,7 @@ class ChatViewModel: ObservableObject {
     private let persistenceController: PersistenceController
     private let memoryService: MemoryService  // 🧠 Memory service for context-aware conversations
     private let memoryPersistenceService: MemoryPersistenceService // 💾 Memory persistence across sessions
+    private let tokenWindowService: TokenWindowManagementService? // 🪟 Token window management
     private var currentStreamingMessage: Message?
     private var streamingTask: Task<Void, Never>?  // Memory management cho streaming tasks
     private var currentStreamTask: Task<Void, Never>?  // Task for current streaming operation
@@ -34,7 +35,8 @@ class ChatViewModel: ObservableObject {
          dataService: DataService = DataService(),
          persistenceController: PersistenceController = .shared,
          memoryService: MemoryService? = nil,
-         memoryPersistenceService: MemoryPersistenceService? = nil) {
+         memoryPersistenceService: MemoryPersistenceService? = nil,
+         tokenWindowService: TokenWindowManagementService? = nil) {
         // Use dependency injection or create default service
         if let service = apiService {
             self.apiService = service
@@ -57,6 +59,26 @@ class ChatViewModel: ObservableObject {
             self.memoryPersistenceService = persistence
         } else {
             self.memoryPersistenceService = MemoryPersistenceService()
+        }
+        
+        // Initialize token window service if not provided
+        if let tokenWindow = tokenWindowService {
+            self.tokenWindowService = tokenWindow
+        } else {
+            // Create summary memory service first
+            let summaryMemoryService = ConversationSummaryMemoryService(apiService: self.apiService)
+            summaryMemoryService.setMemoryService(self.memoryService)
+            
+            // Then create compression service
+            let compressionService = ContextCompressionService(
+                memoryService: self.memoryService,
+                summaryMemoryService: summaryMemoryService
+            )
+            
+            self.tokenWindowService = TokenWindowManagementService(
+                memoryService: self.memoryService,
+                compressionService: compressionService
+            )
         }
         
         // Initialize with a new conversation or load existing one
@@ -286,9 +308,23 @@ class ChatViewModel: ObservableObject {
                 var assistantResponse = ""
                 var assistantMessageCreated = false
                 
-                // Get context-aware messages from memory system
+                // Get context-aware messages from memory system with token window management
                 let contextMessages: [Message]
                 do {
+                    // Apply token window management if available
+                    if let tokenWindowService = tokenWindowService {
+                        let tokenResult = try await tokenWindowService.manageTokenWindow(
+                            for: conversation.id ?? UUID(),
+                            model: selectedModel,
+                            reserveTokens: 1500 // Reserve for response
+                        )
+                        
+                        if tokenResult.optimized {
+                            print("🪟 Token window optimized: \(tokenResult.originalTokens) → \(tokenResult.finalTokens) tokens")
+                            print("🪟 Messages removed: \(tokenResult.messagesRemoved), Compression: \(tokenResult.compressionApplied)")
+                        }
+                    }
+                    
                     contextMessages = await memoryService.getContextForAPICall(
                         conversationId: conversation.id ?? UUID(),
                         maxTokens: selectedModel.contextLength

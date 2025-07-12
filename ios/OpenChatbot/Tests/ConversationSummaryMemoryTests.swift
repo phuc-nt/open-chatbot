@@ -130,8 +130,8 @@ class MockLLMAPIService: LLMAPIService {
         ]
     }
     
-    func sendMessage(_ message: String, model: LLMModel, conversation: [ChatMessage]?) async throws -> AsyncThrowingStream<String, Error> {
-        return AsyncThrowingStream { continuation in
+    func sendMessage(_ message: String, model: LLMModel, conversation: [ChatMessage]?) async throws -> AsyncStream<String> {
+        return AsyncStream { continuation in
             Task {
                 // Mock response for summarization
                 let mockSummary = "This is a mock summary of the conversation. It covers the main topics discussed and preserves important context."
@@ -145,6 +145,27 @@ class MockLLMAPIService: LLMAPIService {
                 continuation.finish()
             }
         }
+    }
+    
+    func sendMessageSync(_ message: String, model: LLMModel, conversation: [ChatMessage]?) async throws -> String {
+        // Mock response for synchronous calls
+        return "This is a mock summary of the conversation. It covers the main topics discussed and preserves important context."
+    }
+    
+    func validateAPIKey(_ apiKey: String) async throws -> Bool {
+        // Mock validation - always return true for testing
+        return true
+    }
+    
+    func getAPIKeyStatus() async throws -> APIKeyStatus {
+        // Mock API key status
+        return APIKeyStatus(
+            isValid: true,
+            remainingCredits: 10.0,
+            usageToday: 0.5,
+            rateLimitRemaining: 100,
+            rateLimitReset: Date().addingTimeInterval(3600)
+        )
     }
     
     func cancelCurrentRequest() {

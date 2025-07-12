@@ -20,6 +20,9 @@
 		485395D62E22ADA30078EE38 /* ContextCompressionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395D52E22ADA30078EE38 /* ContextCompressionService.swift */; };
 		485395D82E22AE3E0078EE38 /* ContextCompressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395D72E22AE3E0078EE38 /* ContextCompressionTests.swift */; };
 		485395DA2E22AEDD0078EE38 /* CoreDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395D92E22AEDD0078EE38 /* CoreDataTests.swift */; };
+		485395DC2E22B18A0078EE38 /* TokenWindowManagementService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395DB2E22B18A0078EE38 /* TokenWindowManagementService.swift */; };
+		485395DE2E22B1B70078EE38 /* TokenWindowManagementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395DD2E22B1B70078EE38 /* TokenWindowManagementTests.swift */; };
+		485395E02E22B26F0078EE38 /* TokenUsageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395DF2E22B26F0078EE38 /* TokenUsageView.swift */; };
 		A10001001D000000001D0000 /* OpenChatbotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001011D000000001D0000 /* OpenChatbotApp.swift */; };
 		A10001021D000000001D0000 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001031D000000001D0000 /* ContentView.swift */; };
 		A10001041D000000001D0000 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001051D000000001D0000 /* ChatView.swift */; };
@@ -66,6 +69,9 @@
 		485395D52E22ADA30078EE38 /* ContextCompressionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextCompressionService.swift; sourceTree = "<group>"; };
 		485395D72E22AE3E0078EE38 /* ContextCompressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContextCompressionTests.swift; path = OpenChatbot/Tests/ContextCompressionTests.swift; sourceTree = SOURCE_ROOT; };
 		485395D92E22AEDD0078EE38 /* CoreDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CoreDataTests.swift; path = OpenChatbot/Tests/CoreDataTests.swift; sourceTree = SOURCE_ROOT; };
+		485395DB2E22B18A0078EE38 /* TokenWindowManagementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenWindowManagementService.swift; sourceTree = "<group>"; };
+		485395DD2E22B1B70078EE38 /* TokenWindowManagementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TokenWindowManagementTests.swift; path = OpenChatbot/Tests/TokenWindowManagementTests.swift; sourceTree = SOURCE_ROOT; };
+		485395DF2E22B26F0078EE38 /* TokenUsageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenUsageView.swift; sourceTree = "<group>"; };
 		A10001011D000000001D0000 /* OpenChatbotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenChatbotApp.swift; sourceTree = "<group>"; };
 		A10001031D000000001D0000 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A10001051D000000001D0000 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
@@ -117,6 +123,7 @@
 				485395CB2E2170E00078EE38 /* ConversationSummaryMemoryTests.swift */,
 				485395D72E22AE3E0078EE38 /* ContextCompressionTests.swift */,
 				485395D92E22AEDD0078EE38 /* CoreDataTests.swift */,
+				485395DD2E22B1B70078EE38 /* TokenWindowManagementTests.swift */,
 			);
 			path = OpenChatbotTests;
 			sourceTree = "<group>";
@@ -209,6 +216,7 @@
 				485395C12E214D3F0078EE38 /* MemoryIntegrationDemo.swift */,
 				485395C92E2170CE0078EE38 /* ConversationSummaryMemoryService.swift */,
 				485395D52E22ADA30078EE38 /* ContextCompressionService.swift */,
+				485395DB2E22B18A0078EE38 /* TokenWindowManagementService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -242,6 +250,7 @@
 			isa = PBXGroup;
 			children = (
 				A1000111D000000001D0000 /* MessageBubbleView.swift */,
+				485395DF2E22B26F0078EE38 /* TokenUsageView.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -365,6 +374,7 @@
 				485395D82E22AE3E0078EE38 /* ContextCompressionTests.swift in Sources */,
 				485395C72E214D850078EE38 /* MemoryIntegrationTest.swift in Sources */,
 				485395C82E214D850078EE38 /* MemoryServiceTests.swift in Sources */,
+				485395DE2E22B1B70078EE38 /* TokenWindowManagementTests.swift in Sources */,
 				485395DA2E22AEDD0078EE38 /* CoreDataTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -377,7 +387,9 @@
 				A10001021D000000001D0000 /* ContentView.swift in Sources */,
 				A10001041D000000001D0000 /* ChatView.swift in Sources */,
 				A10001061D000000001D0000 /* HistoryView.swift in Sources */,
+				485395DC2E22B18A0078EE38 /* TokenWindowManagementService.swift in Sources */,
 				A10001081D000000001D0000 /* SettingsView.swift in Sources */,
+				485395E02E22B26F0078EE38 /* TokenUsageView.swift in Sources */,
 				A1000110D000000001D0000 /* MessageBubbleView.swift in Sources */,
 				485395C02E214D320078EE38 /* LangChainMemoryService.swift in Sources */,
 				A1000112D000000001D0000 /* Message.swift in Sources */,
