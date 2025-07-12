@@ -23,6 +23,7 @@ class MemoryService: ObservableObject {
     private let dataService: DataService
     private let memoryCoreDataBridge: MemoryCoreDataBridge
     private let summaryMemoryService: ConversationSummaryMemoryService
+    private let contextCompressionService: ContextCompressionService?
     private var memoryCache: [UUID: ConversationMemory] = [:]
     private var cancellables = Set<AnyCancellable>()
     
@@ -36,6 +37,9 @@ class MemoryService: ObservableObject {
         // Initialize ConversationSummaryMemoryService with lazy initialization
         let defaultAPIService = apiService ?? OpenRouterAPIService(keychain: KeychainService())
         self.summaryMemoryService = ConversationSummaryMemoryService(apiService: defaultAPIService)
+        
+        // Initialize ContextCompressionService - will be set after full initialization
+        self.contextCompressionService = nil
         
         setupMemorySystem()
         
@@ -230,6 +234,12 @@ extension MemoryService: AdvancedLangChainMemoryService {
             print("🧠 Memory compression failed: \(error.localizedDescription)")
             return false
         }
+    }
+    
+    /// Compress memory using importance-based algorithm
+    func compressMemoryWithImportanceScoring(for conversationId: UUID, targetTokens: Int) async -> Bool {
+        // For now, delegate to summarization until ContextCompressionService is fully integrated
+        return await compressMemory(for: conversationId, targetTokens: targetTokens)
     }
     
     /// Get memory summary for conversation

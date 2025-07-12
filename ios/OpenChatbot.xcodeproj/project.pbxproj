@@ -17,6 +17,9 @@
 		485395C82E214D850078EE38 /* MemoryServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395C62E214D850078EE38 /* MemoryServiceTests.swift */; };
 		485395CA2E2170CE0078EE38 /* ConversationSummaryMemoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395C92E2170CE0078EE38 /* ConversationSummaryMemoryService.swift */; };
 		485395CC2E2170E00078EE38 /* ConversationSummaryMemoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395CB2E2170E00078EE38 /* ConversationSummaryMemoryTests.swift */; };
+		485395D62E22ADA30078EE38 /* ContextCompressionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395D52E22ADA30078EE38 /* ContextCompressionService.swift */; };
+		485395D82E22AE3E0078EE38 /* ContextCompressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395D72E22AE3E0078EE38 /* ContextCompressionTests.swift */; };
+		485395DA2E22AEDD0078EE38 /* CoreDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395D92E22AEDD0078EE38 /* CoreDataTests.swift */; };
 		A10001001D000000001D0000 /* OpenChatbotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001011D000000001D0000 /* OpenChatbotApp.swift */; };
 		A10001021D000000001D0000 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001031D000000001D0000 /* ContentView.swift */; };
 		A10001041D000000001D0000 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001051D000000001D0000 /* ChatView.swift */; };
@@ -36,7 +39,6 @@
 		A1000126D000000001D0000 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000127D000000001D0000 /* PersistenceController.swift */; };
 		A1000128D000000001D0000 /* DataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000129D000000001D0000 /* DataService.swift */; };
 		A1000130D000000001D0000 /* OpenChatbot.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A1000131D000000001D0000 /* OpenChatbot.xcdatamodeld */; };
-		A1000140D000000001D0000 /* CoreDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000141D000000001D0000 /* CoreDataTests.swift */; };
 		A1000300D000000001D0000 /* OpenRouterAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000301D000000001D0000 /* OpenRouterAPIService.swift */; };
 /* End PBXBuildFile section */
 
@@ -61,6 +63,9 @@
 		485395C62E214D850078EE38 /* MemoryServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MemoryServiceTests.swift; path = OpenChatbot/Tests/MemoryServiceTests.swift; sourceTree = SOURCE_ROOT; };
 		485395C92E2170CE0078EE38 /* ConversationSummaryMemoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationSummaryMemoryService.swift; sourceTree = "<group>"; };
 		485395CB2E2170E00078EE38 /* ConversationSummaryMemoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ConversationSummaryMemoryTests.swift; path = OpenChatbot/Tests/ConversationSummaryMemoryTests.swift; sourceTree = SOURCE_ROOT; };
+		485395D52E22ADA30078EE38 /* ContextCompressionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextCompressionService.swift; sourceTree = "<group>"; };
+		485395D72E22AE3E0078EE38 /* ContextCompressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContextCompressionTests.swift; path = OpenChatbot/Tests/ContextCompressionTests.swift; sourceTree = SOURCE_ROOT; };
+		485395D92E22AEDD0078EE38 /* CoreDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CoreDataTests.swift; path = OpenChatbot/Tests/CoreDataTests.swift; sourceTree = SOURCE_ROOT; };
 		A10001011D000000001D0000 /* OpenChatbotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenChatbotApp.swift; sourceTree = "<group>"; };
 		A10001031D000000001D0000 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A10001051D000000001D0000 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
@@ -80,7 +85,6 @@
 		A1000127D000000001D0000 /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
 		A1000129D000000001D0000 /* DataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataService.swift; sourceTree = "<group>"; };
 		A1000132D000000001D0000 /* OpenChatbot.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = OpenChatbot.xcdatamodel; sourceTree = "<group>"; };
-		A1000141D000000001D0000 /* CoreDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataTests.swift; sourceTree = "<group>"; };
 		A1000160D000000001D0000 /* OpenChatbotTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OpenChatbotTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000170D000000001D0000 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A1000202D000000001D0000 /* OpenChatbot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpenChatbot.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -108,10 +112,11 @@
 		A1000162D000000001D0000 /* OpenChatbotTests */ = {
 			isa = PBXGroup;
 			children = (
-				A1000141D000000001D0000 /* CoreDataTests.swift */,
 				485395C52E214D850078EE38 /* MemoryIntegrationTest.swift */,
 				485395C62E214D850078EE38 /* MemoryServiceTests.swift */,
 				485395CB2E2170E00078EE38 /* ConversationSummaryMemoryTests.swift */,
+				485395D72E22AE3E0078EE38 /* ContextCompressionTests.swift */,
+				485395D92E22AEDD0078EE38 /* CoreDataTests.swift */,
 			);
 			path = OpenChatbotTests;
 			sourceTree = "<group>";
@@ -203,6 +208,7 @@
 				485395BF2E214D320078EE38 /* LangChainMemoryService.swift */,
 				485395C12E214D3F0078EE38 /* MemoryIntegrationDemo.swift */,
 				485395C92E2170CE0078EE38 /* ConversationSummaryMemoryService.swift */,
+				485395D52E22ADA30078EE38 /* ContextCompressionService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -356,9 +362,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				485395CC2E2170E00078EE38 /* ConversationSummaryMemoryTests.swift in Sources */,
-				A1000140D000000001D0000 /* CoreDataTests.swift in Sources */,
+				485395D82E22AE3E0078EE38 /* ContextCompressionTests.swift in Sources */,
 				485395C72E214D850078EE38 /* MemoryIntegrationTest.swift in Sources */,
 				485395C82E214D850078EE38 /* MemoryServiceTests.swift in Sources */,
+				485395DA2E22AEDD0078EE38 /* CoreDataTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -380,6 +387,7 @@
 				485395C42E214D5C0078EE38 /* ConversationMemoryExtensions.swift in Sources */,
 				A100011AD000000001D0000 /* LLMModel.swift in Sources */,
 				A100011CD000000001D0000 /* KeychainService.swift in Sources */,
+				485395D62E22ADA30078EE38 /* ContextCompressionService.swift in Sources */,
 				485395BA2E2140B40078EE38 /* MemoryService.swift in Sources */,
 				A100011ED000000001D0000 /* LLMAPIService.swift in Sources */,
 				A1000300D000000001D0000 /* OpenRouterAPIService.swift in Sources */,
