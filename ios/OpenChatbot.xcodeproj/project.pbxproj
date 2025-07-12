@@ -23,6 +23,8 @@
 		485395DC2E22B18A0078EE38 /* TokenWindowManagementService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395DB2E22B18A0078EE38 /* TokenWindowManagementService.swift */; };
 		485395DE2E22B1B70078EE38 /* TokenWindowManagementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395DD2E22B1B70078EE38 /* TokenWindowManagementTests.swift */; };
 		485395E02E22B26F0078EE38 /* TokenUsageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395DF2E22B26F0078EE38 /* TokenUsageView.swift */; };
+		485395E22E22B9710078EE38 /* SmartContextRelevanceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395E12E22B9710078EE38 /* SmartContextRelevanceService.swift */; };
+		485395E42E22B9930078EE38 /* SmartContextRelevanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395E32E22B9930078EE38 /* SmartContextRelevanceTests.swift */; };
 		A10001001D000000001D0000 /* OpenChatbotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001011D000000001D0000 /* OpenChatbotApp.swift */; };
 		A10001021D000000001D0000 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001031D000000001D0000 /* ContentView.swift */; };
 		A10001041D000000001D0000 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001051D000000001D0000 /* ChatView.swift */; };
@@ -72,6 +74,8 @@
 		485395DB2E22B18A0078EE38 /* TokenWindowManagementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenWindowManagementService.swift; sourceTree = "<group>"; };
 		485395DD2E22B1B70078EE38 /* TokenWindowManagementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TokenWindowManagementTests.swift; path = OpenChatbot/Tests/TokenWindowManagementTests.swift; sourceTree = SOURCE_ROOT; };
 		485395DF2E22B26F0078EE38 /* TokenUsageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenUsageView.swift; sourceTree = "<group>"; };
+		485395E12E22B9710078EE38 /* SmartContextRelevanceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartContextRelevanceService.swift; sourceTree = "<group>"; };
+		485395E32E22B9930078EE38 /* SmartContextRelevanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SmartContextRelevanceTests.swift; path = OpenChatbot/Tests/SmartContextRelevanceTests.swift; sourceTree = SOURCE_ROOT; };
 		A10001011D000000001D0000 /* OpenChatbotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenChatbotApp.swift; sourceTree = "<group>"; };
 		A10001031D000000001D0000 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A10001051D000000001D0000 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
@@ -124,6 +128,7 @@
 				485395D72E22AE3E0078EE38 /* ContextCompressionTests.swift */,
 				485395D92E22AEDD0078EE38 /* CoreDataTests.swift */,
 				485395DD2E22B1B70078EE38 /* TokenWindowManagementTests.swift */,
+				485395E32E22B9930078EE38 /* SmartContextRelevanceTests.swift */,
 			);
 			path = OpenChatbotTests;
 			sourceTree = "<group>";
@@ -217,6 +222,7 @@
 				485395C92E2170CE0078EE38 /* ConversationSummaryMemoryService.swift */,
 				485395D52E22ADA30078EE38 /* ContextCompressionService.swift */,
 				485395DB2E22B18A0078EE38 /* TokenWindowManagementService.swift */,
+				485395E12E22B9710078EE38 /* SmartContextRelevanceService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -374,6 +380,7 @@
 				485395D82E22AE3E0078EE38 /* ContextCompressionTests.swift in Sources */,
 				485395C72E214D850078EE38 /* MemoryIntegrationTest.swift in Sources */,
 				485395C82E214D850078EE38 /* MemoryServiceTests.swift in Sources */,
+				485395E42E22B9930078EE38 /* SmartContextRelevanceTests.swift in Sources */,
 				485395DE2E22B1B70078EE38 /* TokenWindowManagementTests.swift in Sources */,
 				485395DA2E22AEDD0078EE38 /* CoreDataTests.swift in Sources */,
 			);
@@ -410,6 +417,7 @@
 				485395CA2E2170CE0078EE38 /* ConversationSummaryMemoryService.swift in Sources */,
 				A1000126D000000001D0000 /* PersistenceController.swift in Sources */,
 				A1000128D000000001D0000 /* DataService.swift in Sources */,
+				485395E22E22B9710078EE38 /* SmartContextRelevanceService.swift in Sources */,
 				485395C22E214D3F0078EE38 /* MemoryIntegrationDemo.swift in Sources */,
 				A1000130D000000001D0000 /* OpenChatbot.xcdatamodeld in Sources */,
 				485395BE2E214D170078EE38 /* MemoryPersistenceService.swift in Sources */,

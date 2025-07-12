@@ -24,6 +24,7 @@ class MemoryService: ObservableObject {
     private let memoryCoreDataBridge: MemoryCoreDataBridge
     private let summaryMemoryService: ConversationSummaryMemoryService
     private let contextCompressionService: ContextCompressionService?
+    private var relevanceService: SmartContextRelevanceService?
     private var memoryCache: [UUID: ConversationMemory] = [:]
     private var cancellables = Set<AnyCancellable>()
     
@@ -48,6 +49,53 @@ class MemoryService: ObservableObject {
     }
     
     // MARK: - Public Methods
+    
+    /// Set relevance service for smart context analysis
+    func setRelevanceService(_ service: SmartContextRelevanceService) {
+        relevanceService = service
+    }
+    
+    /// Get context with relevance filtering
+    func getContextWithRelevanceFiltering(
+        conversationId: UUID,
+        query: String? = nil,
+        maxTokens: Int = 4000,
+        relevanceThreshold: Float = 0.6
+    ) async -> [Message] {
+        
+        guard let relevanceService = relevanceService else {
+            // Fall back to regular context if no relevance service
+            return await getContextForAPICall(conversationId: conversationId, maxTokens: maxTokens)
+        }
+        
+        let memory = await getMemoryForConversation(conversationId)
+        
+        // Calculate relevance scores if not already cached
+        do {
+            _ = try await relevanceService.calculateRelevanceScores(
+                for: conversationId,
+                query: query,
+                context: .general
+            )
+        } catch {
+            print("🧠 Relevance calculation failed: \(error)")
+            // Fall back to regular context
+            return memory.getContextWithTokenLimit(maxTokens: maxTokens)
+        }
+        
+        // Filter messages by relevance
+        let relevantMessages = relevanceService.filterMessagesByRelevance(
+            messages: memory.messages,
+            conversationId: conversationId,
+            threshold: relevanceThreshold
+        )
+        
+        // Apply token limit to relevant messages
+        let contextMessages = applyTokenLimitToMessages(relevantMessages, maxTokens: maxTokens)
+        
+        print("🧠 Context with relevance filtering: \(contextMessages.count)/\(memory.messages.count) messages")
+        return contextMessages
+    }
     
     /// Get memory for a conversation - equivalent to LangChain ConversationBufferMemory
     func getMemoryForConversation(_ conversationId: UUID) async -> ConversationMemory {
@@ -137,6 +185,29 @@ class MemoryService: ObservableObject {
         // Memory is automatically saved through DataService when messages are added
         // This method can be extended for additional memory-specific storage
         print("🧠 Memory saved to storage for conversation \(memory.conversationId)")
+    }
+    
+    private func applyTokenLimitToMessages(_ messages: [Message], maxTokens: Int) -> [Message] {
+        // Simple token estimation: ~4 characters per token
+        let estimatedCharsPerToken = 4
+        let maxChars = maxTokens * estimatedCharsPerToken
+        
+        var totalChars = 0
+        var contextMessages: [Message] = []
+        
+        // Start from the most recent messages and work backwards
+        for message in messages.reversed() {
+            let messageChars = message.content.count
+            
+            if totalChars + messageChars <= maxChars {
+                contextMessages.insert(message, at: 0)
+                totalChars += messageChars
+            } else {
+                break
+            }
+        }
+        
+        return contextMessages
     }
 }
 
