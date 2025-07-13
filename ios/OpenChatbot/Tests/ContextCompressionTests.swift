@@ -277,8 +277,4 @@ class ContextCompressionTests: XCTestCase {
     }
 }
 
-// MARK: - Mock API Service Extension
-
-extension MockLLMAPIService {
-    // Already defined in ConversationSummaryMemoryTests.swift
-} 
+// MockLLMAPIService is now imported from shared file 

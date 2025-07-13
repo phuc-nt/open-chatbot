@@ -152,4 +152,164 @@ class BasicMemoryTests: XCTestCase {
         XCTAssertEqual(memory1.messages.first?.content, "Message for conversation 1")
         XCTAssertEqual(memory2.messages.first?.content, "Message for conversation 2")
     }
+}
+
+// MARK: - Shared Mock API Service for All Tests
+class MockLLMAPIService: LLMAPIService {
+    
+    // MARK: - Mock Data
+    private var mockModels: [LLMModel] = []
+    private var mockResponses: [String] = []
+    private var shouldThrowError: Bool = false
+    private var mockError: Error?
+    
+    init() {
+        setupDefaultMockModels()
+    }
+    
+    // MARK: - Configuration Methods
+    func setMockModels(_ models: [LLMModel]) {
+        mockModels = models
+    }
+    
+    func setMockResponses(_ responses: [String]) {
+        mockResponses = responses
+    }
+    
+    func setShouldThrowError(_ shouldThrow: Bool, error: Error? = nil) {
+        shouldThrowError = shouldThrow
+        mockError = error
+    }
+    
+    // MARK: - LLMAPIService Implementation
+    func sendMessage(_ message: String, model: LLMModel, conversation: [ChatMessage]?) async throws -> AsyncStream<String> {
+        if shouldThrowError {
+            throw mockError ?? MockError.testError
+        }
+        
+        return AsyncStream { continuation in
+            Task {
+                let response = getNextMockResponse()
+                
+                // Simulate streaming response
+                for chunk in response.components(separatedBy: " ") {
+                    continuation.yield(chunk + " ")
+                    try? await Task.sleep(nanoseconds: 1_000_000) // 1ms delay
+                }
+                
+                continuation.finish()
+            }
+        }
+    }
+    
+    func sendMessageSync(_ message: String, model: LLMModel, conversation: [ChatMessage]?) async throws -> String {
+        if shouldThrowError {
+            throw mockError ?? MockError.testError
+        }
+        
+        return getNextMockResponse()
+    }
+    
+    func getAvailableModels() async throws -> [LLMModel] {
+        if shouldThrowError {
+            throw mockError ?? MockError.testError
+        }
+        
+        return mockModels
+    }
+    
+    func validateAPIKey(_ apiKey: String) async throws -> Bool {
+        if shouldThrowError {
+            throw mockError ?? MockError.testError
+        }
+        
+        return !apiKey.isEmpty
+    }
+    
+    func getAPIKeyStatus() async throws -> APIKeyStatus {
+        if shouldThrowError {
+            throw mockError ?? MockError.testError
+        }
+        
+        return APIKeyStatus(
+            isValid: true,
+            remainingCredits: 100.0,
+            usageToday: 5.0,
+            rateLimitRemaining: 1000,
+            rateLimitReset: Date().addingTimeInterval(3600)
+        )
+    }
+    
+    func cancelCurrentRequest() {
+        // Mock implementation - no actual cancellation needed
+    }
+    
+    // MARK: - Helper Methods
+    private func setupDefaultMockModels() {
+        mockModels = [
+            LLMModel(
+                id: "gpt-3.5-turbo",
+                name: "GPT-3.5 Turbo",
+                provider: .openai,
+                contextLength: 4096,
+                pricing: ModelPricing(inputTokens: 1.5, outputTokens: 2.0, imageInputs: nil),
+                description: "Mock GPT-3.5 for testing",
+                capabilities: ModelCapabilities(supportsImages: false, supportsStreaming: true, maxTokens: 4096)
+            ),
+            LLMModel(
+                id: "gpt-4",
+                name: "GPT-4",
+                provider: .openai,
+                contextLength: 8192,
+                pricing: ModelPricing(inputTokens: 30, outputTokens: 60, imageInputs: nil),
+                description: "Mock GPT-4 for testing",
+                capabilities: ModelCapabilities(supportsImages: true, supportsStreaming: true, maxTokens: 8192)
+            ),
+            LLMModel(
+                id: "claude-3-sonnet",
+                name: "Claude 3 Sonnet",
+                provider: .anthropic,
+                contextLength: 200000,
+                pricing: ModelPricing(inputTokens: 3, outputTokens: 15, imageInputs: nil),
+                description: "Mock Claude 3 for testing",
+                capabilities: ModelCapabilities(supportsImages: true, supportsStreaming: true, maxTokens: 200000)
+            )
+        ]
+        
+        mockResponses = [
+            "This is a mock response for testing purposes.",
+            "Another mock response with different content.",
+            "Mock response for comprehensive testing scenarios.",
+            "Advanced mock response for integration testing."
+        ]
+    }
+    
+    private func getNextMockResponse() -> String {
+        if mockResponses.isEmpty {
+            return "Default mock response"
+        }
+        
+        // Cycle through responses
+        let response = mockResponses.removeFirst()
+        mockResponses.append(response)
+        return response
+    }
+}
+
+// MARK: - Mock Error
+enum MockError: Error {
+    case testError
+    case networkError
+    case invalidResponse
+    
+    var localizedDescription: String {
+        switch self {
+        case .testError:
+            return "Test error for mock service"
+        case .networkError:
+            return "Mock network error"
+        case .invalidResponse:
+            return "Mock invalid response error"
+        }
+    }
 } 
