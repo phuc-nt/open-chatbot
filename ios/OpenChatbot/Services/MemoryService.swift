@@ -165,6 +165,18 @@ class MemoryService: ObservableObject {
         )
     }
     
+    /// Get memory statistics - alias for test compatibility
+    func getMemoryStatistics(for conversationId: UUID) async -> MemoryStatistics {
+        let memory = await getMemoryForConversation(conversationId)
+        return MemoryStatistics(
+            messageCount: memory.messageCount,
+            estimatedTokens: memory.estimatedTokenCount,
+            lastUpdated: memory.lastUpdated,
+            cacheStatus: memoryCache[conversationId] != nil ? "cached" : "loaded",
+            memorySize: memory.estimatedTokens * 4 // Rough estimation
+        )
+    }
+    
     // MARK: - Private Methods
     
     private func setupMemorySystem() {
@@ -213,7 +225,7 @@ class MemoryService: ObservableObject {
 
 // MARK: - Supporting Types
 
-enum MemoryStatus {
+enum MemoryStatus: Equatable {
     case idle
     case loading
     case ready

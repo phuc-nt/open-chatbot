@@ -99,6 +99,19 @@ class ContextCompressionService: ObservableObject {
         compressionSettings = settings
     }
     
+    /// Compress context with importance scoring - alias for compressContext for test compatibility
+    func compressContextWithImportanceScoring(
+        for conversationId: UUID,
+        targetTokens: Int,
+        preserveRecentCount: Int = 6
+    ) async throws -> CompressedContext {
+        return try await compressContext(
+            for: conversationId,
+            targetTokens: targetTokens,
+            preserveRecentCount: preserveRecentCount
+        )
+    }
+    
     // MARK: - Private Methods
     
     /// Calculate importance scores for messages

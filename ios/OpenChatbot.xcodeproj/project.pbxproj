@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2490fcbec7d54b97ac84d085 /* SmartMemorySystemIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7419b22b723749408910f637 /* SmartMemorySystemIntegrationTests.swift */; };
 		485395BA2E2140B40078EE38 /* MemoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395B92E2140B40078EE38 /* MemoryService.swift */; };
 		485395BC2E214D040078EE38 /* MemoryCoreDataBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395BB2E214D040078EE38 /* MemoryCoreDataBridge.swift */; };
 		485395BE2E214D170078EE38 /* MemoryPersistenceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395BD2E214D170078EE38 /* MemoryPersistenceService.swift */; };
 		485395C02E214D320078EE38 /* LangChainMemoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395BF2E214D320078EE38 /* LangChainMemoryService.swift */; };
 		485395C22E214D3F0078EE38 /* MemoryIntegrationDemo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395C12E214D3F0078EE38 /* MemoryIntegrationDemo.swift */; };
 		485395C42E214D5C0078EE38 /* ConversationMemoryExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395C32E214D5C0078EE38 /* ConversationMemoryExtensions.swift */; };
-
 		485395C82E214D850078EE38 /* MemoryServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395C62E214D850078EE38 /* MemoryServiceTests.swift */; };
 		485395CA2E2170CE0078EE38 /* ConversationSummaryMemoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395C92E2170CE0078EE38 /* ConversationSummaryMemoryService.swift */; };
 		485395CC2E2170E00078EE38 /* ConversationSummaryMemoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395CB2E2170E00078EE38 /* ConversationSummaryMemoryTests.swift */; };
@@ -25,7 +25,7 @@
 		485395E02E22B26F0078EE38 /* TokenUsageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395DF2E22B26F0078EE38 /* TokenUsageView.swift */; };
 		485395E22E22B9710078EE38 /* SmartContextRelevanceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395E12E22B9710078EE38 /* SmartContextRelevanceService.swift */; };
 		485395E42E22B9930078EE38 /* SmartContextRelevanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395E32E22B9930078EE38 /* SmartContextRelevanceTests.swift */; };
-		2490fcbec7d54b97ac84d085 /* SmartMemorySystemIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7419b22b723749408910f637 /* SmartMemorySystemIntegrationTests.swift */; };
+		485395E62E23A9A20078EE38 /* BasicMemoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395E52E23A9A20078EE38 /* BasicMemoryTests.swift */; };
 		A10001001D000000001D0000 /* OpenChatbotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001011D000000001D0000 /* OpenChatbotApp.swift */; };
 		A10001021D000000001D0000 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001031D000000001D0000 /* ContentView.swift */; };
 		A10001041D000000001D0000 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001051D000000001D0000 /* ChatView.swift */; };
@@ -65,7 +65,6 @@
 		485395BF2E214D320078EE38 /* LangChainMemoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LangChainMemoryService.swift; sourceTree = "<group>"; };
 		485395C12E214D3F0078EE38 /* MemoryIntegrationDemo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryIntegrationDemo.swift; sourceTree = "<group>"; };
 		485395C32E214D5C0078EE38 /* ConversationMemoryExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationMemoryExtensions.swift; sourceTree = "<group>"; };
-
 		485395C62E214D850078EE38 /* MemoryServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MemoryServiceTests.swift; path = OpenChatbot/Tests/MemoryServiceTests.swift; sourceTree = SOURCE_ROOT; };
 		485395C92E2170CE0078EE38 /* ConversationSummaryMemoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationSummaryMemoryService.swift; sourceTree = "<group>"; };
 		485395CB2E2170E00078EE38 /* ConversationSummaryMemoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ConversationSummaryMemoryTests.swift; path = OpenChatbot/Tests/ConversationSummaryMemoryTests.swift; sourceTree = SOURCE_ROOT; };
@@ -77,6 +76,7 @@
 		485395DF2E22B26F0078EE38 /* TokenUsageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenUsageView.swift; sourceTree = "<group>"; };
 		485395E12E22B9710078EE38 /* SmartContextRelevanceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartContextRelevanceService.swift; sourceTree = "<group>"; };
 		485395E32E22B9930078EE38 /* SmartContextRelevanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SmartContextRelevanceTests.swift; path = OpenChatbot/Tests/SmartContextRelevanceTests.swift; sourceTree = SOURCE_ROOT; };
+		485395E52E23A9A20078EE38 /* BasicMemoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BasicMemoryTests.swift; path = OpenChatbot/Tests/BasicMemoryTests.swift; sourceTree = SOURCE_ROOT; };
 		7419b22b723749408910f637 /* SmartMemorySystemIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SmartMemorySystemIntegrationTests.swift; path = OpenChatbot/Tests/SmartMemorySystemIntegrationTests.swift; sourceTree = SOURCE_ROOT; };
 		A10001011D000000001D0000 /* OpenChatbotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenChatbotApp.swift; sourceTree = "<group>"; };
 		A10001031D000000001D0000 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -131,6 +131,7 @@
 				485395DD2E22B1B70078EE38 /* TokenWindowManagementTests.swift */,
 				485395E32E22B9930078EE38 /* SmartContextRelevanceTests.swift */,
 				7419b22b723749408910f637 /* SmartMemorySystemIntegrationTests.swift */,
+				485395E52E23A9A20078EE38 /* BasicMemoryTests.swift */,
 			);
 			path = OpenChatbotTests;
 			sourceTree = "<group>";
@@ -385,6 +386,7 @@
 				485395DE2E22B1B70078EE38 /* TokenWindowManagementTests.swift in Sources */,
 				485395DA2E22AEDD0078EE38 /* CoreDataTests.swift in Sources */,
 				2490fcbec7d54b97ac84d085 /* SmartMemorySystemIntegrationTests.swift in Sources */,
+				485395E62E23A9A20078EE38 /* BasicMemoryTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

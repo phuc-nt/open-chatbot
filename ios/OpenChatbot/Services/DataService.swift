@@ -10,6 +10,15 @@ class DataService: ObservableObject {
         self.persistenceController = persistenceController
     }
     
+    /// Convenience initializer for testing with in-memory store
+    convenience init(inMemory: Bool) {
+        if inMemory {
+            self.init(persistenceController: PersistenceController(inMemory: true))
+        } else {
+            self.init(persistenceController: .shared)
+        }
+    }
+    
     // MARK: - Conversation Operations
     
     /// Create a new conversation
@@ -38,6 +47,11 @@ class DataService: ObservableObject {
             print("Error fetching conversations: \(error)")
             return []
         }
+    }
+    
+    /// Fetch conversations - alias for getAllConversations for test compatibility
+    func fetchConversations() -> [ConversationEntity] {
+        return getAllConversations()
     }
     
     /// Get most recent conversation
@@ -75,6 +89,21 @@ class DataService: ObservableObject {
     func getMessagesForConversation(_ conversation: ConversationEntity) -> [Message] {
         let request = MessageEntity.fetchRequest()
         request.predicate = NSPredicate(format: "conversationId == %@", conversation.id! as CVarArg)
+        request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
+        
+        do {
+            let messageEntities = try persistenceController.viewContext.fetch(request)
+            return messageEntities.map { $0.toMessage() }
+        } catch {
+            print("Error fetching messages: \(error)")
+            return []
+        }
+    }
+    
+    /// Fetch messages by conversation ID - for test compatibility
+    func fetchMessages(for conversationId: UUID) -> [Message] {
+        let request = MessageEntity.fetchRequest()
+        request.predicate = NSPredicate(format: "conversationId == %@", conversationId as CVarArg)
         request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
         
         do {
