@@ -2,22 +2,23 @@ import XCTest
 import CoreData
 @testable import OpenChatbot
 
+@MainActor
 class CoreDataTests: XCTestCase {
     
     var persistenceController: PersistenceController!
     var dataService: DataService!
     
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         // Use in-memory store for testing
         persistenceController = PersistenceController(inMemory: true)
         dataService = DataService(persistenceController: persistenceController)
     }
     
-    override func tearDown() {
+    override func tearDown() async throws {
         persistenceController = nil
         dataService = nil
-        super.tearDown()
+        try await super.tearDown()
     }
     
     // MARK: - Conversation Tests
@@ -80,24 +81,28 @@ class CoreDataTests: XCTestCase {
         // Given
         let conversation = dataService.createConversation(title: "Test Conversation")
         let content = "Hello, world!"
-        let role = "user"
+        let role = MessageRole.user
+        let message = Message(content: content, role: role, conversationId: conversation.id!)
         
         // When
-        let message = dataService.addMessage(to: conversation, content: content, role: role)
+        let messageEntity = dataService.addMessage(message, to: conversation)
         
         // Then
-        XCTAssertNotNil(message)
-        XCTAssertEqual(message.content, content)
-        XCTAssertEqual(message.role, role)
-        XCTAssertEqual(message.conversationId, conversation.id)
-        XCTAssertEqual(message.conversation, conversation)
+        XCTAssertNotNil(messageEntity)
+        XCTAssertEqual(messageEntity.content, content)
+        XCTAssertEqual(messageEntity.role, role.rawValue)
+        XCTAssertEqual(messageEntity.conversationId, conversation.id)
+        XCTAssertEqual(messageEntity.conversation, conversation)
     }
     
     func testFetchMessages() {
         // Given
         let conversation = dataService.createConversation(title: "Test Conversation")
-        dataService.addMessage(to: conversation, content: "Message 1", role: "user")
-        dataService.addMessage(to: conversation, content: "Message 2", role: "assistant")
+        let message1 = Message(content: "Message 1", role: .user, conversationId: conversation.id!)
+        let message2 = Message(content: "Message 2", role: .assistant, conversationId: conversation.id!)
+        
+        dataService.addMessage(message1, to: conversation)
+        dataService.addMessage(message2, to: conversation)
         
         // When
         let messages = dataService.fetchMessages(for: conversation.id!)
@@ -110,10 +115,11 @@ class CoreDataTests: XCTestCase {
     func testDeleteMessage() {
         // Given
         let conversation = dataService.createConversation(title: "Test Conversation")
-        let message = dataService.addMessage(to: conversation, content: "To Delete", role: "user")
+        let message = Message(content: "To Delete", role: .user, conversationId: conversation.id!)
+        dataService.addMessage(message, to: conversation)
         
         // When
-        dataService.deleteMessage(message)
+        dataService.deleteMessage(message, from: conversation)
         
         // Then
         let messages = dataService.fetchMessages(for: conversation.id!)
@@ -171,36 +177,40 @@ class CoreDataTests: XCTestCase {
         dataService.createConversation(title: "Conversation 2")
         
         // When
-        let count = dataService.getConversationCount()
+        let conversations = dataService.fetchConversations()
         
         // Then
-        XCTAssertEqual(count, 2)
+        XCTAssertEqual(conversations.count, 2)
     }
     
     func testMessageCount() {
         // Given
         let conversation = dataService.createConversation(title: "Test Conversation")
-        dataService.addMessage(to: conversation, content: "Message 1", role: "user")
-        dataService.addMessage(to: conversation, content: "Message 2", role: "assistant")
+        let message1 = Message(content: "Message 1", role: .user, conversationId: conversation.id!)
+        let message2 = Message(content: "Message 2", role: .assistant, conversationId: conversation.id!)
+        
+        dataService.addMessage(message1, to: conversation)
+        dataService.addMessage(message2, to: conversation)
         
         // When
-        let count = dataService.getMessageCount(for: conversation.id!)
+        let messages = dataService.fetchMessages(for: conversation.id!)
         
         // Then
-        XCTAssertEqual(count, 2)
+        XCTAssertEqual(messages.count, 2)
     }
     
     func testDeleteAllData() {
         // Given
         let conversation = dataService.createConversation(title: "Test Conversation")
-        dataService.addMessage(to: conversation, content: "Test Message", role: "user")
+        let message = Message(content: "Test Message", role: .user, conversationId: conversation.id!)
+        dataService.addMessage(message, to: conversation)
         dataService.createAPIKey(name: "Test Key", provider: "openai", keyData: Data())
         
         // When
         dataService.deleteAllData()
         
         // Then
-        XCTAssertEqual(dataService.getConversationCount(), 0)
+        XCTAssertEqual(dataService.fetchConversations().count, 0)
         XCTAssertEqual(dataService.fetchAPIKeys().count, 0)
     }
     
@@ -209,8 +219,11 @@ class CoreDataTests: XCTestCase {
     func testCascadeDelete() {
         // Given
         let conversation = dataService.createConversation(title: "Test Conversation")
-        dataService.addMessage(to: conversation, content: "Message 1", role: "user")
-        dataService.addMessage(to: conversation, content: "Message 2", role: "assistant")
+        let message1 = Message(content: "Message 1", role: .user, conversationId: conversation.id!)
+        let message2 = Message(content: "Message 2", role: .assistant, conversationId: conversation.id!)
+        
+        dataService.addMessage(message1, to: conversation)
+        dataService.addMessage(message2, to: conversation)
         
         // When
         dataService.deleteConversation(conversation)
@@ -227,9 +240,13 @@ class CoreDataTests: XCTestCase {
         let conversation = dataService.createConversation(title: "Memory Test Conversation")
         
         // Add messages with memory-related metadata
-        let message1 = dataService.addMessage(to: conversation, content: "What is the capital of France?", role: "user")
-        let message2 = dataService.addMessage(to: conversation, content: "The capital of France is Paris.", role: "assistant")
-        let message3 = dataService.addMessage(to: conversation, content: "Tell me more about it", role: "user")
+        let message1 = Message(content: "What is the capital of France?", role: .user, conversationId: conversation.id!)
+        let message2 = Message(content: "The capital of France is Paris.", role: .assistant, conversationId: conversation.id!)
+        let message3 = Message(content: "Tell me more about it", role: .user, conversationId: conversation.id!)
+        
+        dataService.addMessage(message1, to: conversation)
+        dataService.addMessage(message2, to: conversation)
+        dataService.addMessage(message3, to: conversation)
         
         // Verify messages are persisted with proper order
         let messages = dataService.fetchMessages(for: conversation.id!)
@@ -239,9 +256,9 @@ class CoreDataTests: XCTestCase {
         XCTAssertEqual(messages[2].content, "Tell me more about it")
         
         // Test context continuity
-        XCTAssertEqual(messages[0].role, "user")
-        XCTAssertEqual(messages[1].role, "assistant")
-        XCTAssertEqual(messages[2].role, "user")
+        XCTAssertEqual(messages[0].role, MessageRole.user.rawValue)
+        XCTAssertEqual(messages[1].role, MessageRole.assistant.rawValue)
+        XCTAssertEqual(messages[2].role, MessageRole.user.rawValue)
     }
     
     func testConversationMemoryMetadata() {
@@ -249,17 +266,20 @@ class CoreDataTests: XCTestCase {
         let conversation = dataService.createConversation(title: "Metadata Test")
         
         // Add messages with various content types
-        let shortMessage = dataService.addMessage(to: conversation, content: "Hi", role: "user")
-        let longMessage = dataService.addMessage(to: conversation, content: "This is a much longer message that contains substantial content for testing token counting and memory compression algorithms in the Smart Memory System.", role: "assistant")
+        let shortMessage = Message(content: "Hi", role: .user, conversationId: conversation.id!)
+        let longMessage = Message(content: "This is a much longer message that contains substantial content for testing token counting and memory compression algorithms in the Smart Memory System.", role: .assistant, conversationId: conversation.id!)
+        
+        dataService.addMessage(shortMessage, to: conversation)
+        dataService.addMessage(longMessage, to: conversation)
         
         // Verify both messages are stored correctly
         let messages = dataService.fetchMessages(for: conversation.id!)
         XCTAssertEqual(messages.count, 2)
         
         // Test that long content is preserved
-        let retrievedLongMessage = messages.first { $0.content.contains("substantial content") }
+        let retrievedLongMessage = messages.first { $0.content!.contains("substantial content") }
         XCTAssertNotNil(retrievedLongMessage)
-        XCTAssertEqual(retrievedLongMessage?.role, "assistant")
+        XCTAssertEqual(retrievedLongMessage?.role, MessageRole.assistant.rawValue)
     }
     
     func testMemoryCompressionDataPersistence() {
@@ -268,9 +288,10 @@ class CoreDataTests: XCTestCase {
         
         // Add many messages to simulate compression scenario
         for i in 1...20 {
-            let role = i % 2 == 0 ? "assistant" : "user"
+            let role: MessageRole = i % 2 == 0 ? .assistant : .user
             let content = "Message \(i): This is message content that would be subject to compression in the Smart Memory System."
-            dataService.addMessage(to: conversation, content: content, role: role)
+            let message = Message(content: content, role: role, conversationId: conversation.id!)
+            dataService.addMessage(message, to: conversation)
         }
         
         // Verify all messages are persisted
@@ -280,8 +301,8 @@ class CoreDataTests: XCTestCase {
         // Test that messages maintain proper order
         let firstMessage = messages.first
         let lastMessage = messages.last
-        XCTAssertTrue(firstMessage!.content.contains("Message 1"))
-        XCTAssertTrue(lastMessage!.content.contains("Message 20"))
+        XCTAssertTrue(firstMessage!.content!.contains("Message 1"))
+        XCTAssertTrue(lastMessage!.content!.contains("Message 20"))
         
         // Test chronological ordering
         XCTAssertTrue(firstMessage!.timestamp! <= lastMessage!.timestamp!)
@@ -294,7 +315,9 @@ class CoreDataTests: XCTestCase {
         // Add messages that would trigger summarization
         for i in 1...10 {
             let content = "Message \(i): Detailed content about a specific topic that would be summarized by the ConversationSummaryMemory service."
-            dataService.addMessage(to: conversation, content: content, role: i % 2 == 0 ? "assistant" : "user")
+            let role: MessageRole = i % 2 == 0 ? .assistant : .user
+            let message = Message(content: content, role: role, conversationId: conversation.id!)
+            dataService.addMessage(message, to: conversation)
         }
         
         // Verify data is ready for summarization
@@ -302,7 +325,7 @@ class CoreDataTests: XCTestCase {
         XCTAssertEqual(messages.count, 10)
         
         // Test that conversation has enough content for summarization
-        let totalContentLength = messages.reduce(0) { $0 + $1.content.count }
+        let totalContentLength = messages.reduce(0) { $0 + ($1.content?.count ?? 0) }
         XCTAssertGreaterThan(totalContentLength, 500) // Should have substantial content
     }
     
@@ -311,16 +334,19 @@ class CoreDataTests: XCTestCase {
         let conversation = dataService.createConversation(title: "Context Retrieval Test")
         
         // Add messages with different timestamps
-        let message1 = dataService.addMessage(to: conversation, content: "First message", role: "user")
+        let message1 = Message(content: "First message", role: .user, conversationId: conversation.id!)
+        dataService.addMessage(message1, to: conversation)
         
         // Simulate time passing
         Thread.sleep(forTimeInterval: 0.1)
         
-        let message2 = dataService.addMessage(to: conversation, content: "Second message", role: "assistant")
+        let message2 = Message(content: "Second message", role: .assistant, conversationId: conversation.id!)
+        dataService.addMessage(message2, to: conversation)
         
         Thread.sleep(forTimeInterval: 0.1)
         
-        let message3 = dataService.addMessage(to: conversation, content: "Third message", role: "user")
+        let message3 = Message(content: "Third message", role: .user, conversationId: conversation.id!)
+        dataService.addMessage(message3, to: conversation)
         
         // Test retrieval with proper ordering
         let messages = dataService.fetchMessages(for: conversation.id!)
@@ -342,32 +368,34 @@ class CoreDataTests: XCTestCase {
         let conversation = dataService.createConversation(title: "Data Integrity Test")
         
         // Add messages with special characters and long content
-        let specialMessage = dataService.addMessage(
-            to: conversation, 
+        let specialMessage = Message(
             content: "Message with special chars: 🚀 émoji ñ unicode 中文 العربية", 
-            role: "user"
+            role: .user,
+            conversationId: conversation.id!
         )
+        dataService.addMessage(specialMessage, to: conversation)
         
-        let longMessage = dataService.addMessage(
-            to: conversation,
+        let longMessage = Message(
             content: String(repeating: "Long content for testing data integrity in memory persistence. ", count: 50),
-            role: "assistant"
+            role: .assistant,
+            conversationId: conversation.id!
         )
+        dataService.addMessage(longMessage, to: conversation)
         
         // Verify data integrity
         let messages = dataService.fetchMessages(for: conversation.id!)
         XCTAssertEqual(messages.count, 2)
         
         // Test special character preservation
-        let retrievedSpecialMessage = messages.first { $0.content.contains("🚀") }
+        let retrievedSpecialMessage = messages.first { $0.content?.contains("🚀") == true }
         XCTAssertNotNil(retrievedSpecialMessage)
-        XCTAssertTrue(retrievedSpecialMessage!.content.contains("émoji"))
-        XCTAssertTrue(retrievedSpecialMessage!.content.contains("中文"))
+        XCTAssertTrue(retrievedSpecialMessage!.content!.contains("émoji"))
+        XCTAssertTrue(retrievedSpecialMessage!.content!.contains("中文"))
         
         // Test long content preservation
-        let retrievedLongMessage = messages.first { $0.content.count > 1000 }
+        let retrievedLongMessage = messages.first { ($0.content?.count ?? 0) > 1000 }
         XCTAssertNotNil(retrievedLongMessage)
-        XCTAssertEqual(retrievedLongMessage?.role, "assistant")
+        XCTAssertEqual(retrievedLongMessage?.role, MessageRole.assistant.rawValue)
     }
     
     // MARK: - Performance Tests for Memory Operations
@@ -380,7 +408,9 @@ class CoreDataTests: XCTestCase {
         let insertStartTime = CFAbsoluteTimeGetCurrent()
         
         for i in 1...100 {
-            dataService.addMessage(to: conversation, content: "Performance test message \(i)", role: i % 2 == 0 ? "assistant" : "user")
+            let role: MessageRole = i % 2 == 0 ? .assistant : .user
+            let message = Message(content: "Performance test message \(i)", role: role, conversationId: conversation.id!)
+            dataService.addMessage(message, to: conversation)
         }
         
         let insertEndTime = CFAbsoluteTimeGetCurrent()
@@ -406,15 +436,16 @@ class CoreDataTests: XCTestCase {
         
         // Simulate memory service operations
         let contextMessages = [
-            ("What is machine learning?", "user"),
-            ("Machine learning is a subset of artificial intelligence...", "assistant"),
-            ("Can you give me an example?", "user"),
-            ("Sure! A common example is email spam detection...", "assistant")
+            ("What is machine learning?", MessageRole.user),
+            ("Machine learning is a subset of artificial intelligence...", MessageRole.assistant),
+            ("Can you give me an example?", MessageRole.user),
+            ("Sure! A common example is email spam detection...", MessageRole.assistant)
         ]
         
         // Add messages through data service (simulating memory bridge)
         for (content, role) in contextMessages {
-            dataService.addMessage(to: conversation, content: content, role: role)
+            let message = Message(content: content, role: role, conversationId: conversation.id!)
+            dataService.addMessage(message, to: conversation)
         }
         
         // Verify data is available for memory retrieval
@@ -423,9 +454,9 @@ class CoreDataTests: XCTestCase {
         
         // Test conversation flow integrity
         XCTAssertEqual(storedMessages[0].content, "What is machine learning?")
-        XCTAssertEqual(storedMessages[1].role, "assistant")
+        XCTAssertEqual(storedMessages[1].role, MessageRole.assistant.rawValue)
         XCTAssertEqual(storedMessages[2].content, "Can you give me an example?")
-        XCTAssertEqual(storedMessages[3].role, "assistant")
+        XCTAssertEqual(storedMessages[3].role, MessageRole.assistant.rawValue)
     }
     
     // MARK: - Existing Tests (Relationship Tests)
@@ -433,17 +464,20 @@ class CoreDataTests: XCTestCase {
     func testConversationMessageRelationship() {
         // Given
         let conversation = dataService.createConversation(title: "Test Conversation")
-        let message1 = dataService.addMessage(to: conversation, content: "Message 1", role: "user")
-        let message2 = dataService.addMessage(to: conversation, content: "Message 2", role: "assistant")
+        let message1 = Message(content: "Message 1", role: .user, conversationId: conversation.id!)
+        let message2 = Message(content: "Message 2", role: .assistant, conversationId: conversation.id!)
+        
+        let messageEntity1 = dataService.addMessage(message1, to: conversation)
+        let messageEntity2 = dataService.addMessage(message2, to: conversation)
         
         // When
         let conversationMessages = conversation.messages?.allObjects as? [MessageEntity] ?? []
         
         // Then
         XCTAssertEqual(conversationMessages.count, 2)
-        XCTAssertTrue(conversationMessages.contains(message1))
-        XCTAssertTrue(conversationMessages.contains(message2))
-        XCTAssertEqual(message1.conversation, conversation)
-        XCTAssertEqual(message2.conversation, conversation)
+        XCTAssertTrue(conversationMessages.contains(messageEntity1))
+        XCTAssertTrue(conversationMessages.contains(messageEntity2))
+        XCTAssertEqual(messageEntity1.conversation, conversation)
+        XCTAssertEqual(messageEntity2.conversation, conversation)
     }
 } 
