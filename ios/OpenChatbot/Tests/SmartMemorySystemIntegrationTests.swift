@@ -33,7 +33,7 @@ class SmartMemorySystemIntegrationTests: XCTestCase {
         
         // Setup other services
         relevanceService = SmartContextRelevanceService(memoryService: memoryService)
-        tokenWindowService = TokenWindowManagementService(memoryService: memoryService)
+        tokenWindowService = TokenWindowManagementService(memoryService: memoryService, compressionService: compressionService)
         
         // Create test conversation
         testConversationId = UUID()
@@ -72,12 +72,12 @@ class SmartMemorySystemIntegrationTests: XCTestCase {
         
         // Test memory retrieval
         let memory = await memoryService.getMemoryForConversation(testConversationId)
-        XCTAssertEqual(memory.count, 4)
+        XCTAssertEqual(memory.messageCount, 4)
         
         // Test memory context generation
-        let context = await memoryService.getMemoryContext(for: testConversationId, maxTokens: 1000)
+        let context = await memoryService.getContextForAPICall(conversationId: testConversationId, maxTokens: 1000)
         XCTAssertFalse(context.isEmpty)
-        XCTAssertTrue(context.contains("Swift"))
+        XCTAssertTrue(context.contains { $0.content.contains("Swift") })
     }
     
     func testMemoryPersistenceIntegration() async throws {
@@ -92,13 +92,13 @@ class SmartMemorySystemIntegrationTests: XCTestCase {
         
         // Simulate new session with new services
         let newDataService = DataService(inMemory: true)
-        let newMemoryService = await MemoryService(dataService: newDataService, apiService: mockAPIService)
+        let newMemoryService = MemoryService(dataService: newDataService, apiService: mockAPIService)
         
         // Test that memory persists (in real implementation, this would use persistent storage)
         let memory = await newMemoryService.getMemoryForConversation(testConversationId)
         // In this test, we expect empty memory since we're using in-memory storage
         // In production, this would verify persistence across sessions
-        XCTAssertTrue(memory.isEmpty || !memory.isEmpty) // Flexible assertion for test environment
+        XCTAssertTrue(memory.messageCount == 0 || memory.messageCount > 0) // Flexible assertion for test environment
     }
     
     func testContextCompressionIntegration() async throws {
@@ -131,7 +131,7 @@ class SmartMemorySystemIntegrationTests: XCTestCase {
         XCTAssertNotNil(compressedMemory)
         
         // Test that compression maintains important information
-        let context = await memoryService.getMemoryContext(for: testConversationId, maxTokens: 1000)
+        let context = await memoryService.getContextForAPICall(conversationId: testConversationId, maxTokens: 1000)
         XCTAssertFalse(context.isEmpty)
     }
     
@@ -147,7 +147,7 @@ class SmartMemorySystemIntegrationTests: XCTestCase {
                 contextLength: 4096,
                 pricing: ModelPricing(inputTokens: 1.5, outputTokens: 2.0, imageInputs: nil),
                 description: "GPT-3.5 Turbo",
-                capabilities: ModelCapabilities(supportsImages: false, supportsStreaming: true, maxTokens: 4096)
+                capabilities: ModelCapabilities(supportsImages: false, supportsDocuments: false, supportsWebSearch: false, supportsToolCalling: false, supportsStreaming: true)
             ),
             LLMModel(
                 id: "gpt-4", 
@@ -156,7 +156,7 @@ class SmartMemorySystemIntegrationTests: XCTestCase {
                 contextLength: 8192,
                 pricing: ModelPricing(inputTokens: 30, outputTokens: 60, imageInputs: nil),
                 description: "GPT-4",
-                capabilities: ModelCapabilities(supportsImages: true, supportsStreaming: true, maxTokens: 8192)
+                capabilities: ModelCapabilities(supportsImages: true, supportsDocuments: true, supportsWebSearch: false, supportsToolCalling: true, supportsStreaming: true)
             ),
             LLMModel(
                 id: "claude-3-sonnet", 
@@ -165,7 +165,7 @@ class SmartMemorySystemIntegrationTests: XCTestCase {
                 contextLength: 200000,
                 pricing: ModelPricing(inputTokens: 3, outputTokens: 15, imageInputs: nil),
                 description: "Claude 3 Sonnet",
-                capabilities: ModelCapabilities(supportsImages: true, supportsStreaming: true, maxTokens: 200000)
+                capabilities: ModelCapabilities(supportsImages: true, supportsDocuments: true, supportsWebSearch: false, supportsToolCalling: true, supportsStreaming: true)
             )
         ]
         
@@ -181,18 +181,20 @@ class SmartMemorySystemIntegrationTests: XCTestCase {
         
         // Test token window management for each model
         for model in models {
-            let managedContext = await tokenWindowService.getContextForModel(
+            let tokenWindowResult = try await tokenWindowService.manageTokenWindow(
+                for: testConversationId,
                 model: model,
-                conversationId: testConversationId,
-                maxTokens: model.contextLength / 2
+                reserveTokens: 1000
             )
             
-            XCTAssertNotNil(managedContext)
-            XCTAssertFalse(managedContext.isEmpty)
+            XCTAssertNotNil(tokenWindowResult)
+            XCTAssertLessThanOrEqual(tokenWindowResult.finalTokens, model.contextLength - 1000)
             
-            // Test that context fits within token limits
-            let estimatedTokens = managedContext.count / 4 // Rough estimation
-            XCTAssertLessThanOrEqual(estimatedTokens, model.contextLength / 2)
+            // Test that optimization worked if needed
+            if tokenWindowResult.originalTokens > model.contextLength - 1000 {
+                XCTAssertTrue(tokenWindowResult.optimized)
+                XCTAssertLessThan(tokenWindowResult.finalTokens, tokenWindowResult.originalTokens)
+            }
         }
     }
     
@@ -215,8 +217,8 @@ class SmartMemorySystemIntegrationTests: XCTestCase {
         
         // Test relevance filtering
         let allMessages = await memoryService.getMemoryForConversation(testConversationId)
-        let filteredMessages = try await relevanceService.filterMessagesByRelevance(
-            messages: allMessages,
+        let filteredMessages = await relevanceService.filterMessagesByRelevance(
+            messages: allMessages.messages,
             conversationId: testConversationId,
             threshold: 0.5,
             maxMessages: 4
@@ -257,7 +259,7 @@ class SmartMemorySystemIntegrationTests: XCTestCase {
         
         // Test context generation performance
         let contextStart = CFAbsoluteTimeGetCurrent()
-        let context = await memoryService.getMemoryContext(for: testConversationId, maxTokens: 2000)
+        let context = await memoryService.getContextForAPICall(conversationId: testConversationId, maxTokens: 2000)
         let contextTime = CFAbsoluteTimeGetCurrent() - contextStart
         
         // Performance assertions
@@ -266,7 +268,7 @@ class SmartMemorySystemIntegrationTests: XCTestCase {
         XCTAssertLessThan(contextTime, 2.0, "Context generation should complete within 2 seconds")
         
         // Verify data integrity
-        XCTAssertEqual(memory.count, 100)
+        XCTAssertEqual(memory.messageCount, 100)
         XCTAssertFalse(context.isEmpty)
     }
     
@@ -287,12 +289,12 @@ class SmartMemorySystemIntegrationTests: XCTestCase {
         
         // Step 2: Test memory retrieval
         let memory = await memoryService.getMemoryForConversation(testConversationId)
-        XCTAssertEqual(memory.count, 4)
+        XCTAssertEqual(memory.messageCount, 4)
         
         // Step 3: Test context generation
-        let context = await memoryService.getMemoryContext(for: testConversationId, maxTokens: 1000)
+        let context = await memoryService.getContextForAPICall(conversationId: testConversationId, maxTokens: 1000)
         XCTAssertFalse(context.isEmpty)
-        XCTAssertTrue(context.contains("iOS"))
+        XCTAssertTrue(context.contains { $0.content.contains("iOS") })
         
         // Step 4: Add more messages to trigger compression
         for i in 5...25 {
@@ -315,9 +317,9 @@ class SmartMemorySystemIntegrationTests: XCTestCase {
         }
         
         // Step 6: Test final context generation
-        let finalContext = await memoryService.getMemoryContext(for: testConversationId, maxTokens: 1500)
+        let finalContext = await memoryService.getContextForAPICall(conversationId: testConversationId, maxTokens: 1500)
         XCTAssertFalse(finalContext.isEmpty)
-        XCTAssertTrue(finalContext.contains("iOS") || finalContext.contains("development"))
+        XCTAssertTrue(finalContext.contains { $0.content.contains("iOS") } || finalContext.contains { $0.content.contains("development") })
     }
     
     // MARK: - Helper Methods
@@ -330,7 +332,7 @@ class SmartMemorySystemIntegrationTests: XCTestCase {
             contextLength: 4096,
             pricing: ModelPricing(inputTokens: 1.5, outputTokens: 2.0, imageInputs: nil),
             description: "Test model for integration tests",
-            capabilities: ModelCapabilities(supportsImages: false, supportsStreaming: true, maxTokens: 4096)
+            capabilities: ModelCapabilities(supportsImages: false, supportsDocuments: false, supportsWebSearch: false, supportsToolCalling: false, supportsStreaming: true)
         )
     }
 }

@@ -254,7 +254,7 @@ class MockLLMAPIService: LLMAPIService {
                 contextLength: 4096,
                 pricing: ModelPricing(inputTokens: 1.5, outputTokens: 2.0, imageInputs: nil),
                 description: "Mock GPT-3.5 for testing",
-                capabilities: ModelCapabilities(supportsImages: false, supportsStreaming: true, maxTokens: 4096)
+                capabilities: ModelCapabilities(supportsImages: false, supportsDocuments: false, supportsWebSearch: false, supportsToolCalling: false, supportsStreaming: true)
             ),
             LLMModel(
                 id: "gpt-4",
@@ -263,7 +263,7 @@ class MockLLMAPIService: LLMAPIService {
                 contextLength: 8192,
                 pricing: ModelPricing(inputTokens: 30, outputTokens: 60, imageInputs: nil),
                 description: "Mock GPT-4 for testing",
-                capabilities: ModelCapabilities(supportsImages: true, supportsStreaming: true, maxTokens: 8192)
+                capabilities: ModelCapabilities(supportsImages: true, supportsDocuments: true, supportsWebSearch: false, supportsToolCalling: true, supportsStreaming: true)
             ),
             LLMModel(
                 id: "claude-3-sonnet",
@@ -272,7 +272,7 @@ class MockLLMAPIService: LLMAPIService {
                 contextLength: 200000,
                 pricing: ModelPricing(inputTokens: 3, outputTokens: 15, imageInputs: nil),
                 description: "Mock Claude 3 for testing",
-                capabilities: ModelCapabilities(supportsImages: true, supportsStreaming: true, maxTokens: 200000)
+                capabilities: ModelCapabilities(supportsImages: true, supportsDocuments: true, supportsWebSearch: false, supportsToolCalling: true, supportsStreaming: true)
             )
         ]
         

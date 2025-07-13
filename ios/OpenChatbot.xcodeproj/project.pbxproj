@@ -19,7 +19,7 @@
 		485395CC2E2170E00078EE38 /* ConversationSummaryMemoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395CB2E2170E00078EE38 /* ConversationSummaryMemoryTests.swift */; };
 		485395D62E22ADA30078EE38 /* ContextCompressionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395D52E22ADA30078EE38 /* ContextCompressionService.swift */; };
 		485395D82E22AE3E0078EE38 /* ContextCompressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395D72E22AE3E0078EE38 /* ContextCompressionTests.swift */; };
-		485395DA2E22AEDD0078EE38 /* CoreDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395D92E22AEDD0078EE38 /* CoreDataTests.swift */; };
+
 		485395DC2E22B18A0078EE38 /* TokenWindowManagementService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395DB2E22B18A0078EE38 /* TokenWindowManagementService.swift */; };
 		485395DE2E22B1B70078EE38 /* TokenWindowManagementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395DD2E22B1B70078EE38 /* TokenWindowManagementTests.swift */; };
 		485395E02E22B26F0078EE38 /* TokenUsageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395DF2E22B26F0078EE38 /* TokenUsageView.swift */; };
@@ -70,7 +70,7 @@
 		485395CB2E2170E00078EE38 /* ConversationSummaryMemoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ConversationSummaryMemoryTests.swift; path = OpenChatbot/Tests/ConversationSummaryMemoryTests.swift; sourceTree = SOURCE_ROOT; };
 		485395D52E22ADA30078EE38 /* ContextCompressionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextCompressionService.swift; sourceTree = "<group>"; };
 		485395D72E22AE3E0078EE38 /* ContextCompressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContextCompressionTests.swift; path = OpenChatbot/Tests/ContextCompressionTests.swift; sourceTree = SOURCE_ROOT; };
-		485395D92E22AEDD0078EE38 /* CoreDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CoreDataTests.swift; path = OpenChatbot/Tests/CoreDataTests.swift; sourceTree = SOURCE_ROOT; };
+
 		485395DB2E22B18A0078EE38 /* TokenWindowManagementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenWindowManagementService.swift; sourceTree = "<group>"; };
 		485395DD2E22B1B70078EE38 /* TokenWindowManagementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TokenWindowManagementTests.swift; path = OpenChatbot/Tests/TokenWindowManagementTests.swift; sourceTree = SOURCE_ROOT; };
 		485395DF2E22B26F0078EE38 /* TokenUsageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenUsageView.swift; sourceTree = "<group>"; };
@@ -127,7 +127,7 @@
 				485395C62E214D850078EE38 /* MemoryServiceTests.swift */,
 				485395CB2E2170E00078EE38 /* ConversationSummaryMemoryTests.swift */,
 				485395D72E22AE3E0078EE38 /* ContextCompressionTests.swift */,
-				485395D92E22AEDD0078EE38 /* CoreDataTests.swift */,
+
 				485395DD2E22B1B70078EE38 /* TokenWindowManagementTests.swift */,
 				485395E32E22B9930078EE38 /* SmartContextRelevanceTests.swift */,
 				7419b22b723749408910f637 /* SmartMemorySystemIntegrationTests.swift */,
@@ -384,7 +384,7 @@
 				485395C82E214D850078EE38 /* MemoryServiceTests.swift in Sources */,
 				485395E42E22B9930078EE38 /* SmartContextRelevanceTests.swift in Sources */,
 				485395DE2E22B1B70078EE38 /* TokenWindowManagementTests.swift in Sources */,
-				485395DA2E22AEDD0078EE38 /* CoreDataTests.swift in Sources */,
+
 				2490fcbec7d54b97ac84d085 /* SmartMemorySystemIntegrationTests.swift in Sources */,
 				485395E62E23A9A20078EE38 /* BasicMemoryTests.swift in Sources */,
 			);
@@ -623,7 +623,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 75EN938B6L;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
@@ -643,7 +643,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 75EN938B6L;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;

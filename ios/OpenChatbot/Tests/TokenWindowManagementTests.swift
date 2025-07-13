@@ -1,6 +1,7 @@
 import XCTest
 @testable import OpenChatbot
 
+@MainActor
 class TokenWindowManagementTests: XCTestCase {
     
     var tokenService: TokenWindowManagementService!
@@ -12,8 +13,16 @@ class TokenWindowManagementTests: XCTestCase {
         try await super.setUp()
         dataService = DataService()
         memoryService = MemoryService(dataService: dataService)
-        compressionService = ContextCompressionService(memoryService: memoryService)
-        tokenService = await TokenWindowManagementService(
+        
+        // Create mock API service and summary memory service
+        let mockAPIService = MockLLMAPIService()
+        let summaryMemoryService = ConversationSummaryMemoryService(apiService: mockAPIService)
+        
+        compressionService = ContextCompressionService(
+            memoryService: memoryService,
+            summaryMemoryService: summaryMemoryService
+        )
+        tokenService = TokenWindowManagementService(
             memoryService: memoryService,
             compressionService: compressionService
         )
