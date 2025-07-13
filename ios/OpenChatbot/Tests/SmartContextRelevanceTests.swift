@@ -1,6 +1,7 @@
 import XCTest
 @testable import OpenChatbot
 
+@MainActor
 class SmartContextRelevanceTests: XCTestCase {
     
     var relevanceService: SmartContextRelevanceService!
@@ -14,20 +15,20 @@ class SmartContextRelevanceTests: XCTestCase {
         
         // Setup mock services
         mockAPIService = MockLLMAPIService()
-        memoryService = MemoryService(apiService: mockAPIService)
+        memoryService = MemoryService(dataService: DataService(inMemory: true))
         
         // Create token window service
         let compressionService = ContextCompressionService(
             memoryService: memoryService,
             summaryMemoryService: ConversationSummaryMemoryService(apiService: mockAPIService)
         )
-        tokenWindowService = await TokenWindowManagementService(
+        tokenWindowService = TokenWindowManagementService(
             memoryService: memoryService,
             compressionService: compressionService
         )
         
         // Create relevance service
-        relevanceService = await SmartContextRelevanceService(
+        relevanceService = SmartContextRelevanceService(
             memoryService: memoryService,
             tokenWindowService: tokenWindowService
         )

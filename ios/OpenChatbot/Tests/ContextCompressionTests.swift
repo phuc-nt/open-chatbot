@@ -1,6 +1,7 @@
 import XCTest
 @testable import OpenChatbot
 
+@MainActor
 class ContextCompressionTests: XCTestCase {
     
     var contextCompressionService: ContextCompressionService!
@@ -8,12 +9,12 @@ class ContextCompressionTests: XCTestCase {
     var summaryMemoryService: ConversationSummaryMemoryService!
     var mockAPIService: MockLLMAPIService!
     
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         
         // Setup mock services
         mockAPIService = MockLLMAPIService()
-        memoryService = MemoryService(apiService: mockAPIService)
+        memoryService = MemoryService(dataService: DataService(inMemory: true))
         summaryMemoryService = ConversationSummaryMemoryService(apiService: mockAPIService)
         summaryMemoryService.setMemoryService(memoryService)
         
@@ -24,12 +25,12 @@ class ContextCompressionTests: XCTestCase {
         )
     }
     
-    override func tearDown() {
+    override func tearDown() async throws {
         contextCompressionService = nil
         memoryService = nil
         summaryMemoryService = nil
         mockAPIService = nil
-        super.tearDown()
+        try await super.tearDown()
     }
     
     // MARK: - Initialization Tests

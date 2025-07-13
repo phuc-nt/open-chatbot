@@ -1,14 +1,15 @@
 import XCTest
 @testable import OpenChatbot
 
+@MainActor
 class MemoryServiceTests: XCTestCase {
     
     var memoryService: MemoryService!
     var dataService: DataService!
     var testConversationId: UUID!
     
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         
         // Setup services for testing
         dataService = DataService(inMemory: true)
@@ -16,11 +17,11 @@ class MemoryServiceTests: XCTestCase {
         testConversationId = UUID()
     }
     
-    override func tearDown() {
+    override func tearDown() async throws {
         memoryService = nil
         dataService = nil
         testConversationId = nil
-        super.tearDown()
+        try await super.tearDown()
     }
     
     // MARK: - Basic Memory Service Tests

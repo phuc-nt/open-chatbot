@@ -1,31 +1,32 @@
 import XCTest
 @testable import OpenChatbot
 
+@MainActor
 class ConversationSummaryMemoryTests: XCTestCase {
     
     var summaryMemoryService: ConversationSummaryMemoryService!
     var mockAPIService: MockLLMAPIService!
     var memoryService: MemoryService!
     
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         
         // Setup mock API service
         mockAPIService = MockLLMAPIService()
         
-        // Create memory service with mock API
-        memoryService = MemoryService(apiService: mockAPIService)
+        // Create memory service with data service
+        memoryService = MemoryService(dataService: DataService(inMemory: true))
         
         // Create summary memory service
         summaryMemoryService = ConversationSummaryMemoryService(apiService: mockAPIService)
         summaryMemoryService.setMemoryService(memoryService)
     }
     
-    override func tearDown() {
+    override func tearDown() async throws {
         summaryMemoryService = nil
         mockAPIService = nil
         memoryService = nil
-        super.tearDown()
+        try await super.tearDown()
     }
     
     func testConversationSummaryMemoryInitialization() {
@@ -121,9 +122,9 @@ class MockLLMAPIService: LLMAPIService {
             LLMModel(
                 id: "gpt-3.5-turbo",
                 name: "GPT-3.5 Turbo",
-                provider: .openRouter,
+                provider: .openrouter,
                 contextLength: 16385,
-                pricing: ModelPricing(inputTokens: 0.0015, outputTokens: 0.002),
+                pricing: ModelPricing(inputTokens: 0.0015, outputTokens: 0.002, imageInputs: nil),
                 description: "Mock model for testing",
                 capabilities: .basic
             )
