@@ -1,4 +1,5 @@
 import XCTest
+import Combine
 @testable import OpenChatbot
 
 @MainActor
@@ -249,19 +250,24 @@ class ContextCompressionTests: XCTestCase {
         
         // Track progress during compression
         var progressValues: [Float] = []
+        let progressLock = NSLock()
         
         let expectation = XCTestExpectation(description: "Compression completes")
         
-        Task {
-            // Observe progress
-            for await progress in contextCompressionService.$compressionProgress.values {
+        // Use a cancellable to observe progress
+        let cancellable = contextCompressionService.$compressionProgress
+            .sink { progress in
+                progressLock.lock()
                 progressValues.append(progress)
+                progressLock.unlock()
+                
                 if progress >= 1.0 {
                     expectation.fulfill()
-                    break
                 }
             }
-        }
+        
+        // Give a moment for the observer to be set up
+        try await Task.sleep(nanoseconds: 10_000_000) // 10ms
         
         // Start compression
         _ = try await contextCompressionService.compressContextWithImportanceScoring(
@@ -270,10 +276,16 @@ class ContextCompressionTests: XCTestCase {
         )
         
         await fulfillment(of: [expectation], timeout: 5.0)
+        cancellable.cancel()
         
         // Should have tracked progress
-        XCTAssertGreaterThan(progressValues.count, 1)
-        XCTAssertEqual(progressValues.last, 1.0)
+        progressLock.lock()
+        let count = progressValues.count
+        let lastValue = progressValues.last
+        progressLock.unlock()
+        
+        XCTAssertGreaterThan(count, 1, "Should have multiple progress updates, got: \(progressValues)")
+        XCTAssertEqual(lastValue, 1.0)
     }
 }
 

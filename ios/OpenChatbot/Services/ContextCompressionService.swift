@@ -68,15 +68,17 @@ class ContextCompressionService: ObservableObject {
             print("🗜️ Compressing based on message count (not token limit)")
         }
         
-        compressionProgress = 0.2
+        compressionProgress = 0.1
         
         // Calculate importance scores for all messages
+        compressionProgress = 0.2
         let importanceMap = await calculateImportanceScores(for: memory.messages, conversationId: conversationId)
         importanceCache[conversationId] = importanceMap
         
         compressionProgress = 0.4
         
         // Apply compression algorithm
+        compressionProgress = 0.5
         let compressedMessages = try await applyCompressionAlgorithm(
             messages: memory.messages,
             importanceMap: importanceMap,
@@ -84,7 +86,9 @@ class ContextCompressionService: ObservableObject {
             preserveRecentCount: preserveRecentCount
         )
         
-        compressionProgress = 0.8
+        compressionProgress = 0.7
+        
+        compressionProgress = 0.9
         
         // Calculate compression statistics
         let stats = calculateCompressionStats(

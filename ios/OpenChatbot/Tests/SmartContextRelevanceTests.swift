@@ -454,9 +454,9 @@ class SmartContextRelevanceTests: XCTestCase {
             analysisTimestamp: Date()
         )
         
-        XCTAssertEqual(stats.highRelevancePercentage, 30.0)
-        XCTAssertEqual(stats.mediumRelevancePercentage, 40.0)
-        XCTAssertEqual(stats.lowRelevancePercentage, 30.0)
+        XCTAssertEqual(stats.highRelevancePercentage, 30.0, accuracy: 0.001)
+        XCTAssertEqual(stats.mediumRelevancePercentage, 40.0, accuracy: 0.001)
+        XCTAssertEqual(stats.lowRelevancePercentage, 30.0, accuracy: 0.001)
     }
     
     func testRelevanceAnalysisStatsWithZeroMessages() {

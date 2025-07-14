@@ -147,7 +147,11 @@ class SmartContextRelevanceService: ObservableObject {
     ) -> [Message] {
         
         guard let relevanceMap = relevanceCache[conversationId] else {
-            return messages // Return all if no relevance data
+            // Return all messages but respect maxMessages limit
+            if let maxMessages = maxMessages {
+                return Array(messages.prefix(maxMessages))
+            }
+            return messages
         }
         
         // Filter by relevance score
