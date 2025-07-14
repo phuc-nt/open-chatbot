@@ -92,3 +92,6 @@ docs/build/
 **/APIKeys.plist
 **/secrets.plist
 **/*-secrets.json 
+
+# Ignore VSCode settings
+.vscode/ 
