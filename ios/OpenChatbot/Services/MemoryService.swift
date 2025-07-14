@@ -121,6 +121,18 @@ class MemoryService: ObservableObject {
     
     /// Add new message to memory - similar to LangChain memory.addMessage()
     func addMessageToMemory(_ message: Message, conversationId: UUID) async {
+        // First, ensure the conversation exists in persistence
+        let conversations = dataService.getAllConversations()
+        let conversation = conversations.first(where: { $0.id == conversationId }) ?? {
+            // Create new conversation if it doesn't exist
+            let newConversation = dataService.createConversation(title: "New Conversation")
+            return newConversation
+        }()
+        
+        // Save the message to persistence first
+        dataService.addMessage(message, to: conversation)
+        
+        // Then add to memory cache
         guard let memory = memoryCache[conversationId] else {
             // If no memory exists, create new one
             let newMemory = ConversationMemory(conversationId: conversationId, messages: [message])
@@ -130,10 +142,7 @@ class MemoryService: ObservableObject {
         
         memory.addMessage(message)
         
-        // Save to persistent storage
-        await saveMemoryToStorage(memory)
-        
-        print("🧠 Added message to memory: \(message.role.rawValue)")
+        print("🧠 Added message to memory and persistence: \(message.role.rawValue)")
     }
     
     /// Get context for API call - equivalent to memory.chatMemory.messages

@@ -7,45 +7,11 @@ extension ConversationEntity {
     
     // MARK: - Memory Persistence Properties
     
-    /// Memory data stored as serialized JSON
-    var memoryData: Data? {
-        get {
-            return value(forKey: "memoryData") as? Data
-        }
-        set {
-            setValue(newValue, forKey: "memoryData")
-        }
-    }
-    
-    /// Last time memory was updated
-    var memoryLastUpdated: Date? {
-        get {
-            return value(forKey: "memoryLastUpdated") as? Date
-        }
-        set {
-            setValue(newValue, forKey: "memoryLastUpdated")
-        }
-    }
-    
-    /// Number of messages in memory
-    var memoryMessageCount: Int {
-        get {
-            return value(forKey: "memoryMessageCount") as? Int ?? 0
-        }
-        set {
-            setValue(newValue, forKey: "memoryMessageCount")
-        }
-    }
-    
-    /// Estimated token count in memory
-    var memoryTokenCount: Int {
-        get {
-            return value(forKey: "memoryTokenCount") as? Int ?? 0
-        }
-        set {
-            setValue(newValue, forKey: "memoryTokenCount")
-        }
-    }
+    // Note: These properties are now defined in Core Data model
+    // memoryData: Data? - Memory data stored as serialized JSON
+    // memoryLastUpdated: Date? - Last time memory was updated  
+    // memoryMessageCount: Int32 - Number of messages in memory
+    // memoryTokenCount: Int32 - Estimated token count in memory
     
     // MARK: - Memory Helper Methods
     
@@ -54,21 +20,10 @@ extension ConversationEntity {
         return memoryData != nil && memoryMessageCount > 0
     }
     
-    /// Get memory age in seconds
-    var memoryAge: TimeInterval {
+    /// Get memory age in hours
+    var memoryAgeInHours: Double {
         guard let lastUpdated = memoryLastUpdated else { return 0 }
-        return Date().timeIntervalSince(lastUpdated)
-    }
-    
-    /// Check if memory is fresh (less than 1 hour old)
-    var isMemoryFresh: Bool {
-        return memoryAge < 3600 // 1 hour
-    }
-    
-    /// Get memory efficiency score (messages per token)
-    var memoryEfficiency: Double {
-        guard memoryTokenCount > 0 else { return 0 }
-        return Double(memoryMessageCount) / Double(memoryTokenCount)
+        return Date().timeIntervalSince(lastUpdated) / 3600.0
     }
     
     /// Clear all memory data
@@ -79,22 +34,24 @@ extension ConversationEntity {
         memoryTokenCount = 0
     }
     
-    /// Update memory metadata
-    func updateMemoryMetadata(messageCount: Int, tokenCount: Int) {
-        memoryMessageCount = messageCount
-        memoryTokenCount = tokenCount
+    /// Update memory statistics
+    func updateMemoryStats(messageCount: Int, tokenCount: Int) {
+        memoryMessageCount = Int32(messageCount)
+        memoryTokenCount = Int32(tokenCount)
         memoryLastUpdated = Date()
     }
     
-    /// Get memory summary for debugging
-    var memorySummary: String {
-        guard hasMemoryData else { return "No memory data" }
-        
-        let ageString = memoryAge < 60 ? "\(Int(memoryAge))s" : 
-                       memoryAge < 3600 ? "\(Int(memoryAge/60))m" : 
-                       "\(Int(memoryAge/3600))h"
-        
-        return "\(memoryMessageCount) messages, \(memoryTokenCount) tokens, \(ageString) old"
+    /// Initialize memory fields if needed (for migration)
+    func initializeMemoryFieldsIfNeeded() {
+        // This method ensures memory fields are properly initialized
+        // Useful for existing conversations that don't have memory data
+        if memoryData == nil {
+            memoryData = nil
+        }
+        if memoryLastUpdated == nil {
+            memoryLastUpdated = nil
+        }
+        // memoryMessageCount and memoryTokenCount have default values in Core Data model
     }
 }
 
@@ -154,13 +111,22 @@ struct ConversationMemoryStats {
     init(from conversation: ConversationEntity) {
         self.conversationId = conversation.id ?? UUID()
         self.hasMemory = conversation.hasMemoryData
-        self.messageCount = conversation.memoryMessageCount
-        self.tokenCount = conversation.memoryTokenCount
+        self.messageCount = Int(conversation.memoryMessageCount)
+        self.tokenCount = Int(conversation.memoryTokenCount)
         self.lastUpdated = conversation.memoryLastUpdated
-        self.memoryAge = conversation.memoryAge
-        self.isMemoryFresh = conversation.isMemoryFresh
-        self.efficiency = conversation.memoryEfficiency
-        self.summary = conversation.memorySummary
+        self.memoryAge = conversation.memoryAgeInHours * 3600 // Convert hours to seconds
+        self.isMemoryFresh = conversation.memoryAgeInHours < 1 // Less than 1 hour old
+        self.efficiency = tokenCount > 0 ? Double(messageCount) / Double(tokenCount) : 0
+        
+        // Generate summary
+        if hasMemory {
+            let ageString = memoryAge < 60 ? "\(Int(memoryAge))s" : 
+                           memoryAge < 3600 ? "\(Int(memoryAge/60))m" : 
+                           "\(Int(memoryAge/3600))h"
+            self.summary = "\(messageCount) messages, \(tokenCount) tokens, \(ageString) old"
+        } else {
+            self.summary = "No memory data"
+        }
     }
 }
 
@@ -190,8 +156,8 @@ extension ConversationEntity {
         request.predicate = NSPredicate(format: "memoryMessageCount > 0")
         
         let conversations = try context.fetch(request)
-        let totalMessages = conversations.reduce(0) { $0 + $1.memoryMessageCount }
-        let totalTokens = conversations.reduce(0) { $0 + $1.memoryTokenCount }
+        let totalMessages = conversations.reduce(0) { $0 + Int($1.memoryMessageCount) }
+        let totalTokens = conversations.reduce(0) { $0 + Int($1.memoryTokenCount) }
         
         return (conversations.count, totalMessages, totalTokens)
     }

@@ -10,6 +10,10 @@
     <entity name="Conversation" representedClassName="ConversationEntity" syncable="YES" codeGenerationType="class">
         <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="memoryData" optional="YES" attributeType="Binary"/>
+        <attribute name="memoryLastUpdated" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="memoryMessageCount" optional="YES" attributeType="Integer 32" defaultValue="0" usesScalarValueType="YES"/>
+        <attribute name="memoryTokenCount" optional="YES" attributeType="Integer 32" defaultValue="0" usesScalarValueType="YES"/>
         <attribute name="selectedModelID" optional="YES" attributeType="String"/>
         <attribute name="title" optional="YES" attributeType="String"/>
         <attribute name="updatedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
