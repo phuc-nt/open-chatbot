@@ -120,17 +120,34 @@ class BasicMemoryTests: XCTestCase {
             conversationId: testConversationId
         )
         
+        print("🧪 TEST: Adding message to memory...")
         await memoryService.addMessageToMemory(message, conversationId: testConversationId)
         
         // Verify message is in memory
+        print("🧪 TEST: Getting memory before clear...")
         let memoryBefore = await memoryService.getMemoryForConversation(testConversationId)
+        print("🧪 TEST: Memory before clear: \(memoryBefore.messageCount) messages")
         XCTAssertEqual(memoryBefore.messageCount, 1)
         
+        // Check if message is actually in persistence
+        print("🧪 TEST: Checking persistence directly...")
+        let conversations = dataService.getAllConversations()
+        print("🧪 TEST: Found \(conversations.count) conversations in persistence")
+        if let conversation = conversations.first(where: { $0.id == testConversationId }) {
+            let persistedMessages = dataService.getMessagesForConversation(conversation)
+            print("🧪 TEST: Found \(persistedMessages.count) messages in persistence")
+        } else {
+            print("🧪 TEST: No conversation found in persistence!")
+        }
+        
         // Clear memory cache
+        print("🧪 TEST: Clearing memory cache...")
         memoryService.clearMemory(for: testConversationId)
         
         // Verify memory is cleared from cache but can be reloaded from persistence
+        print("🧪 TEST: Getting memory after clear (should reload from persistence)...")
         let memoryAfter = await memoryService.getMemoryForConversation(testConversationId)
+        print("🧪 TEST: Memory after clear: \(memoryAfter.messageCount) messages")
         XCTAssertEqual(memoryAfter.messageCount, 1) // Should reload from persistence
     }
     

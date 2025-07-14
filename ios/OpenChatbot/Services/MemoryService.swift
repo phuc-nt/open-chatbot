@@ -126,6 +126,8 @@ class MemoryService: ObservableObject {
         let conversation = conversations.first(where: { $0.id == conversationId }) ?? {
             // Create new conversation if it doesn't exist
             let newConversation = dataService.createConversation(title: "New Conversation")
+            // Update the conversation ID to match the requested conversationId
+            newConversation.id = conversationId
             return newConversation
         }()
         
