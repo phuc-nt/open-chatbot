@@ -62,8 +62,9 @@
 - **Architecture**: Async processing pipeline ready
 - **Testing**: DocumentTypesTests với 14 comprehensive test cases
 
-#### DOC-002: Multilingual Embedding Strategy ✅ COMPLETED (20h)
-**Status**: ✅ IMPLEMENTED + MANUAL VERIFICATION | **Completion**: 2025-07-15
+#### DOC-002: Multilingual Embedding Strategy ⚠️ IMPLEMENTATION COMPLETE - TESTING FAILED (20h)
+**Status**: ⚠️ CODE COMPLETE + TESTING BLOCKED | **Completion**: Implementation 2025-07-15, Testing FAILED
+**CRITICAL ISSUE**: EmbeddingServiceTests không chạy được, chưa validate functionality nào
 **Priority**: P0 (Critical)
 **Dependencies**: DOC-001
 **Tasks**:
