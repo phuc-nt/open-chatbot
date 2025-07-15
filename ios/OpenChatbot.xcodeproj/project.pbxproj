@@ -19,13 +19,21 @@
 		485395CC2E2170E00078EE38 /* ConversationSummaryMemoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395CB2E2170E00078EE38 /* ConversationSummaryMemoryTests.swift */; };
 		485395D62E22ADA30078EE38 /* ContextCompressionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395D52E22ADA30078EE38 /* ContextCompressionService.swift */; };
 		485395D82E22AE3E0078EE38 /* ContextCompressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395D72E22AE3E0078EE38 /* ContextCompressionTests.swift */; };
-
 		485395DC2E22B18A0078EE38 /* TokenWindowManagementService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395DB2E22B18A0078EE38 /* TokenWindowManagementService.swift */; };
 		485395DE2E22B1B70078EE38 /* TokenWindowManagementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395DD2E22B1B70078EE38 /* TokenWindowManagementTests.swift */; };
 		485395E02E22B26F0078EE38 /* TokenUsageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395DF2E22B26F0078EE38 /* TokenUsageView.swift */; };
 		485395E22E22B9710078EE38 /* SmartContextRelevanceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395E12E22B9710078EE38 /* SmartContextRelevanceService.swift */; };
 		485395E42E22B9930078EE38 /* SmartContextRelevanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395E32E22B9930078EE38 /* SmartContextRelevanceTests.swift */; };
 		485395E62E23A9A20078EE38 /* BasicMemoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395E52E23A9A20078EE38 /* BasicMemoryTests.swift */; };
+		48E0DC912E2694A30033A0D8 /* DocumentEmbedding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DC8E2E2694A30033A0D8 /* DocumentEmbedding.swift */; };
+		48E0DC922E2694A30033A0D8 /* DocumentTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DC902E2694A30033A0D8 /* DocumentTypes.swift */; };
+		48E0DC932E2694A30033A0D8 /* DocumentModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DC8F2E2694A30033A0D8 /* DocumentModel.swift */; };
+		48E0DC952E2694E40033A0D8 /* DocumentProcessingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DC942E2694E40033A0D8 /* DocumentProcessingService.swift */; };
+		48E0DC9A2E26952C0033A0D8 /* DocumentUploadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DC962E26952C0033A0D8 /* DocumentUploadView.swift */; };
+		48E0DC9D2E2695430033A0D8 /* DocumentUploadViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DC9C2E2695430033A0D8 /* DocumentUploadViewModel.swift */; };
+		48E0DCA02E269A860033A0D8 /* DocumentUploadViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DC9F2E269A860033A0D8 /* DocumentUploadViewModelTests.swift */; };
+		48E0DCA12E269A860033A0D8 /* DocumentProcessingServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DC9E2E269A860033A0D8 /* DocumentProcessingServiceTests.swift */; };
+		48E0DCA32E269B0D0033A0D8 /* DocumentTypesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DCA22E269B0D0033A0D8 /* DocumentTypesTests.swift */; };
 		A10001001D000000001D0000 /* OpenChatbotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001011D000000001D0000 /* OpenChatbotApp.swift */; };
 		A10001021D000000001D0000 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001031D000000001D0000 /* ContentView.swift */; };
 		A10001041D000000001D0000 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001051D000000001D0000 /* ChatView.swift */; };
@@ -70,13 +78,21 @@
 		485395CB2E2170E00078EE38 /* ConversationSummaryMemoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ConversationSummaryMemoryTests.swift; path = OpenChatbot/Tests/ConversationSummaryMemoryTests.swift; sourceTree = SOURCE_ROOT; };
 		485395D52E22ADA30078EE38 /* ContextCompressionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextCompressionService.swift; sourceTree = "<group>"; };
 		485395D72E22AE3E0078EE38 /* ContextCompressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContextCompressionTests.swift; path = OpenChatbot/Tests/ContextCompressionTests.swift; sourceTree = SOURCE_ROOT; };
-
 		485395DB2E22B18A0078EE38 /* TokenWindowManagementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenWindowManagementService.swift; sourceTree = "<group>"; };
 		485395DD2E22B1B70078EE38 /* TokenWindowManagementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TokenWindowManagementTests.swift; path = OpenChatbot/Tests/TokenWindowManagementTests.swift; sourceTree = SOURCE_ROOT; };
 		485395DF2E22B26F0078EE38 /* TokenUsageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenUsageView.swift; sourceTree = "<group>"; };
 		485395E12E22B9710078EE38 /* SmartContextRelevanceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartContextRelevanceService.swift; sourceTree = "<group>"; };
 		485395E32E22B9930078EE38 /* SmartContextRelevanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SmartContextRelevanceTests.swift; path = OpenChatbot/Tests/SmartContextRelevanceTests.swift; sourceTree = SOURCE_ROOT; };
 		485395E52E23A9A20078EE38 /* BasicMemoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BasicMemoryTests.swift; path = OpenChatbot/Tests/BasicMemoryTests.swift; sourceTree = SOURCE_ROOT; };
+		48E0DC8E2E2694A30033A0D8 /* DocumentEmbedding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentEmbedding.swift; sourceTree = "<group>"; };
+		48E0DC8F2E2694A30033A0D8 /* DocumentModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentModel.swift; sourceTree = "<group>"; };
+		48E0DC902E2694A30033A0D8 /* DocumentTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentTypes.swift; sourceTree = "<group>"; };
+		48E0DC942E2694E40033A0D8 /* DocumentProcessingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentProcessingService.swift; sourceTree = "<group>"; };
+		48E0DC962E26952C0033A0D8 /* DocumentUploadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentUploadView.swift; sourceTree = "<group>"; };
+		48E0DC9C2E2695430033A0D8 /* DocumentUploadViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentUploadViewModel.swift; sourceTree = "<group>"; };
+		48E0DC9E2E269A860033A0D8 /* DocumentProcessingServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DocumentProcessingServiceTests.swift; path = OpenChatbot/Tests/DocumentProcessingServiceTests.swift; sourceTree = SOURCE_ROOT; };
+		48E0DC9F2E269A860033A0D8 /* DocumentUploadViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DocumentUploadViewModelTests.swift; path = OpenChatbot/Tests/DocumentUploadViewModelTests.swift; sourceTree = SOURCE_ROOT; };
+		48E0DCA22E269B0D0033A0D8 /* DocumentTypesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DocumentTypesTests.swift; path = OpenChatbot/Tests/DocumentTypesTests.swift; sourceTree = SOURCE_ROOT; };
 		7419b22b723749408910f637 /* SmartMemorySystemIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SmartMemorySystemIntegrationTests.swift; path = OpenChatbot/Tests/SmartMemorySystemIntegrationTests.swift; sourceTree = SOURCE_ROOT; };
 		A10001011D000000001D0000 /* OpenChatbotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenChatbotApp.swift; sourceTree = "<group>"; };
 		A10001031D000000001D0000 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -121,17 +137,27 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		48E0DC972E26952C0033A0D8 /* Documents */ = {
+			isa = PBXGroup;
+			children = (
+				48E0DC962E26952C0033A0D8 /* DocumentUploadView.swift */,
+			);
+			path = Documents;
+			sourceTree = "<group>";
+		};
 		A1000162D000000001D0000 /* OpenChatbotTests */ = {
 			isa = PBXGroup;
 			children = (
 				485395C62E214D850078EE38 /* MemoryServiceTests.swift */,
 				485395CB2E2170E00078EE38 /* ConversationSummaryMemoryTests.swift */,
 				485395D72E22AE3E0078EE38 /* ContextCompressionTests.swift */,
-
 				485395DD2E22B1B70078EE38 /* TokenWindowManagementTests.swift */,
 				485395E32E22B9930078EE38 /* SmartContextRelevanceTests.swift */,
 				7419b22b723749408910f637 /* SmartMemorySystemIntegrationTests.swift */,
 				485395E52E23A9A20078EE38 /* BasicMemoryTests.swift */,
+				48E0DC9E2E269A860033A0D8 /* DocumentProcessingServiceTests.swift */,
+				48E0DC9F2E269A860033A0D8 /* DocumentUploadViewModelTests.swift */,
+				48E0DCA22E269B0D0033A0D8 /* DocumentTypesTests.swift */,
 			);
 			path = OpenChatbotTests;
 			sourceTree = "<group>";
@@ -183,6 +209,7 @@
 				A1000213D000000001D0000 /* Chat */,
 				A1000214D000000001D0000 /* Settings */,
 				A1000215D000000001D0000 /* Common */,
+				48E0DC972E26952C0033A0D8 /* Documents */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -193,6 +220,7 @@
 				A1000121D000000001D0000 /* ChatViewModel.swift */,
 				A1000123D000000001D0000 /* HistoryViewModel.swift */,
 				A1000125D000000001D0000 /* SettingsViewModel.swift */,
+				48E0DC9C2E2695430033A0D8 /* DocumentUploadViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -206,6 +234,9 @@
 				A1000119D000000001D0000 /* CoreDataExtensions.swift */,
 				A100011BD000000001D0000 /* LLMModel.swift */,
 				485395C32E214D5C0078EE38 /* ConversationMemoryExtensions.swift */,
+				48E0DC8E2E2694A30033A0D8 /* DocumentEmbedding.swift */,
+				48E0DC8F2E2694A30033A0D8 /* DocumentModel.swift */,
+				48E0DC902E2694A30033A0D8 /* DocumentTypes.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -226,6 +257,7 @@
 				485395D52E22ADA30078EE38 /* ContextCompressionService.swift */,
 				485395DB2E22B18A0078EE38 /* TokenWindowManagementService.swift */,
 				485395E12E22B9710078EE38 /* SmartContextRelevanceService.swift */,
+				48E0DC942E2694E40033A0D8 /* DocumentProcessingService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -381,12 +413,14 @@
 			files = (
 				485395CC2E2170E00078EE38 /* ConversationSummaryMemoryTests.swift in Sources */,
 				485395D82E22AE3E0078EE38 /* ContextCompressionTests.swift in Sources */,
+				48E0DCA32E269B0D0033A0D8 /* DocumentTypesTests.swift in Sources */,
 				485395C82E214D850078EE38 /* MemoryServiceTests.swift in Sources */,
 				485395E42E22B9930078EE38 /* SmartContextRelevanceTests.swift in Sources */,
 				485395DE2E22B1B70078EE38 /* TokenWindowManagementTests.swift in Sources */,
-
 				2490fcbec7d54b97ac84d085 /* SmartMemorySystemIntegrationTests.swift in Sources */,
 				485395E62E23A9A20078EE38 /* BasicMemoryTests.swift in Sources */,
+				48E0DCA02E269A860033A0D8 /* DocumentUploadViewModelTests.swift in Sources */,
+				48E0DCA12E269A860033A0D8 /* DocumentProcessingServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -396,7 +430,9 @@
 			files = (
 				A10001001D000000001D0000 /* OpenChatbotApp.swift in Sources */,
 				A10001021D000000001D0000 /* ContentView.swift in Sources */,
+				48E0DC9D2E2695430033A0D8 /* DocumentUploadViewModel.swift in Sources */,
 				A10001041D000000001D0000 /* ChatView.swift in Sources */,
+				48E0DC9A2E26952C0033A0D8 /* DocumentUploadView.swift in Sources */,
 				A10001061D000000001D0000 /* HistoryView.swift in Sources */,
 				485395DC2E22B18A0078EE38 /* TokenWindowManagementService.swift in Sources */,
 				A10001081D000000001D0000 /* SettingsView.swift in Sources */,
@@ -406,10 +442,14 @@
 				A1000112D000000001D0000 /* Message.swift in Sources */,
 				A1000114D000000001D0000 /* Conversation.swift in Sources */,
 				A1000116D000000001D0000 /* APIKey.swift in Sources */,
+				48E0DC952E2694E40033A0D8 /* DocumentProcessingService.swift in Sources */,
 				A1000118D000000001D0000 /* CoreDataExtensions.swift in Sources */,
 				485395C42E214D5C0078EE38 /* ConversationMemoryExtensions.swift in Sources */,
 				A100011AD000000001D0000 /* LLMModel.swift in Sources */,
 				A100011CD000000001D0000 /* KeychainService.swift in Sources */,
+				48E0DC912E2694A30033A0D8 /* DocumentEmbedding.swift in Sources */,
+				48E0DC922E2694A30033A0D8 /* DocumentTypes.swift in Sources */,
+				48E0DC932E2694A30033A0D8 /* DocumentModel.swift in Sources */,
 				485395D62E22ADA30078EE38 /* ContextCompressionService.swift in Sources */,
 				485395BA2E2140B40078EE38 /* MemoryService.swift in Sources */,
 				A100011ED000000001D0000 /* LLMAPIService.swift in Sources */,

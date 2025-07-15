@@ -157,6 +157,8 @@ xcodebuild test -project OpenChatbot.xcodeproj \
 #### **Format Requirements**
 **Template**: `<type>: <concise description>`
 
+**🚨 CRITICAL**: **NO EMOJIS** in commit messages - professional standards only
+
 **Types**:
 - `feat`: New feature implementation
 - `fix`: Bug fixes and issue resolution
@@ -175,11 +177,12 @@ test: add comprehensive integration tests for memory system
 docs: update sprint 3 plan with completion status and metrics
 refactor: consolidate memory service interfaces for better maintainability
 
-# Bad commit messages (avoid these)
-fix: bug fix 🐛
-update: stuff
-test: tests
-docs: 📝 update docs
+# Bad commit messages (avoid these - emojis, vague descriptions)
+fix: bug fix 🐛 ❌ EMOJI VIOLATION
+update: stuff ❌ TOO VAGUE  
+test: tests ❌ NO CONTEXT
+docs: 📝 update docs ❌ EMOJI + VAGUE
+feat: 📋 DOC-001 Sprint Progress ❌ EMOJI IN PROFESSIONAL CONTEXT
 ```
 
 #### **Commit Content Requirements**
