@@ -1,11 +1,13 @@
 # Task Management Guide
 
 ## 🎯 **Mục Đích**
-Quy trình làm việc chuẩn cho **mỗi task** từ planning đến completion, đảm bảo:
+Quy trình làm việc chuẩn cho **HOW to work** từ planning đến completion, đảm bảo:
 - **Code quality**: Consistent và maintainable
 - **Documentation**: Always up-to-date
 - **Progress tracking**: Transparent và accurate
 - **Knowledge sharing**: Lessons learned được capture
+
+> 🔗 **Content Integration**: This guide focuses on **workflow processes**. For **content maintenance strategy** (WHAT to document), see [Documentation Maintenance Guide](documentation_maintenance_guide.md)
 
 ## 🔄 **Task Lifecycle Overview**
 
@@ -77,8 +79,14 @@ Quy trình làm việc chuẩn cho **mỗi task** từ planning đến completio
 
 ### **2. Progress Tracking**
 #### **Daily Updates**
-> 📖 **Documentation process**: [Documentation Maintenance Guide](documentation_maintenance_guide.md#daily-after-each-development-session)
-> 📖 **Working checklists**: [Checklist System Guide](checklist_system_guide.md) - How to create và use task-specific checklists
+**Daily Documentation Requirements** (Quick checklist):
+- Update `current_status.md` with progress
+- Update sprint plan with task status  
+- Document significant decisions made
+- Record blockers encountered
+
+> 📖 **Detailed content strategy**: [Documentation Maintenance Guide](documentation_maintenance_guide.md#daily-after-each-development-session)  
+> 📖 **Checklist templates**: [Checklist System Guide](checklist_system_guide.md#working-checklist-templates)
 
 - [ ] **Update** `docs/00_context/current_status.md` với progress
 - [ ] **Log** significant decisions made
@@ -107,159 +115,257 @@ Quy trình làm việc chuẩn cho **mỗi task** từ planning đến completio
 
 ---
 
-## ✅ **AFTER Task - Review & Completion**
+## ✅ **AFTER Task - Review & Update**
 
-### **1. Code Review & Integration**
-#### **Pre-Merge Checklist**
-- [ ] **Review** all code changes
-- [ ] **Ensure** all tests pass
-- [ ] **Verify** no breaking changes
-- [ ] **Check** performance impact
+### **1. Sprint Completion Requirements (New - Based on Sprint 3 Experience)**
 
-#### **Documentation Validation**
-> 📖 **Documentation review process**: [Documentation Maintenance Guide](documentation_maintenance_guide.md#weekly-end-of-sprint)
+#### **Test Suite Validation (MANDATORY)**
+- [ ] **Run complete test suite** on real device using verified commands
+- [ ] **Achieve 100% test pass rate** - no exceptions allowed
+- [ ] **Document test results** with exact pass/fail counts
+- [ ] **Fix all failing tests** before sprint can be marked complete
+- [ ] **Update test suite** if new features added during sprint
 
-- [ ] **Verify** all documentation updated
-- [ ] **Check** links work correctly
-- [ ] **Ensure** consistent formatting
-- [ ] **Validate** information accuracy
+**Verified Test Commands (iOS)**:
+```bash
+# 1. Clean build cache first
+cd ios
+xcodebuild clean -project OpenChatbot.xcodeproj -scheme OpenChatbot
 
-### **2. Knowledge Capture**
-#### **Lessons Learned**
-- [ ] **Document** key insights gained
-- [ ] **Record** problems encountered và solutions
-- [ ] **Note** better approaches for future
-- [ ] **Update** best practices if applicable
+# 2. Run complete test suite on simulator
+xcodebuild test -project OpenChatbot.xcodeproj \
+    -scheme OpenChatbot \
+    -destination 'platform=iOS Simulator,name=iPhone 16' \
+    | tee test_results.log
 
-#### **Architecture Updates**
-- [ ] **Document** any architectural decisions made
-- [ ] **Update** architecture diagrams nếu cần
-- [ ] **Record** rationale for technical choices
-- [ ] **Note** future considerations
-
-### **3. Acceptance Testing**
-#### **Mục đích**
-- [ ] **Verify** that completed features meet all specified requirements from the sprint plan.
-- [ ] **Ensure** the end-user experience is correct, intuitive, and bug-free.
-- [ ] **Confirm** the application is stable and production-ready before merging or deploying.
-
-#### **Quy trình**
-- [ ] **Yêu cầu AI tạo Test Cases**: Sau khi các task chính của sprint hoàn thành, developer yêu cầu AI tạo test cases.
-  > **Prompt mẫu**: "Hãy tạo các acceptance test cases cho Sprint 2."
-- [ ] **Lưu trữ Test Cases**: AI sẽ tạo một file Markdown mới (ví dụ: `docs/03_implementation/sprint_02_acceptance_tests.md`) chứa bảng test case chi tiết.
-- [ ] **Thực hiện Test**: Developer thực hiện các test case theo file đã tạo trên simulator hoặc thiết bị thật.
-- [ ] **Báo cáo & Sửa lỗi**:
-  - Nếu một test case **Fail**, developer báo cáo ID của test case đó cho AI.
-  - AI tiến hành phân tích, debug và sửa lỗi.
-  - Quá trình lặp lại cho đến khi tất cả các test case trong file đều **Pass**.
-
-### **4. Project Updates**
-#### **Progress Documentation**
-- [ ] **Update** feature status trong Feature Backlog v2.0
-- [ ] **Mark** task as completed trong `sprint_xx_plan.md`
-- [ ] **Update** `current_status.md` nếu có phase milestone hoặc major achievement
-- [ ] **Note** any scope changes affects roadmap phases
-
-#### **Communication**
-- [ ] **Share** significant learnings với team
-- [ ] **Update** stakeholders on progress
-- [ ] **Document** any changes to timeline
-- [ ] **Prepare** demo materials nếu cần
-
----
-
-## 🔧 **Task-Specific Workflows**
-
-### **LangChain/AI Agent Feature Tasks**
-#### **Additional Steps**
-- [ ] **Document** LangChain/LangGraph integration approach
-- [ ] **Update** technical guide với new patterns
-- [ ] **Plan** progressive feature rollout for AI capabilities
-- [ ] **Consider** feature compatibility với existing chat foundation
-
-### **Bug Fix Tasks**
-#### **Additional Steps**
-- [ ] **Document** root cause analysis
-- [ ] **Update** troubleshooting guides
-- [ ] **Add** regression tests
-- [ ] **Verify** fix doesn't introduce new issues
-
-### **Refactoring Tasks**
-#### **Additional Steps**
-- [ ] **Document** refactoring rationale
-- [ ] **Ensure** backward compatibility
-- [ ] **Update** related documentation
-- [ ] **Verify** no functionality changes
-
----
-
-## 📊 **Task Tracking Templates**
-
-### **Task Planning Template**
-```markdown
-## Task: [Task Name]
-**Type**: Feature/Bug/Refactor/Documentation
-**Priority**: P0/P1/P2
-**Estimate**: Small/Medium/Large
-**Sprint**: [Sprint Number]
-
-### Objective
-[Clear description of what needs to be accomplished]
-
-### Success Criteria
-- [ ] Criterion 1
-- [ ] Criterion 2
-- [ ] Criterion 3
-
-### Technical Approach
-[High-level approach to solving the task]
-
-### Dependencies
-- [List any blocking dependencies]
-
-### Risks/Concerns
-- [Any potential issues or unknowns]
+# 3. For real device testing (when device connected)
+# First get device ID: xcrun devicectl list devices
+xcodebuild test -project OpenChatbot.xcodeproj \
+    -scheme OpenChatbot \
+    -destination 'id=<DEVICE_ID>' \
+    | tee device_test_results.log
 ```
 
-### **Daily Progress Template**
+#### **Sprint Documentation Updates**
+- [ ] **Update sprint plan** with completion status and final metrics
+- [ ] **Update current status** to reflect sprint completion and next phase
+- [ ] **Update roadmap** to mark phase complete with actual achievements
+- [ ] **Create sprint retrospective** document capturing lessons learned
+
+### **2. Commit Message Standards (Updated)**
+
+#### **Format Requirements**
+**Template**: `<type>: <concise description>`
+
+**Types**:
+- `feat`: New feature implementation
+- `fix`: Bug fixes and issue resolution
+- `test`: Test suite updates and fixes
+- `docs`: Documentation updates
+- `refactor`: Code restructuring without behavior change
+- `style`: Code formatting and style improvements
+- `build`: Build system and dependency updates
+
+**Examples**:
+```bash
+# Good commit messages (concise, informative, no emoji)
+feat: implement ConversationSummaryMemory with AI-powered compression
+fix: resolve token window management overflow in GPT-4 contexts
+test: add comprehensive integration tests for memory system
+docs: update sprint 3 plan with completion status and metrics
+refactor: consolidate memory service interfaces for better maintainability
+
+# Bad commit messages (avoid these)
+fix: bug fix 🐛
+update: stuff
+test: tests
+docs: 📝 update docs
+```
+
+#### **Commit Content Requirements**
+- [ ] **Include context** - what was changed and why
+- [ ] **Be specific** - mention components/files affected when relevant
+- [ ] **Keep concise** - one line preferred, max 72 characters
+- [ ] **No emoji** - maintain professional standard
+- [ ] **Present tense** - "add feature" not "added feature"
+
+### **3. Build and Deploy Commands (Verified)**
+
+#### **iOS Development Commands**
+Based on Sprint 3 experience, these commands are verified to work:
+
+**Development Build (Simulator)**:
+```bash
+# Using SweetPad in Cursor (preferred for development)
+# 1. Cmd+Shift+P → "SweetPad: Clean"
+# 2. Cmd+Shift+P → "SweetPad: Build & Run"
+# 3. Select iPhone 16 simulator
+
+# Command line alternative
+cd ios
+xcodebuild -project OpenChatbot.xcodeproj \
+    -scheme OpenChatbot \
+    -destination 'platform=iOS Simulator,name=iPhone 16' \
+    build
+```
+
+**Production Build (Real Device)**:
+```bash
+# Step 1: Clean build cache
+cd ios
+xcodebuild clean -project OpenChatbot.xcodeproj -scheme OpenChatbot
+
+# Step 2: Build for specific device
+# Get device ID first: xcrun devicectl list devices
+xcodebuild -project OpenChatbot.xcodeproj \
+    -scheme OpenChatbot \
+    -destination 'id=<DEVICE_ID>' \
+    build
+
+# Step 3: Install on device
+xcrun devicectl device install app \
+    --device <DEVICE_ID> \
+    <PATH_TO_APP_BUNDLE>
+```
+
+**Code Quality Checks**:
+```bash
+# Run all quality checks
+./scripts/format.sh
+
+# Individual commands
+swiftlint lint --strict
+swiftformat --lint .
+```
+
+### **4. Quality Assurance Checklist**
+
+#### **Before Sprint Completion**
+- [ ] All planned features implemented and working
+- [ ] Test suite updated for new functionality
+- [ ] 100% test pass rate achieved on both simulator and real device
+- [ ] Code quality standards met (SwiftLint + SwiftFormat)
+- [ ] Documentation updated to reflect current state
+- [ ] No critical bugs or crashes in production scenarios
+
+#### **Sprint Metrics Documentation**
+- [ ] **Test Coverage**: X/X tests passed (target: 100%)
+- [ ] **Performance**: Key metrics within acceptable ranges
+- [ ] **Build Status**: Clean builds on all target platforms
+- [ ] **Code Quality**: No lint errors, consistent formatting
+- [ ] **Documentation**: All guides updated and accurate
+
+### **5. Knowledge Capture**
+#### **Sprint Retrospective Document**
+- [ ] **Create** retrospective document với lessons learned
+- [ ] **Capture** what worked well và what needs improvement
+- [ ] **Document** technical challenges và solutions found
+- [ ] **Record** process improvements for next sprint
+- [ ] **Update** best practices based on experience
+
+#### **Update Project Documentation**
+> 📖 **Content maintenance strategy**: [Documentation Maintenance Guide](documentation_maintenance_guide.md) - File-specific maintenance rules and schedules
+
+- [ ] **Technical guides** updated với new findings
+- [ ] **Architecture decisions** documented
+- [ ] **Performance optimizations** recorded
+- [ ] **Integration patterns** captured
+
+#### **Team Knowledge Sharing**
+- [ ] **Share** key insights với team
+- [ ] **Update** development guides based on experience
+- [ ] **Document** common issues và solutions
+- [ ] **Create** troubleshooting entries for future reference
+
+### **6. Sprint Completion Validation**
+
+#### **Final Sprint Checklist (MANDATORY)**
+This checklist must be completed before marking any sprint as complete:
+
+**Technical Validation**:
+- [ ] ✅ **100% test pass rate** verified on real device
+- [ ] ✅ **All build commands working** with verified procedures
+- [ ] ✅ **Code quality standards met** (no lint errors)
+- [ ] ✅ **Performance benchmarks achieved** for new features
+- [ ] ✅ **No critical bugs** in production scenarios
+
+**Documentation Validation**:
+- [ ] ✅ **Sprint plan updated** with completion status and metrics
+- [ ] ✅ **Current status document updated** to reflect new phase
+- [ ] ✅ **Roadmap updated** with actual achievements vs planned
+- [ ] ✅ **All technical guides updated** for new features
+- [ ] ✅ **Sprint retrospective created** with lessons learned
+
+**Process Validation**:
+- [ ] ✅ **All commits follow** standardized message format
+- [ ] ✅ **All changes pushed** to remote repository
+- [ ] ✅ **Branch merge completed** if applicable
+- [ ] ✅ **Next sprint preparation** started based on retrospective
+
+**Success Criteria Met**:
+- [ ] ✅ **All sprint goals achieved** or justified alternatives documented
+- [ ] ✅ **Quality standards maintained** throughout development
+- [ ] ✅ **Team learnings captured** for continuous improvement
+- [ ] ✅ **Foundation prepared** for next sprint
+
+#### **Sprint Completion Metrics Template**
+Document these metrics for every completed sprint:
+
 ```markdown
-## [Date] - [Task Name] Progress
+# Sprint X Completion Report
 
-### Work Completed
-- [Specific accomplishments]
+## Achievement Summary
+- **Test Results**: X/X tests passed (100% target achieved)
+- **Features Delivered**: X/X planned features completed
+- **Code Quality**: 0 lint errors, consistent formatting maintained
+- **Performance**: All benchmarks within acceptable ranges
+- **Documentation**: All guides updated and verified
 
-### Key Decisions Made
-- [Important technical/design decisions]
+## Challenges and Solutions
+- **Challenge 1**: [Description] → **Solution**: [Approach taken]
+- **Challenge 2**: [Description] → **Solution**: [Approach taken]
 
-### Blockers/Issues
-- [Any obstacles encountered]
+## Process Improvements Identified
+- **Improvement 1**: [What we learned]
+- **Improvement 2**: [Process adjustment for next sprint]
 
-### Next Steps
-- [What to work on next]
-
-### Time Spent
-[Actual time spent on task]
+## Next Sprint Readiness
+- **Foundation**: ✅ Ready for [next phase]
+- **Blockers**: None identified / [List any blockers]
+- **Team Capacity**: [Assessment for next sprint]
 ```
 
 ---
 
 ## 🚨 **Common Pitfalls & Solutions**
 
-### **Documentation Debt**
-**Problem**: Documentation falls behind code changes
-**Solution**: Update docs trong same commit as code changes
+### **Test Suite Management**
+**Problem**: Tests passing locally but failing in CI/different environment
+**Solution**: Always test on multiple environments including real devices before sprint completion
 
-### **Scope Creep**
-**Problem**: Task grows beyond original scope
-**Solution**: Document scope changes và get approval before proceeding
+**Problem**: New features added without corresponding test updates
+**Solution**: Test suite updates are MANDATORY part of feature completion, not optional
 
-### **Technical Debt**
-**Problem**: Quick fixes without proper documentation
-**Solution**: Always document workarounds và plan proper fixes
+### **Commit Message Quality**
+**Problem**: Vague commit messages make debugging difficult later
+**Solution**: Include specific component names and clear description of changes
 
-### **Knowledge Silos**
-**Problem**: Important decisions not shared
-**Solution**: Use templates to capture và share learnings
+**Problem**: Using emoji or casual language in commits
+**Solution**: Maintain professional standards for long-term maintainability
+
+### **Sprint Completion Rush**
+**Problem**: Rushing to mark sprint complete without proper validation
+**Solution**: Follow the mandatory completion checklist - no exceptions
+
+**Problem**: Skipping documentation updates to "save time"
+**Solution**: Documentation debt always costs more time later than updating it immediately
+
+### **Build and Deploy Issues**
+**Problem**: "It works on my machine" but fails for others
+**Solution**: Use verified command sequences and test on clean environments
+
+**Problem**: Inconsistent build procedures across team members
+**Solution**: Standardize on documented, verified command procedures
 
 ---
 

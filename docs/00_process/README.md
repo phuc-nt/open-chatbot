@@ -1,21 +1,36 @@
-# Management Guides
+# Process Guides
 
-## 📁 **Guides**
+## 🎯 **Clear Separation of Concerns**
 
-### **`task_management_guide.md`** ⭐
-Complete task workflow: Before → During → After
+### **`task_management_guide.md`** ⭐ **HOW to Work**
+Complete workflow processes: BEFORE → DURING → AFTER task execution
+- Sprint completion requirements  
+- Build & test commands
+- Quality assurance standards
 
-### **`checklist_system_guide.md`**
-How to use master guides vs working checklists
+### **`documentation_maintenance_guide.md`** 📝 **WHAT to Document**  
+Content maintenance strategy và file-specific rules
+- Daily/weekly update schedules
+- Content quality standards
+- Link management
 
-### **`documentation_maintenance_guide.md`**
-Documentation maintenance schedule và best practices
+### **`checklist_system_guide.md`** 📋 **Templates Provider**
+Ready-to-use checklist templates for different task types
+- Working checklist creation
+- Template customization
+- Progress tracking methods
 
-## 🚀 **Quick Start**
+## 🚀 **Quick Start Guide**
 
-**New to project?** Read `task_management_guide.md` first để hiểu workflow.
+**New developer?** 
+1. Read `task_management_guide.md` để hiểu complete workflow
+2. Use templates từ `checklist_system_guide.md` for your tasks
+3. Follow content rules từ `documentation_maintenance_guide.md`
 
-**Starting a task?** Use templates từ `checklist_system_guide.md`.
+**Starting a task?**
+1. Get process từ `task_management_guide.md`
+2. Create checklist từ `checklist_system_guide.md` 
+3. Follow documentation requirements
 
 ---
-*Master guides = Templates | Working checklists = Actual progress* 
+**Integration**: Process (HOW) + Content Strategy (WHAT) + Templates (TOOLS) = Complete Workflow 

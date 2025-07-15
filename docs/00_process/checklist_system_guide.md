@@ -1,17 +1,21 @@
 # Checklist System Guide
 
 ## 🎯 **Purpose**
-Hướng dẫn cách sử dụng **checklist system** hiệu quả trong development workflow để:
+Hướng dẫn cách tạo và sử dụng **checklist templates** hiệu quả trong development workflow để:
 - **Track progress** accurately cho mỗi task
 - **Ensure consistency** trong process execution
 - **Capture learnings** for process improvement
 - **Maintain quality** standards
+
+> 🔗 **Template Integration**: This guide provides **checklist templates**. These templates reference processes defined in [Task Management Guide](task_management_guide.md)
 
 ## 🔄 **Two-Tier Checklist System**
 
 ### **📋 Tier 1: Master Guides (Templates)**
 **Location**: `docs/00_process/`  
 **Purpose**: Reference templates và complete processes
+
+> 📖 **Complete process workflow**: [Task Management Guide](task_management_guide.md) - Full BEFORE → DURING → AFTER task workflow
 
 ```
 Master Guides = Complete Process Documentation

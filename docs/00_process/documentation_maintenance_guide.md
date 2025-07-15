@@ -1,11 +1,13 @@
 # Documentation Maintenance Guide
 
 ## 🎯 **Mục Đích**
-Hướng dẫn maintain toàn bộ documentation system để đảm bảo:
+Hướng dẫn **WHAT to document** và content maintenance strategy để đảm bảo:
 - **Accuracy**: Thông tin luôn up-to-date
-- **Consistency**: Format và style thống nhất
+- **Consistency**: Format và style thống nhất  
 - **Efficiency**: No duplication, clear links
 - **Usability**: Easy to find và understand
+
+> 🔗 **Process Integration**: This guide focuses on **content strategy**. For **workflow processes** (HOW to work), see [Task Management Guide](task_management_guide.md)
 
 ## 📁 **Documentation Structure Overview**
 ```
@@ -20,8 +22,7 @@ docs/
 
 ## 🔄 **Maintenance Schedule**
 
-> 📖 **Task workflow integration**: [Task Management Guide](task_management_guide.md) - Complete task workflow including documentation steps
-> 📖 **Working checklists**: [Checklist System Guide](checklist_system_guide.md) - How to use checklists in practice
+**Integration Reference**: This guide focuses on WHAT to document. For HOW to work, see [Task Management Guide](task_management_guide.md#during-task---active-development)
 
 ### **Daily (After Each Development Session)**
 #### Context Files (00_context/)
@@ -33,6 +34,20 @@ docs/
 - [ ] **Update** sprint plan files (sprint_xx_plan.md) với daily progress
 - [ ] **Add** coding session notes nếu có significant learnings
 - [ ] **Update** sprint status và acceptance test results nếu có task completion
+
+## 📈 **Weekly Progress Updates**
+
+### **Sprint Completion Documentation Reference**
+
+> 📖 **Complete Sprint Completion Process**: [Task Management Guide](task_management_guide.md#sprint-completion-requirements-new---based-on-sprint-3-experience) - Full sprint completion workflow including test validation, documentation updates, and quality assurance
+
+**Quick Reference - Documents to Update at Sprint Completion**:
+- `sprint_XX_plan.md` - Status và achievements
+- `current_status.md` - Phase completion và next steps  
+- `roadmap_v2.md` - Actual vs planned results
+- `test_suite_status_report.md` - Final test metrics
+
+### **Standard Weekly Updates**
 
 ### **Weekly (End of Sprint)**
 #### All Folders Review
