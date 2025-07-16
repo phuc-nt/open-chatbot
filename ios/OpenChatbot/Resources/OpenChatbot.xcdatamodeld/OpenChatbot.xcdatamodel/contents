@@ -19,6 +19,33 @@
         <attribute name="updatedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <relationship name="messages" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Message" inverseName="conversation" inverseEntity="Message"/>
     </entity>
+    <entity name="Document" representedClassName="DocumentEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="detectedLanguage" optional="YES" attributeType="String"/>
+        <attribute name="fileSize" optional="YES" attributeType="Integer 64" defaultValue="0" usesScalarValueType="YES"/>
+        <attribute name="fileURL" optional="YES" attributeType="URI"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isProcessed" optional="YES" attributeType="Boolean" defaultValue="NO" usesScalarValueType="YES"/>
+        <attribute name="pageCount" optional="YES" attributeType="Integer 32" defaultValue="0" usesScalarValueType="YES"/>
+        <attribute name="processingStatus" optional="YES" attributeType="String"/>
+        <attribute name="textContent" optional="YES" attributeType="String"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <attribute name="type" optional="YES" attributeType="String"/>
+        <attribute name="updatedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="embeddings" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="DocumentEmbedding" inverseName="document" inverseEntity="Document"/>
+    </entity>
+    <entity name="DocumentEmbedding" representedClassName="DocumentEmbeddingEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="chunkIndex" optional="YES" attributeType="Integer 32" defaultValue="0" usesScalarValueType="YES"/>
+        <attribute name="chunkText" optional="YES" attributeType="String"/>
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="documentID" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="embeddingDimensions" optional="YES" attributeType="Integer 32" defaultValue="512" usesScalarValueType="YES"/>
+        <attribute name="embeddingVector" optional="YES" attributeType="Binary" allowsExternalBinaryDataStorage="NO" spotlight="NO" customClassName="" elementID="" allowsCloudEncryption="YES" preserveValueInHistoryOnDeletion="NO" allowsConstrainedMemoryOnlyValues="NO" usesMergepolicy="NO" vectorSearchable="YES" vectorDimensions="512" vectorDistanceFunction="cosine"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="language" optional="YES" attributeType="String"/>
+        <attribute name="metadata" optional="YES" attributeType="String"/>
+        <relationship name="document" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Document" inverseName="embeddings" inverseEntity="Document"/>
+    </entity>
     <entity name="Message" representedClassName="MessageEntity" syncable="YES" codeGenerationType="class">
         <attribute name="content" optional="YES" attributeType="String"/>
         <attribute name="conversationId" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
