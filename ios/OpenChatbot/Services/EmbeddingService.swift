@@ -2,12 +2,47 @@ import Foundation
 import NaturalLanguage
 import CoreData
 
-// MARK: - Embedding Service Protocol
+// MARK: - Enhanced Embedding Service Protocol for Testing
 protocol EmbeddingServiceProtocol {
     func generateEmbedding(for text: String, language: String?) async throws -> [Float]
+    func generateEmbeddings(for texts: [String], language: String?) async throws -> [[Float]]
     func detectLanguage(for text: String) -> String?
     func cacheEmbedding(text: String, embedding: [Float], language: String?)
     func getCachedEmbedding(for text: String) -> [Float]?
+    func benchmarkEmbeddingPerformance(text: String, iterations: Int) async -> (averageTime: Double, embeddings: [[Float]])
+}
+
+// MARK: - NLContextualEmbedding Wrapper Protocol for Testing
+protocol NLContextualEmbeddingProtocol {
+    var hasAvailableAssets: Bool { get }
+    func requestAssets() async throws -> NLContextualEmbedding.AssetsResult
+    func embeddingResult(for text: String, language: NLLanguage) throws -> NLContextualEmbeddingResult
+}
+
+// MARK: - API Embedding Service Protocol
+protocol APIEmbeddingServiceProtocol {
+    func generateEmbedding(for text: String, language: String) async throws -> [Float]
+}
+
+// MARK: - Real NLContextualEmbedding Wrapper
+class NLContextualEmbeddingWrapper: NLContextualEmbeddingProtocol {
+    private let embedding: NLContextualEmbedding
+    
+    init(language: NLLanguage) {
+        self.embedding = NLContextualEmbedding(language: language)!
+    }
+    
+    var hasAvailableAssets: Bool {
+        return embedding.hasAvailableAssets
+    }
+    
+    func requestAssets() async throws -> NLContextualEmbedding.AssetsResult {
+        return try await embedding.requestAssets()
+    }
+    
+    func embeddingResult(for text: String, language: NLLanguage) throws -> NLContextualEmbeddingResult {
+        return try embedding.embeddingResult(for: text, language: language)
+    }
 }
 
 // MARK: - Embedding Errors
@@ -48,26 +83,30 @@ class EmbeddingService: EmbeddingServiceProtocol {
     // MARK: - Properties
     private let strategy: EmbeddingStrategy
     private let context: NSManagedObjectContext
-    private let apiService: APIEmbeddingService?
+    private let apiService: APIEmbeddingServiceProtocol?
     private var embeddingCache: [String: [Float]] = [:]
     
-    // iOS NLContextualEmbedding setup
-    private lazy var vietnameseEmbedding: NLContextualEmbedding? = {
-        return NLContextualEmbedding(language: .vietnamese)
-    }()
+    // Dependency injection for testing
+    private let vietnameseEmbedding: NLContextualEmbeddingProtocol
+    private let englishEmbedding: NLContextualEmbeddingProtocol
     
-    private lazy var englishEmbedding: NLContextualEmbedding? = {
-        return NLContextualEmbedding(language: .english)
-    }()
-    
-    // MARK: - Initialization
+    // MARK: - Initialization with Dependency Injection
     init(strategy: EmbeddingStrategy = .hybrid, 
          context: NSManagedObjectContext,
-         apiKey: String? = nil) {
+         apiKey: String? = nil,
+         vietnameseEmbedding: NLContextualEmbeddingProtocol? = nil,
+         englishEmbedding: NLContextualEmbeddingProtocol? = nil,
+         apiService: APIEmbeddingServiceProtocol? = nil) {
         self.strategy = strategy
         self.context = context
         
-        if strategy != .onDevice, let apiKey = apiKey {
+        // Use injected dependencies or create real ones
+        self.vietnameseEmbedding = vietnameseEmbedding ?? NLContextualEmbeddingWrapper(language: .vietnamese)
+        self.englishEmbedding = englishEmbedding ?? NLContextualEmbeddingWrapper(language: .english)
+        
+        if let injectedAPIService = apiService {
+            self.apiService = injectedAPIService
+        } else if strategy != .onDevice, let apiKey = apiKey {
             self.apiService = APIEmbeddingService(apiKey: apiKey)
         } else {
             self.apiService = nil
@@ -114,7 +153,7 @@ class EmbeddingService: EmbeddingServiceProtocol {
     // MARK: - On-Device Embedding Generation
     private func generateOnDeviceEmbedding(text: String, language: String) async throws -> [Float] {
         let nlLanguage: NLLanguage
-        let embedding: NLContextualEmbedding?
+        let embedding: NLContextualEmbeddingProtocol
         
         switch language.lowercased() {
         case "vi", "vi-vn", "vietnamese":
@@ -129,9 +168,7 @@ class EmbeddingService: EmbeddingServiceProtocol {
             embedding = englishEmbedding
         }
         
-        guard let contextualEmbedding = embedding else {
-            throw EmbeddingError.unsupportedLanguage("NLContextualEmbedding not available for \(language)")
-        }
+        let contextualEmbedding = embedding
         
         return try await withCheckedThrowingContinuation { continuation in
             Task {
@@ -266,7 +303,7 @@ class EmbeddingService: EmbeddingServiceProtocol {
 }
 
 // MARK: - API Embedding Service
-class APIEmbeddingService {
+class APIEmbeddingService: APIEmbeddingServiceProtocol {
     private let apiKey: String
     private let baseURL = "https://api.openai.com/v1/embeddings" // Default to OpenAI, can be configured
     

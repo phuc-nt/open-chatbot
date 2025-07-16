@@ -3,6 +3,116 @@ import CoreData
 import NaturalLanguage
 @testable import OpenChatbot
 
+// MARK: - Mock Classes for Testing
+
+class MockAPIEmbeddingService: APIEmbeddingServiceProtocol {
+    var shouldFail: Bool
+    var delay: TimeInterval
+    var embeddings: [String: [Float]] = [:]
+    
+    init(shouldFail: Bool = false, delay: TimeInterval = 0.05) {
+        self.shouldFail = shouldFail
+        self.delay = delay
+        
+        // Pre-populate with test embeddings
+        self.embeddings = [
+            "Test Vietnamese text": generateMockEmbedding(for: "Test Vietnamese text", dimension: 1536),
+            "Test English text": generateMockEmbedding(for: "Test English text", dimension: 1536),
+            "Hello world": generateMockEmbedding(for: "Hello world", dimension: 1536),
+            "Xin chào thế giới": generateMockEmbedding(for: "Xin chào thế giới", dimension: 1536)
+        ]
+    }
+    
+    func generateEmbedding(for text: String, language: String) async throws -> [Float] {
+        // Simulate network delay
+        try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+        
+        if shouldFail {
+            throw NSError(domain: "MockAPIError", code: 401, userInfo: [
+                NSLocalizedDescriptionKey: "Mock API call failed - Invalid API key"
+            ])
+        }
+        
+        // Return cached or generate new embedding
+        if let cachedEmbedding = embeddings[text] {
+            return cachedEmbedding
+        }
+        
+        let embedding = generateMockEmbedding(for: text, dimension: 1536)
+        embeddings[text] = embedding
+        return embedding
+    }
+    
+    private func generateMockEmbedding(for text: String, dimension: Int = 768) -> [Float] {
+        var hash = text.hashValue
+        var embedding: [Float] = []
+        
+        for _ in 0..<dimension {
+            let value = Float((hash % 2001) - 1000) / 1000.0
+            embedding.append(value)
+            hash = hash &* 31 &+ 17
+        }
+        
+        let magnitude = sqrt(embedding.reduce(0) { $0 + $1 * $1 })
+        if magnitude > 0 {
+            embedding = embedding.map { $0 / magnitude }
+        }
+        
+        return embedding
+    }
+}
+
+class MockNLContextualEmbedding: NLContextualEmbeddingProtocol {
+    var language: NLLanguage
+    var shouldFail: Bool
+    var delay: TimeInterval
+    var shouldFailAssetRequest: Bool
+    private var assetRequestResult: NLContextualEmbedding.AssetsResult
+    
+    init(language: NLLanguage = .vietnamese, shouldFail: Bool = false, delay: TimeInterval = 0.05, shouldFailAssetRequest: Bool = false) {
+        self.language = language
+        self.shouldFail = shouldFail
+        self.delay = delay
+        self.shouldFailAssetRequest = shouldFailAssetRequest
+        self.assetRequestResult = shouldFailAssetRequest ? .notAvailable : .available
+    }
+    
+    var hasAvailableAssets: Bool {
+        return !shouldFailAssetRequest
+    }
+    
+    func requestAssets() async throws -> NLContextualEmbedding.AssetsResult {
+        try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+        return assetRequestResult
+    }
+    
+    func embeddingResult(for text: String, language: NLLanguage) throws -> NLContextualEmbeddingResult {
+        if shouldFail {
+            throw NSError(domain: "MockEmbeddingError", code: 500, userInfo: [
+                NSLocalizedDescriptionKey: "Mock embedding generation failed"
+            ])
+        }
+        
+        // For testing, we'll create a minimal mock that doesn't actually use ML
+        // This will prevent hanging tests while still testing the logic
+        throw NSError(domain: "MockEmbeddingError", code: 501, userInfo: [
+            NSLocalizedDescriptionKey: "Mock embedding - not implemented for fast testing"
+        ])
+    }
+    
+    static func createVietnameseMock() -> MockNLContextualEmbedding {
+        return MockNLContextualEmbedding(language: .vietnamese, shouldFail: false, delay: 0.05)
+    }
+    
+    static func createEnglishMock() -> MockNLContextualEmbedding {
+        return MockNLContextualEmbedding(language: .english, shouldFail: false, delay: 0.05)
+    }
+    
+    static func createFailingMock() -> MockNLContextualEmbedding {
+        return MockNLContextualEmbedding(language: .vietnamese, shouldFail: true, delay: 0.01)
+    }
+}
+
 @MainActor
 class EmbeddingServiceTests: XCTestCase {
     
@@ -17,11 +127,14 @@ class EmbeddingServiceTests: XCTestCase {
         dataService = DataService(inMemory: true)
         mockContext = dataService.viewContext
         
-        // Create embedding service with hybrid strategy
+        // Create embedding service with MOCK dependencies for testing
         embeddingService = EmbeddingService(
             strategy: .hybrid,
             context: mockContext,
-            apiKey: "test-api-key"
+            apiKey: "test-api-key",
+            vietnameseEmbedding: MockNLContextualEmbedding.createVietnameseMock(),
+            englishEmbedding: MockNLContextualEmbedding(),
+            apiService: MockAPIEmbeddingService()
         )
     }
     
