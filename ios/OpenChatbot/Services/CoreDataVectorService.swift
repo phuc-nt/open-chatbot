@@ -356,3 +356,5 @@ enum VectorDatabaseError: LocalizedError {
         }
     }
 } 
+
+ 

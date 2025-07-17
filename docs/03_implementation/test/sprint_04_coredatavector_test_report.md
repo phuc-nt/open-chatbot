@@ -410,7 +410,7 @@ func optimizedSimilaritySearch() {
 ### 🎯 **Technical Foundation for Future Features**
 
 #### **1. Enhanced Query Capabilities**
-```swift
+   ```swift
 // Future enhancements readily available
 func hybridSearch(
     textQuery: String,

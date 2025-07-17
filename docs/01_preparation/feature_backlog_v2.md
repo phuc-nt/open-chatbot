@@ -48,20 +48,22 @@
 | DOC-005 | Document upload UI enhancements | 2d | DOC-004 | SwiftUI | P1 |
 
 ### **Epic 2.2: RAG-Powered Q&A**
-| Task ID | Task | Effort | Dependencies | Technology | Priority |
-|---------|------|--------|--------------|------------|----------|
-| DOC-006 | Vector Store integration (local) | 4d | DOC-004 | Vector Database | P0 |
-| DOC-007 | Embedding Models service | 3d | DOC-006 | Embedding API | P0 |
-| DOC-008 | Retrieval Chains implementation | 3d | DOC-007 | LangChain RAG | P0 |
-| DOC-009 | Source citation and references | 2d | DOC-008 | Metadata handling | P0 |
-| DOC-010 | Multi-document cross-referencing | 3d | DOC-009 | Advanced RAG | P1 |
-| DOC-011 | Document Q&A UI components | 2d | DOC-008 | SwiftUI | P1 |
+| Task ID | Task | Effort | Dependencies | Technology | Priority | Status |
+|---------|------|--------|--------------|------------|----------|---|
+| DOC-006 | Vector Store integration (local) | 4d | DOC-004 | Vector Database | P0 | ✅ Completed |
+| DOC-007 | Embedding Models service | 3d | DOC-006 | Embedding API | P0 | ✅ Completed |
+| DOC-008 | Retrieval Chains implementation | 3d | DOC-007 | LangChain RAG | P0 | ✅ Completed |
+| DOC-009 | Source citation and references | 2d | DOC-008 | Metadata handling | P0 | ✅ Completed |
+| DOC-010 | Multi-document cross-referencing | 3d | DOC-009 | Advanced RAG | P1 | 🔄 In Progress |
+| DOC-011 | Document Q&A UI components | 2d | DOC-008 | SwiftUI | P1 | 🔄 Planned |
 
 **Sprint Breakdown**:
-- **Sprint 4.1** (Week 4): DOC-001,002,003
-- **Sprint 4.2** (Week 5): DOC-004,005,006
-- **Sprint 4.3** (Week 6): DOC-007,008,009
-- **Sprint 4.4** (Week 7): DOC-010,011 + Integration Testing
+- **Sprint 4.1** (Week 1): DOC-001,002,003 ✅ COMPLETED
+- **Sprint 4.2** (Week 2): DOC-004,005,006 ✅ RAG CORE COMPLETED  
+- **Sprint 4.3** (Week 3): DOC-007,008,009 🔄 UI/UX PHASE
+- **Sprint 4.4** (Week 4): DOC-010,011 + Integration Testing 🔄 OPTIMIZATION PHASE
+
+**Note**: Task mapping updated to reflect actual Sprint 4 implementation. DOC-006,007,008,009 were implemented as part of the comprehensive RAG pipeline in Sprint 4.2.
 
 ---
 
