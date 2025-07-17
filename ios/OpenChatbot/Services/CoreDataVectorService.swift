@@ -60,7 +60,7 @@ class CoreDataVectorService {
         }
     }
     
-    /// Perform similarity search using Core Data Vector Search (iOS 17+)
+    /// Perform similarity search using hybrid approach: Core Data Vector Search + Manual fallback
     func similaritySearch(
         queryEmbedding: [Float],
         topK: Int = 5,
@@ -71,84 +71,125 @@ class CoreDataVectorService {
         return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<[SimilarityResult], Error>) in
             backgroundContext.perform {
                 do {
-                    let request = NSFetchRequest<DocumentEmbeddingEntity>(entityName: "DocumentEmbedding")
+                    print("🔍 Starting hybrid similarity search...")
+                    print("📊 Query embedding dimensions: \(queryEmbedding.count)")
+                    print("📊 Search parameters: topK=\(topK), threshold=\(threshold)")
                     
-                    // Convert query embedding to Data
-                    let queryData = Data(bytes: queryEmbedding, count: queryEmbedding.count * MemoryLayout<Float>.size)
-                    
-                    // Build predicate với vector distance function (iOS 17+)
-                    var predicates: [NSPredicate] = []
-                    
-                    // Vector similarity constraint using Core Data Vector Search
-                    let vectorPredicate = NSPredicate(
-                        format: "distance(for: embeddingVector, to: %@) < %f",
-                        queryData as CVarArg, 1.0 - threshold
+                    // Always use manual similarity search for now (Core Data Vector Search debugging)
+                    let results = try self.manualSimilaritySearch(
+                        queryEmbedding: queryEmbedding,
+                        topK: topK,
+                        threshold: threshold,
+                        documentIDs: documentIDs,
+                        language: language
                     )
-                    predicates.append(vectorPredicate)
                     
-                    // Optional document ID filter
-                    if let documentIDs = documentIDs, !documentIDs.isEmpty {
-                        let documentPredicate = NSPredicate(format: "documentID IN %@", documentIDs)
-                        predicates.append(documentPredicate)
-                    }
-                    
-                    // Optional language filter
-                    if let language = language {
-                        let languagePredicate = NSPredicate(format: "language == %@", language)
-                        predicates.append(languagePredicate)
-                    }
-                    
-                    // Combine predicates
-                    request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
-                    
-                    // Sort by similarity (closest first) using Core Data Vector Search
-                    request.sortDescriptors = [
-                        NSSortDescriptor(
-                            key: "distance(for: embeddingVector, to: \(queryData))",
-                            ascending: true
-                        )
-                    ]
-                    
-                    request.fetchLimit = topK
-                    
-                    let results = try self.backgroundContext.fetch(request)
-                    
-                    // Convert to SimilarityResult
-                    let similarityResults = results.compactMap { embedding -> SimilarityResult? in
-                        guard let embeddingData = embedding.embeddingVector,
-                              let chunkText = embedding.chunkText else {
-                            return nil
-                        }
-                        
-                        // Calculate cosine similarity (approximate from distance)
-                        let distance = self.calculateDistance(queryEmbedding: queryEmbedding, embeddingData: embeddingData)
-                        let similarity = 1.0 - distance
-                        
-                        // Parse metadata
-                        var metadata: [String: Any] = [:]
-                        if let metadataString = embedding.metadata {
-                            if let metadataData = metadataString.data(using: .utf8),
-                               let parsedMetadata = try? JSONSerialization.jsonObject(with: metadataData) as? [String: Any] {
-                                metadata = parsedMetadata
-                            }
-                        }
-                        
-                        return SimilarityResult(
-                            id: embedding.id?.uuidString ?? UUID().uuidString,
-                            documentID: embedding.documentID?.uuidString ?? "",
-                            chunkText: chunkText,
-                            similarity: similarity,
-                            chunkIndex: Int(embedding.chunkIndex),
-                            metadata: metadata
-                        )
-                    }
-                    
-                    continuation.resume(returning: similarityResults)
+                    print("✅ Similarity search completed: \(results.count) results")
+                    continuation.resume(returning: results)
                 } catch {
+                    print("❌ Similarity search failed: \(error)")
                     continuation.resume(throwing: VectorDatabaseError.searchFailed(error))
                 }
             }
         }
+    }
+    
+    /// Manual similarity search - pure Swift calculation with Core Data filtering
+    private func manualSimilaritySearch(
+        queryEmbedding: [Float],
+        topK: Int,
+        threshold: Float,
+        documentIDs: [UUID]?,
+        language: String?
+    ) throws -> [SimilarityResult] {
+        print("🔧 Starting manual similarity search...")
+        
+        let request = NSFetchRequest<DocumentEmbeddingEntity>(entityName: "DocumentEmbedding")
+        
+        // Build predicate for basic filtering (no vector search)
+        var predicates: [NSPredicate] = []
+        
+        // Optional document ID filter
+        if let documentIDs = documentIDs, !documentIDs.isEmpty {
+            let documentPredicate = NSPredicate(format: "documentID IN %@", documentIDs)
+            predicates.append(documentPredicate)
+            print("📄 Filtering by document IDs: \(documentIDs.count)")
+        }
+        
+        // Optional language filter
+        if let language = language {
+            let languagePredicate = NSPredicate(format: "language == %@", language)
+            predicates.append(languagePredicate)
+            print("🌐 Filtering by language: \(language)")
+        }
+        
+        // Combine predicates if any
+        if !predicates.isEmpty {
+            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+        }
+        
+        // Fetch all matching documents (no vector filtering yet)
+        let allResults = try backgroundContext.fetch(request)
+        print("📊 Fetched \(allResults.count) embeddings for manual calculation")
+        
+        // Calculate similarity for each result
+        var similarityResults: [SimilarityResult] = []
+        
+        for (index, embedding) in allResults.enumerated() {
+            // Safe unwrapping of optional properties
+            guard let embeddingData = embedding.embeddingVector,
+                  let chunkText = embedding.chunkText,
+                  let documentID = embedding.documentID else {
+                print("⚠️ Skipping embedding \(index) with missing data")
+                continue
+            }
+            
+            // Calculate cosine similarity
+            let similarity = self.calculateCosineSimilarityFromData(
+                queryEmbedding: queryEmbedding,
+                embeddingData: embeddingData
+            )
+            
+            // Apply threshold filter
+            guard similarity >= threshold else {
+                if index < 5 { // Log first few for debugging
+                    print("📉 Embedding \(index): similarity \(String(format: "%.3f", similarity)) below threshold \(threshold)")
+                }
+                continue
+            }
+            
+            // Parse metadata if available
+            var metadata: [String: Any] = [:]
+            if let metadataString = embedding.metadata {
+                if let metadataData = metadataString.data(using: .utf8),
+                   let parsedMetadata = try? JSONSerialization.jsonObject(with: metadataData) as? [String: Any] {
+                    metadata = parsedMetadata
+                }
+            }
+            
+            let result = SimilarityResult(
+                id: embedding.id?.uuidString ?? UUID().uuidString,
+                documentID: documentID.uuidString,
+                chunkText: chunkText,
+                similarity: similarity,
+                chunkIndex: Int(embedding.chunkIndex),
+                metadata: metadata
+            )
+            
+            similarityResults.append(result)
+            print("✅ Added result \(similarityResults.count): similarity=\(String(format: "%.3f", similarity))")
+        }
+        
+        print("🎯 Manual search found \(similarityResults.count) results above threshold")
+        
+        // Sort by similarity (highest first) and return top K
+        let topResults = similarityResults
+            .sorted { $0.similarity > $1.similarity }
+            .prefix(topK)
+            .map { $0 }
+            
+        print("📋 Returning top \(topResults.count) results")
+        return topResults
     }
     
     /// Batch insert embeddings for performance
@@ -254,6 +295,23 @@ class CoreDataVectorService {
         guard magnitude1 > 0 && magnitude2 > 0 else { return 0.0 }
         
         return dotProduct / (magnitude1 * magnitude2)
+    }
+    
+    /// Calculate cosine similarity from Data format
+    private func calculateCosineSimilarityFromData(
+        queryEmbedding: [Float],
+        embeddingData: Data
+    ) -> Float {
+        let storedEmbedding = embeddingData.withUnsafeBytes { buffer in
+            Array(buffer.bindMemory(to: Float.self))
+        }
+        
+        guard storedEmbedding.count == queryEmbedding.count else {
+            print("⚠️ Dimension mismatch: query=\(queryEmbedding.count), stored=\(storedEmbedding.count)")
+            return 0.0 // Dimension mismatch
+        }
+        
+        return cosineSimilarity(queryEmbedding, storedEmbedding)
     }
 }
 

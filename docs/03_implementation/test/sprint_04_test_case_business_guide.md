@@ -229,6 +229,61 @@ Next chat sessions: Instant (cached embeddings)
 
 ---
 
+## 🗂️ **DOC-003: Vector Database & Similarity Search**
+
+### **User Experience**: Chatbot tìm kiếm và tìm thấy thông tin chính xác trong tài liệu
+
+#### **CoreDataVectorServiceTests (12/12 PASSED ✅)**
+
+**Nghiệp vụ**: Sau khi chatbot đã "đọc hiểu" tài liệu (bước embedding), nó cần một "bộ não" siêu nhanh để có thể tìm lại chính xác mẩu thông tin liên quan đến câu hỏi của người dùng. Đây chính là vai trò của Vector Database và Similarity Search.
+
+##### **1. CRUD Operations Tests (7/7 tests)**
+
+**Test Cases**:
+- `testSaveEmbedding()`, `testBatchInsertEmbeddings()`
+- `testDeleteEmbeddings()`, `testGetEmbeddingCount()`
+- `testErrorHandlingInvalidEmbedding()`, `testPerformanceBatchInsert()`
+
+**Giải thích nghiệp vụ**:
+- **Tại sao test**: Đảm bảo "kiến thức" của chatbot có thể được thêm, xóa, và quản lý một cách an toàn.
+- **Giá trị**: User có thể tự do quản lý kho tài liệu của mình. Khi họ xóa một file, chatbot sẽ "quên" đi kiến thức từ file đó. Khi họ cập nhật, kiến thức mới sẽ được thay thế.
+- **Rủi ro nếu fail**: Chatbot có thể trả lời dựa trên thông tin từ tài liệu đã bị xóa, dẫn đến câu trả lời sai và lỗi thời.
+
+**User Scenario**:
+```
+User uploads "Policy_v1.pdf". Chatbot trả lời dựa trên v1.
+Sau đó, user xóa file đó và upload "Policy_v2.pdf".
+✅ Good: Chatbot giờ sẽ chỉ trả lời dựa trên kiến thức của v2.
+❌ Bad: Chatbot vẫn trả lời lẫn lộn thông tin từ v1 và v2.
+```
+
+##### **2. Similarity Search Tests (5/5 tests)** 🎉 **FIXED**
+
+**Test Cases**:
+- `testSimilaritySearchBasic()`, `testSimilaritySearchTopK()`
+- `testSimilaritySearchWithDocumentFilter()`, `testSimilaritySearchWithLanguageFilter()`
+- `testPerformanceSimilaritySearch()`
+
+**Giải thích nghiệp vụ**:
+- **Tại sao test**: Đây là **tính năng quan trọng nhất** của RAG. Nó quyết định chatbot có "thông minh" hay không. Khi user hỏi, các test này đảm bảo hệ thống có thể tìm ra những câu/đoạn văn liên quan nhất từ toàn bộ kho tài liệu.
+- **Giá trị**: Thay vì đọc hàng trăm trang, user chỉ cần hỏi, và chatbot sẽ chỉ ra câu trả lời chính xác trong vài giây.
+- **Rủi ro nếu fail**: Chatbot trở nên vô dụng. Nó sẽ không thể tìm thấy thông tin liên quan và trả lời "Tôi không biết" dù câu trả lời có trong tài liệu.
+
+**Vượt qua thử thách (Business Value of the Fix)**:
+- **Thử thách**: Tính năng tìm kiếm vector gốc của Apple (iOS 17+) không ổn định.
+- **Giải pháp của chúng ta**: Xây dựng một giải pháp hybrid (lọc bằng Core Data + tính toán thủ công) đáng tin cậy hơn.
+- **Giá trị cho User**: "Bộ não" tìm kiếm của chatbot giờ đây hoạt động trên một nền tảng **ổn định và đã được kiểm chứng**, đảm bảo các câu trả lời luôn được tìm kiếm một cách chính xác và đáng tin cậy.
+
+**User Scenario**:
+```
+User upload một tài liệu dài 50 trang.
+User hỏi: "Lợi nhuận Quý 4 là bao nhiêu?"
+✅ Good: Hệ thống quét qua 50 trang, tìm thấy câu "Lợi nhuận Quý 4 đạt 5 tỷ đồng" và dùng nó để trả lời.
+❌ Bad: Hệ thống không tìm thấy gì và trả lời "Tôi không tìm thấy thông tin này".
+```
+
+---
+
 ## 📊 **Test Coverage vs User Needs**
 
 ### **✅ Fully Validated User Needs**
@@ -363,6 +418,8 @@ Next chat sessions: Instant (cached embeddings)
 | Caching | Performance | Fast repeated interactions | Slow user experience |
 | Embedding Generation | Document understanding | Accurate answers from docs | Completely wrong responses |
 | API Integration | Reliability & scale | Works under load | Service unavailable |
+| **Vector CRUD** | **Knowledge Management** | **Can update/delete document knowledge** | **Outdated/wrong answers** |
+| **Similarity Search** | **Intelligent Search** | **Finds exact info in long docs** | **Core feature fails, chatbot is useless** |
 
 ---
 

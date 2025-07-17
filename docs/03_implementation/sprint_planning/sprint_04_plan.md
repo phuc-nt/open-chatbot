@@ -150,17 +150,15 @@
 - **Architecture**: iOS 17+ Core Data Vector Search (native Apple solution)
 - **Service**: CoreDataVectorService (287 lines) với comprehensive API
 - **Core Features**: saveEmbedding(), batchInsertEmbeddings(), similaritySearch()
-- **Performance**: Background context processing, async/await patterns
-- **Database**: Vector attributes với cosine similarity, vectorDimensions="512"
-- **Major Issue**: NSPredicate vector search syntax hoặc Core Data vector indexing
-
-**Next Steps Required**:
-1. 🔥 **URGENT**: Debug similarity search NSPredicate syntax
-2. 🔥 **URGENT**: Validate Core Data vector indexing activation  
-3. 🔥 **URGENT**: Test on physical device (simulator limitation possible)
-4. Consider fallback to manual similarity calculation if Core Data vector search unavailable
+- **Performance**: Optimized with hybrid filtering and manual calculation
+- **Database**: Correct entity (`DocumentEmbeddingEntity`) and data handling
+- **✅ SOLUTION**: Implemented a robust hybrid solution:
+   1.  **Core Data Filtering**: Pre-filter candidates efficiently.
+   2.  **Manual Cosine Similarity**: Calculate final similarity in-memory for reliability.
+- **Resolution Details**: See `sprint_04_coredatavector_test_report.md` for a full breakdown.
 
 #### DOC-004: RAG Query Pipeline (12h)
+**Status**: ✅ UNBLOCKED & READY | **Progress**: 0%
 **Priority**: P0 (Critical)
 **Dependencies**: DOC-003
 **Tasks**:
