@@ -41,6 +41,49 @@ enum DocumentType: String, CaseIterable {
     }
 }
 
+import SwiftUI
+
+extension DocumentType {
+    var icon: String {
+        switch self {
+        case .pdf:
+            return "doc.fill"
+        case .text:
+            return "doc.text.fill"
+        case .image, .imagePNG:
+            return "photo.fill"
+        case .unknown:
+            return "doc.fill"
+        }
+    }
+    
+    var backgroundColor: Color {
+        switch self {
+        case .pdf:
+            return Color.red.opacity(0.1)
+        case .text:
+            return Color.blue.opacity(0.1)
+        case .image, .imagePNG:
+            return Color.green.opacity(0.1)
+        case .unknown:
+            return Color.gray.opacity(0.1)
+        }
+    }
+    
+    var foregroundColor: Color {
+        switch self {
+        case .pdf:
+            return Color.red
+        case .text:
+            return Color.blue
+        case .image, .imagePNG:
+            return Color.green
+        case .unknown:
+            return Color.gray
+        }
+    }
+}
+
 // MARK: - Processing Task
 struct ProcessingTask: Identifiable {
     let id: String
