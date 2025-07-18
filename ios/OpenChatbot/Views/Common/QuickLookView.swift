@@ -11,7 +11,7 @@ struct QuickLookView: UIViewControllerRepresentable {
     }
     
     func updateUIViewController(_ uiViewController: QLPreviewController, context: Context) {
-        // Update not needed for this use case
+        // No updates needed
     }
     
     func makeCoordinator() -> Coordinator {
@@ -32,5 +32,12 @@ struct QuickLookView: UIViewControllerRepresentable {
         func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
             return parent.url as QLPreviewItem
         }
+    }
+}
+
+// MARK: - Preview
+struct QuickLookView_Previews: PreviewProvider {
+    static var previews: some View {
+        QuickLookView(url: URL(fileURLWithPath: "/tmp/sample.pdf"))
     }
 } 

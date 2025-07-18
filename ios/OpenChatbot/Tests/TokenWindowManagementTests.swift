@@ -11,7 +11,7 @@ class TokenWindowManagementTests: XCTestCase {
     
     override func setUp() async throws {
         try await super.setUp()
-        dataService = DataService()
+        dataService = DataService(inMemory: true)
         memoryService = MemoryService(dataService: dataService)
         
         // Create mock API service and summary memory service

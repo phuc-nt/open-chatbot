@@ -12,7 +12,8 @@ final class DocumentEditViewTests: XCTestCase {
         let testDocument = createTestProcessedDocument()
         
         // When
-        let view = DocumentEditView(document: testDocument, onSave: { _, _ in })
+        let mockViewModel = DocumentDetailViewModel()
+        let view = DocumentEditView(document: testDocument, viewModel: mockViewModel)
         
         // Then - View should initialize without crashing
         XCTAssertNotNil(view)
@@ -27,10 +28,8 @@ final class DocumentEditViewTests: XCTestCase {
         var savedTags: [String]?
         
         // When
-        let view = DocumentEditView(document: testDocument) { title, tags in
-            savedTitle = title
-            savedTags = tags
-        }
+        let mockViewModel = DocumentDetailViewModel()
+        let view = DocumentEditView(document: testDocument, viewModel: mockViewModel)
         
         // Then - Should be able to access the document for editing
         XCTAssertNotNil(view)
@@ -43,10 +42,8 @@ final class DocumentEditViewTests: XCTestCase {
         let initialTags = ["tag1", "tag2"]
         
         // When
-        let view = DocumentEditView(document: testDocument) { title, tags in
-            // Verify tags are passed correctly
-            XCTAssertEqual(tags.count, 2)
-        }
+        let mockViewModel = DocumentDetailViewModel()
+        let view = DocumentEditView(document: testDocument, viewModel: mockViewModel)
         
         // Then
         XCTAssertNotNil(view)
@@ -59,12 +56,8 @@ final class DocumentEditViewTests: XCTestCase {
         let testDocument = createTestProcessedDocument()
         
         // When
-        let view = DocumentEditView(document: testDocument) { title, tags in
-            // Should handle empty title gracefully
-            if title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                XCTFail("Empty title should not be allowed")
-            }
-        }
+        let mockViewModel = DocumentDetailViewModel()
+        let view = DocumentEditView(document: testDocument, viewModel: mockViewModel)
         
         // Then
         XCTAssertNotNil(view)
@@ -93,11 +86,8 @@ final class DocumentEditViewTests: XCTestCase {
         var saveCallbackTriggered = false
         
         // When
-        let view = DocumentEditView(document: testDocument) { title, tags in
-            saveCallbackTriggered = true
-            XCTAssertEqual(title, newTitle)
-            XCTAssertEqual(tags, newTags)
-        }
+        let mockViewModel = DocumentDetailViewModel()
+        let view = DocumentEditView(document: testDocument, viewModel: mockViewModel)
         
         // Simulate save action (in actual implementation)
         // saveCallbackTriggered would be set to true when save is called
@@ -115,9 +105,8 @@ final class DocumentEditViewTests: XCTestCase {
         var saveCallbackTriggered = false
         
         // When
-        let view = DocumentEditView(document: testDocument) { title, tags in
-            saveCallbackTriggered = true
-        }
+        let mockViewModel = DocumentDetailViewModel()
+        let view = DocumentEditView(document: testDocument, viewModel: mockViewModel)
         
         // Simulate cancel action
         // In actual implementation, cancel should not trigger save callback
@@ -134,7 +123,8 @@ final class DocumentEditViewTests: XCTestCase {
         let testDocument = createTestProcessedDocument()
         
         // When
-        let view = DocumentEditView(document: testDocument) { _, _ in }
+        let mockViewModel = DocumentDetailViewModel()
+        let view = DocumentEditView(document: testDocument, viewModel: mockViewModel)
         
         // Then - Should display document metadata
         // In actual implementation, would verify:
@@ -192,7 +182,8 @@ final class DocumentEditViewTests: XCTestCase {
         let testDocument = createTestProcessedDocument()
         
         // When
-        let view = DocumentEditView(document: testDocument) { _, _ in }
+        let mockViewModel = DocumentDetailViewModel()
+        let view = DocumentEditView(document: testDocument, viewModel: mockViewModel)
         
         // Then - Should have proper accessibility labels
         // In actual implementation, would verify:
@@ -210,7 +201,8 @@ final class DocumentEditViewTests: XCTestCase {
         
         measure {
             // Measure view creation performance
-            let view = DocumentEditView(document: testDocument) { _, _ in }
+            let mockViewModel = DocumentDetailViewModel()
+            let view = DocumentEditView(document: testDocument, viewModel: mockViewModel)
             _ = view
         }
     }

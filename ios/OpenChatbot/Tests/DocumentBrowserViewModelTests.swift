@@ -1,11 +1,11 @@
 import XCTest
+import SwiftUI
+import CoreData
 @testable import OpenChatbot
 
 @MainActor
-final class DocumentBrowserViewModelTests: XCTestCase {
-    
+class DocumentBrowserViewModelTests: XCTestCase {
     var viewModel: DocumentBrowserViewModel!
-    var mockDataService: MockDataService!
     var testContext: NSManagedObjectContext!
     
     override func setUp() {
@@ -19,85 +19,132 @@ final class DocumentBrowserViewModelTests: XCTestCase {
         
         persistentContainer.loadPersistentStores { _, error in
             if let error = error {
-                fatalError("Failed to load test store: \(error)")
+                fatalError("Failed to load store: \(error)")
             }
         }
         
         testContext = persistentContainer.viewContext
-        mockDataService = MockDataService(context: testContext)
         viewModel = DocumentBrowserViewModel()
     }
     
     override func tearDown() {
         viewModel = nil
-        mockDataService = nil
         testContext = nil
         super.tearDown()
     }
     
-    // MARK: - Initialization Tests
+    // MARK: - Basic Functionality Tests
     
     func testInitialState() {
-        XCTAssertEqual(viewModel.documents.count, 0)
+        XCTAssertTrue(viewModel.documents.isEmpty)
+        XCTAssertTrue(viewModel.filteredDocuments.isEmpty)
+        XCTAssertEqual(viewModel.searchText, "")
+        XCTAssertEqual(viewModel.selectedFilter, .all)
+        XCTAssertEqual(viewModel.sortOption, .dateModified)
+        XCTAssertFalse(viewModel.sortAscending)
         XCTAssertFalse(viewModel.isLoading)
         XCTAssertNil(viewModel.errorMessage)
         XCTAssertFalse(viewModel.showError)
     }
     
-    // MARK: - Document Loading Tests
-    
-    func testInitialize() async {
-        // Given
-        XCTAssertEqual(viewModel.documents.count, 0)
-        
-        // When
-        await viewModel.initialize()
-        
-        // Then
-        XCTAssertFalse(viewModel.isLoading)
-    }
-    
-    // MARK: - Search Functionality Tests
-    
-    func testSearchTextEmpty() {
-        // Given
+    func testDocumentStats() {
+        // Create test documents
         let testDocuments = createTestDocuments()
-        
-        // When - search with empty text should show all documents
         viewModel.documents = testDocuments
         
-        // Then
-        XCTAssertEqual(viewModel.documents.count, testDocuments.count)
+        let stats = viewModel.documentStats
+        XCTAssertEqual(stats.total, 4)
+        XCTAssertEqual(stats.pdf, 2)
+        XCTAssertEqual(stats.text, 1)
+        XCTAssertEqual(stats.images, 1)
     }
     
-    // MARK: - Error Handling Tests
-    
-    func testErrorHandling() {
-        // Given
-        let errorMessage = "Test error message"
+    func testSearchFunctionality() {
+        // Setup test documents
+        let testDocuments = createTestDocuments()
+        viewModel.documents = testDocuments
         
-        // When
-        viewModel.errorMessage = errorMessage
-        viewModel.showError = true
+        // Test search
+        viewModel.updateSearchFilter("Test")
         
-        // Then
-        XCTAssertEqual(viewModel.errorMessage, errorMessage)
-        XCTAssertTrue(viewModel.showError)
+        // Should filter documents containing "Test" in title
+        XCTAssertEqual(viewModel.filteredDocuments.count, 4) // All test documents contain "Test"
     }
     
-    // MARK: - Test Helpers
+    func testFilterFunctionality() {
+        // Setup test documents
+        let testDocuments = createTestDocuments()
+        viewModel.documents = testDocuments
+        
+        // Test PDF filter
+        viewModel.updateFilter(.pdf)
+        XCTAssertEqual(viewModel.filteredDocuments.count, 2)
+        
+        // Test text filter
+        viewModel.updateFilter(.text)
+        XCTAssertEqual(viewModel.filteredDocuments.count, 1)
+    }
     
-    private func createTestDocuments() -> [String] {
-        return [
-            "Document 1",
-            "Document 2", 
-            "Document 3"
-        ]
+    // MARK: - Helper Methods
+    
+    private func createTestDocuments() -> [ProcessedDocument] {
+        let doc1 = ProcessedDocument(
+            id: "1",
+            title: "Test PDF 1",
+            fileName: "test1.pdf",
+            fileURL: URL(fileURLWithPath: "/tmp/test1.pdf"),
+            fileSize: 1024,
+            type: .pdf,
+            pageCount: 5,
+            content: "Test content 1",
+            detectedLanguage: "en",
+            createdAt: Date()
+        )
+        
+        let doc2 = ProcessedDocument(
+            id: "2", 
+            title: "Test PDF 2",
+            fileName: "test2.pdf",
+            fileURL: URL(fileURLWithPath: "/tmp/test2.pdf"),
+            fileSize: 2048,
+            type: .pdf,
+            pageCount: 10,
+            content: "Test content 2",
+            detectedLanguage: "en",
+            createdAt: Date()
+        )
+        
+        let doc3 = ProcessedDocument(
+            id: "3",
+            title: "Test Text",
+            fileName: "test.txt", 
+            fileURL: URL(fileURLWithPath: "/tmp/test.txt"),
+            fileSize: 512,
+            type: .text,
+            pageCount: 1,
+            content: "Test text content",
+            detectedLanguage: "en",
+            createdAt: Date()
+        )
+        
+        let doc4 = ProcessedDocument(
+            id: "4",
+            title: "Test Image",
+            fileName: "test.jpg",
+            fileURL: URL(fileURLWithPath: "/tmp/test.jpg"),
+            fileSize: 4096,
+            type: .image,
+            pageCount: 1,
+            content: "Image description",
+            detectedLanguage: "en",
+            createdAt: Date()
+        )
+        
+        return [doc1, doc2, doc3, doc4]
     }
 }
 
-// MARK: - Mock Data Service
-
+// MARK: - Mock DataService for Testing
 class MockDataService {
     private let context: NSManagedObjectContext
     
@@ -105,24 +152,19 @@ class MockDataService {
         self.context = context
     }
     
-    func createTestDocument(title: String, type: DocumentType) -> DocumentEntity {
-        let document = DocumentEntity(context: context)
-        document.id = UUID()
-        document.title = title
-        document.filename = "\(title).pdf"
-        document.fileType = type.rawValue
-        document.createdAt = Date()
-        document.updatedAt = Date()
-        document.fileSize = Int64.random(in: 1000...10000)
-        
-        return document
+    func fetchDocuments() async throws -> [ProcessedDocument] {
+        // Return mock data for testing
+        return []
+    }
+    
+    func deleteDocument(withId id: String) async throws {
+        // Mock delete implementation
     }
 }
 
-// MARK: - Test Data Extensions
-
+// MARK: - Test Extensions
 extension DocumentType {
-    static var testCases: [DocumentType] {
-        return [.pdf, .text, .image, .other]
+    static var allTestCases: [DocumentType] {
+        return [.pdf, .text, .image, .unknown]
     }
 } 

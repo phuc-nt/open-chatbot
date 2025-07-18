@@ -11,6 +11,7 @@ struct DocumentBrowserView: View {
     @State private var selectedDocument: ProcessedDocument?
     @State private var showingDeleteConfirmation = false
     @State private var documentToDelete: ProcessedDocument?
+    @State private var showingOrganization = false
     
     var body: some View {
         NavigationView {
@@ -25,12 +26,13 @@ struct DocumentBrowserView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    organizationButton
                     sortMenuButton
                     uploadButton
                 }
             }
             .searchable(text: $searchText, prompt: "Search documents...")
-            .onChange(of: searchText) { _ in
+            .onChange(of: searchText) {
                 viewModel.updateSearchFilter(searchText)
             }
             .refreshable {
@@ -42,23 +44,32 @@ struct DocumentBrowserView: View {
                 }
             }
             .alert("Delete Document", isPresented: $showingDeleteConfirmation) {
-                Button("Cancel", role: .cancel) {
-                    documentToDelete = nil
-                }
                 Button("Delete", role: .destructive) {
                     if let document = documentToDelete {
-                        viewModel.deleteDocument(document)
+                        Task {
+                            await viewModel.deleteDocument(document)
+                        }
                         documentToDelete = nil
                     }
+                }
+                Button("Cancel", role: .cancel) {
+                    documentToDelete = nil
                 }
             } message: {
                 if let document = documentToDelete {
                     Text("Are you sure you want to delete '\(document.title)'? This action cannot be undone.")
                 }
             }
+            .alert("Error", isPresented: $viewModel.showError) {
+                Button("OK") { }
+            } message: {
+                if let errorMessage = viewModel.errorMessage {
+                    Text(errorMessage)
+                }
+            }
         }
-        .onAppear {
-            viewModel.loadDocuments()
+        .task {
+            await viewModel.initialize()
         }
     }
     
@@ -125,7 +136,9 @@ struct DocumentBrowserView: View {
                         }
                         
                         Button("Archive") {
-                            viewModel.archiveDocument(document)
+                            Task {
+                                await viewModel.archiveDocument(document)
+                            }
                         }
                         .tint(.orange)
                     }
@@ -134,13 +147,15 @@ struct DocumentBrowserView: View {
                             selectedDocument = document
                             showingDocumentDetail = true
                         } label: {
-                            Label("View Details", systemImage: "doc.text.magnifyingglass")
+                            Label("View", systemImage: "eye")
                         }
                         
                         Button {
-                            viewModel.duplicateDocument(document)
+                            Task {
+                                await viewModel.archiveDocument(document)
+                            }
                         } label: {
-                            Label("Duplicate", systemImage: "doc.on.doc")
+                            Label("Archive", systemImage: "archivebox")
                         }
                         
                         Divider()
@@ -158,53 +173,29 @@ struct DocumentBrowserView: View {
         }
     }
     
-    // MARK: - Empty State
+    // MARK: - Empty State View
     @ViewBuilder
     private var emptyStateView: some View {
-        VStack(spacing: 24) {
-            if searchText.isEmpty && selectedFilter == .all {
-                // No documents at all
-                VStack(spacing: 16) {
-                    Image(systemName: "folder")
-                        .font(.system(size: 60))
-                        .foregroundColor(.gray)
-                    
-                    Text("No documents yet")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
-                    
-                    Text("Upload your first document to get started with AI-powered document analysis")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 32)
-                }
-            } else {
-                // No search results
-                VStack(spacing: 16) {
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 60))
-                        .foregroundColor(.gray)
-                    
-                    Text("No results found")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
-                    
-                    if !searchText.isEmpty {
-                        Text("No documents match '\(searchText)'")
-                            .font(.body)
-                            .foregroundColor(.secondary)
-                    } else {
-                        Text("No \(selectedFilter.displayName.lowercased()) documents")
-                            .font(.body)
-                            .foregroundColor(.secondary)
-                    }
-                }
-            }
+        VStack(spacing: 16) {
+            Image(systemName: searchText.isEmpty && selectedFilter == .all ? "doc" : "magnifyingglass")
+                .font(.system(size: 48))
+                .foregroundColor(.secondary)
             
-            // Action Buttons
+            Text(searchText.isEmpty && selectedFilter == .all ? 
+                 "No Documents" : 
+                 "No Results Found"
+            )
+            .font(.title2)
+            .fontWeight(.semibold)
+            
+            Text(searchText.isEmpty && selectedFilter == .all ? 
+                 "Upload your first document to get started" : 
+                 "Try adjusting your search or filters"
+            )
+            .font(.subheadline)
+            .foregroundColor(.secondary)
+            .multilineTextAlignment(.center)
+            
             VStack(spacing: 12) {
                 if searchText.isEmpty && selectedFilter == .all {
                     NavigationLink(destination: DocumentUploadView()) {
@@ -233,6 +224,18 @@ struct DocumentBrowserView: View {
     
     // MARK: - Toolbar Buttons
     @ViewBuilder
+    private var organizationButton: some View {
+        Button {
+            showingOrganization = true
+        } label: {
+            Image(systemName: "folder.badge.gearshape")
+        }
+        .sheet(isPresented: $showingOrganization) {
+            DocumentOrganizationView()
+        }
+    }
+    
+    @ViewBuilder
     private var sortMenuButton: some View {
         Menu {
             Picker("Sort by", selection: $selectedSortOption) {
@@ -241,7 +244,7 @@ struct DocumentBrowserView: View {
                         .tag(option)
                 }
             }
-            .onChange(of: selectedSortOption) { newValue in
+            .onChange(of: selectedSortOption) { _, newValue in
                 viewModel.updateSortOption(newValue, ascending: isAscending)
             }
             
@@ -368,7 +371,7 @@ struct DocumentBrowserRow: View {
                 // Action Indicator
                 Image(systemName: "chevron.right")
                     .font(.caption)
-                    .foregroundColor(.tertiary)
+                    .foregroundColor(.secondary)
             }
             .padding(.vertical, 4)
         }
@@ -376,60 +379,8 @@ struct DocumentBrowserRow: View {
     }
 }
 
-// MARK: - Supporting Enums
-enum DocumentFilter: String, CaseIterable {
-    case all = "all"
-    case pdf = "pdf"
-    case image = "image"
-    case text = "text"
-    case recent = "recent"
-    case archived = "archived"
-    
-    var displayName: String {
-        switch self {
-        case .all: return "All"
-        case .pdf: return "PDFs"
-        case .image: return "Images"
-        case .text: return "Text"
-        case .recent: return "Recent"
-        case .archived: return "Archived"
-        }
-    }
-}
-
-enum DocumentSortOption: String, CaseIterable {
-    case name = "name"
-    case dateCreated = "dateCreated"
-    case dateModified = "dateModified"
-    case size = "size"
-    case type = "type"
-    
-    var displayName: String {
-        switch self {
-        case .name: return "Name"
-        case .dateCreated: return "Date Created"
-        case .dateModified: return "Date Modified"
-        case .size: return "Size"
-        case .type: return "Type"
-        }
-    }
-}
-
-// MARK: - DocumentType Extensions
-extension DocumentType {
-    var backgroundColor: Color {
-        switch self {
-        case .pdf: return .red
-        case .image, .imagePNG: return .green
-        case .text: return .blue
-        case .unknown: return .gray
-        }
-    }
-    
-    var foregroundColor: Color {
-        return .white
-    }
-}
+// Note: DocumentFilter and DocumentSortOption are defined in DocumentBrowserViewModel.swift to avoid duplication
+// Note: DocumentType extensions are defined in DocumentTypes.swift to avoid duplication
 
 // MARK: - Preview
 struct DocumentBrowserView_Previews: PreviewProvider {

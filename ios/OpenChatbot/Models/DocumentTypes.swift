@@ -12,6 +12,70 @@ struct ProcessedDocument: Identifiable {
     let content: String
     let detectedLanguage: String?
     let createdAt: Date
+    var folder: DocumentFolder?
+    var tags: [String] = []
+    var isArchived: Bool = false
+    var archivedAt: Date?
+}
+
+// MARK: - Document Folder System
+struct DocumentFolder: Identifiable, Codable, Hashable {
+    let id: String
+    let name: String
+    let color: FolderColor
+    let icon: String
+    var parentID: String?
+    let createdAt: Date
+    
+    init(name: String, color: FolderColor = .blue, icon: String = "folder", parentID: String? = nil) {
+        self.id = UUID().uuidString
+        self.name = name
+        self.color = color
+        self.icon = icon
+        self.parentID = parentID
+        self.createdAt = Date()
+    }
+    
+    static let defaultFolders: [DocumentFolder] = [
+        DocumentFolder(name: "Work", color: .blue, icon: "briefcase"),
+        DocumentFolder(name: "Personal", color: .green, icon: "house"),
+        DocumentFolder(name: "Research", color: .purple, icon: "magnifyingglass"),
+        DocumentFolder(name: "Archive", color: .gray, icon: "archivebox")
+    ]
+}
+
+enum FolderColor: String, CaseIterable, Codable {
+    case blue = "blue"
+    case green = "green"
+    case purple = "purple"
+    case orange = "orange"
+    case red = "red"
+    case yellow = "yellow"
+    case pink = "pink"
+    case gray = "gray"
+    
+    var displayName: String {
+        return rawValue.capitalized
+    }
+}
+
+// MARK: - Document Organization Enums
+enum DocumentOrganization: String, CaseIterable {
+    case all = "All Documents"
+    case folders = "By Folder"
+    case tags = "By Tags" 
+    case recent = "Recent"
+    case archived = "Archived"
+    
+    var icon: String {
+        switch self {
+        case .all: return "doc.fill"
+        case .folders: return "folder.fill"
+        case .tags: return "tag.fill"
+        case .recent: return "clock.fill"
+        case .archived: return "archivebox.fill"
+        }
+    }
 }
 
 // MARK: - Document Type Enum
@@ -81,6 +145,25 @@ extension DocumentType {
         case .unknown:
             return Color.gray
         }
+    }
+}
+
+extension FolderColor {
+    var color: Color {
+        switch self {
+        case .blue: return .blue
+        case .green: return .green
+        case .purple: return .purple
+        case .orange: return .orange
+        case .red: return .red
+        case .yellow: return .yellow
+        case .pink: return .pink
+        case .gray: return .gray
+        }
+    }
+    
+    var backgroundColor: Color {
+        return color.opacity(0.1)
     }
 }
 

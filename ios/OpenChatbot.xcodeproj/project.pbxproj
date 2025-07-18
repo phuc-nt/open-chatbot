@@ -44,6 +44,11 @@
 		48E0DCC02E294EFF0033A0D8 /* DocumentUploadViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DCBF2E294EFF0033A0D8 /* DocumentUploadViewTests.swift */; };
 		48E0DCC22E294F160033A0D8 /* DocumentManagementIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DCC12E294F160033A0D8 /* DocumentManagementIntegrationTests.swift */; };
 		48E0DCC42E294F290033A0D8 /* DocumentEditViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DCC32E294F290033A0D8 /* DocumentEditViewTests.swift */; };
+		48E0DCC92E2A90A60033A0D8 /* DocumentDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DCC62E2A90A60033A0D8 /* DocumentDetailView.swift */; };
+		48E0DCCA2E2A90A60033A0D8 /* DocumentEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DCC72E2A90A60033A0D8 /* DocumentEditView.swift */; };
+		48E0DCCB2E2A90A60033A0D8 /* DocumentOrganizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DCC82E2A90A60033A0D8 /* DocumentOrganizationView.swift */; };
+		48E0DCCC2E2A90A60033A0D8 /* DocumentBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DCC52E2A90A60033A0D8 /* DocumentBrowserView.swift */; };
+		48E0DCCE2E2A91B80033A0D8 /* QuickLookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DCCD2E2A91B80033A0D8 /* QuickLookView.swift */; };
 		A10001001D000000001D0000 /* OpenChatbotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001011D000000001D0000 /* OpenChatbotApp.swift */; };
 		A10001021D000000001D0000 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001031D000000001D0000 /* ContentView.swift */; };
 		A10001041D000000001D0000 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001051D000000001D0000 /* ChatView.swift */; };
@@ -113,6 +118,11 @@
 		48E0DCBF2E294EFF0033A0D8 /* DocumentUploadViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DocumentUploadViewTests.swift; path = OpenChatbot/Tests/DocumentUploadViewTests.swift; sourceTree = SOURCE_ROOT; };
 		48E0DCC12E294F160033A0D8 /* DocumentManagementIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DocumentManagementIntegrationTests.swift; path = OpenChatbot/Tests/DocumentManagementIntegrationTests.swift; sourceTree = SOURCE_ROOT; };
 		48E0DCC32E294F290033A0D8 /* DocumentEditViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DocumentEditViewTests.swift; path = OpenChatbot/Tests/DocumentEditViewTests.swift; sourceTree = SOURCE_ROOT; };
+		48E0DCC52E2A90A60033A0D8 /* DocumentBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentBrowserView.swift; sourceTree = "<group>"; };
+		48E0DCC62E2A90A60033A0D8 /* DocumentDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentDetailView.swift; sourceTree = "<group>"; };
+		48E0DCC72E2A90A60033A0D8 /* DocumentEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentEditView.swift; sourceTree = "<group>"; };
+		48E0DCC82E2A90A60033A0D8 /* DocumentOrganizationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentOrganizationView.swift; sourceTree = "<group>"; };
+		48E0DCCD2E2A91B80033A0D8 /* QuickLookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLookView.swift; sourceTree = "<group>"; };
 		7419b22b723749408910f637 /* SmartMemorySystemIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SmartMemorySystemIntegrationTests.swift; path = OpenChatbot/Tests/SmartMemorySystemIntegrationTests.swift; sourceTree = SOURCE_ROOT; };
 		A10001011D000000001D0000 /* OpenChatbotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenChatbotApp.swift; sourceTree = "<group>"; };
 		A10001031D000000001D0000 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -161,6 +171,10 @@
 			isa = PBXGroup;
 			children = (
 				48E0DC962E26952C0033A0D8 /* DocumentUploadView.swift */,
+				48E0DCC52E2A90A60033A0D8 /* DocumentBrowserView.swift */,
+				48E0DCC62E2A90A60033A0D8 /* DocumentDetailView.swift */,
+				48E0DCC72E2A90A60033A0D8 /* DocumentEditView.swift */,
+				48E0DCC82E2A90A60033A0D8 /* DocumentOrganizationView.swift */,
 			);
 			path = Documents;
 			sourceTree = "<group>";
@@ -322,6 +336,7 @@
 			children = (
 				A1000111D000000001D0000 /* MessageBubbleView.swift */,
 				485395DF2E22B26F0078EE38 /* TokenUsageView.swift */,
+				48E0DCCD2E2A91B80033A0D8 /* QuickLookView.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -495,12 +510,17 @@
 				485395BC2E214D040078EE38 /* MemoryCoreDataBridge.swift in Sources */,
 				A1000122D000000001D0000 /* HistoryViewModel.swift in Sources */,
 				A1000124D000000001D0000 /* SettingsViewModel.swift in Sources */,
+				48E0DCC92E2A90A60033A0D8 /* DocumentDetailView.swift in Sources */,
+				48E0DCCA2E2A90A60033A0D8 /* DocumentEditView.swift in Sources */,
+				48E0DCCB2E2A90A60033A0D8 /* DocumentOrganizationView.swift in Sources */,
+				48E0DCCC2E2A90A60033A0D8 /* DocumentBrowserView.swift in Sources */,
 				485395CA2E2170CE0078EE38 /* ConversationSummaryMemoryService.swift in Sources */,
 				48E0DCA52E26A0140033A0D8 /* EmbeddingService.swift in Sources */,
 				A1000126D000000001D0000 /* PersistenceController.swift in Sources */,
 				A1000128D000000001D0000 /* DataService.swift in Sources */,
 				485395E22E22B9710078EE38 /* SmartContextRelevanceService.swift in Sources */,
 				485395C22E214D3F0078EE38 /* MemoryIntegrationDemo.swift in Sources */,
+				48E0DCCE2E2A91B80033A0D8 /* QuickLookView.swift in Sources */,
 				A1000130D000000001D0000 /* OpenChatbot.xcdatamodeld in Sources */,
 				48E0DCB92E29414B0033A0D8 /* DocumentBrowserViewModel.swift in Sources */,
 				48E0DCBA2E29414B0033A0D8 /* DocumentDetailViewModel.swift in Sources */,

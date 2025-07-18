@@ -1,7 +1,3 @@
-/*
-// Temporarily commented out DocumentBrowserViewModel for compilation
-// Will be completed in next iteration
-
 import Foundation
 import SwiftUI
 import CoreData
@@ -34,6 +30,13 @@ class DocumentBrowserViewModel: ObservableObject {
         )
     }
     
+    /// Total file size of all documents
+    var totalFileSize: Int64 {
+        return documents.reduce(0) { total, document in
+            total + document.fileSize
+        }
+    }
+    
     // MARK: - Public Methods
     
     /// Initialize and load documents
@@ -44,6 +47,18 @@ class DocumentBrowserViewModel: ObservableObject {
     /// Refresh documents from Core Data
     func refreshDocuments() async {
         await loadDocuments()
+    }
+    
+    /// Update current filter and refresh documents
+    func updateFilter(_ filter: DocumentFilter) {
+        selectedFilter = filter
+        filterDocuments()
+    }
+    
+    /// Update search text and filter documents
+    func updateSearchFilter(_ text: String) {
+        searchText = text
+        filterDocuments()
     }
     
     /// Search documents with given text
@@ -113,8 +128,15 @@ class DocumentBrowserViewModel: ObservableObject {
     
     /// Archive a document
     func archiveDocument(_ document: ProcessedDocument) async {
-        // TODO: Implement archive functionality
-        print("Archive document: \(document.title)")
+        do {
+            try await performDocumentArchiving(documentID: document.id)
+            await loadDocuments()
+        } catch {
+            await MainActor.run {
+                errorMessage = "Failed to archive document: \(error.localizedDescription)"
+                showError = true
+            }
+        }
     }
     
     /// Duplicate a document
@@ -164,15 +186,6 @@ class DocumentBrowserViewModel: ObservableObject {
     private func filterDocuments(_ documents: [ProcessedDocument], searchText: String, filter: DocumentFilter) async -> [ProcessedDocument] {
         var filtered = documents
         
-        // Apply text search
-        if !searchText.isEmpty {
-            filtered = filtered.filter { document in
-                document.title.localizedCaseInsensitiveContains(searchText) ||
-                document.fileName.localizedCaseInsensitiveContains(searchText) ||
-                document.content.localizedCaseInsensitiveContains(searchText)
-            }
-        }
-        
         // Apply type filter
         switch filter {
         case .all:
@@ -187,7 +200,16 @@ class DocumentBrowserViewModel: ObservableObject {
             filtered = filtered.filter { Calendar.current.isDateInToday($0.createdAt) }
         case .archived:
             // TODO: Implement archived filter
-            break
+            filtered = []
+        }
+        
+        // Apply search filter
+        if !searchText.isEmpty {
+            filtered = filtered.filter { document in
+                document.title.localizedCaseInsensitiveContains(searchText) ||
+                document.fileName.localizedCaseInsensitiveContains(searchText) ||
+                document.content.localizedCaseInsensitiveContains(searchText)
+            }
         }
         
         return filtered
@@ -195,30 +217,30 @@ class DocumentBrowserViewModel: ObservableObject {
     
     /// Sort documents
     private func sortDocuments(_ documents: [ProcessedDocument], by option: DocumentSortOption, ascending: Bool) async -> [ProcessedDocument] {
-        return documents.sorted { doc1, doc2 in
+        let sorted = documents.sorted { first, second in
             let result: Bool
+            
             switch option {
             case .name:
-                result = doc1.title.localizedCaseInsensitiveCompare(doc2.title) == .orderedAscending
-            case .dateCreated:
-                result = doc1.createdAt < doc2.createdAt
-            case .dateModified:
-                result = doc1.createdAt < doc2.createdAt // TODO: Use actual modified date
+                result = first.title.localizedCaseInsensitiveCompare(second.title) == .orderedAscending
+            case .dateCreated, .dateModified:
+                result = first.createdAt < second.createdAt
             case .size:
-                result = doc1.fileSize < doc2.fileSize
+                result = first.fileSize < second.fileSize
             case .type:
-                result = doc1.type.rawValue.localizedCaseInsensitiveCompare(doc2.type.rawValue) == .orderedAscending
+                result = first.type.displayName.localizedCaseInsensitiveCompare(second.type.displayName) == .orderedAscending
             }
+            
             return ascending ? result : !result
         }
+        
+        return sorted
     }
-    
-    // MARK: - Core Data Operations
     
     /// Fetch documents from Core Data
     private func fetchDocumentsFromCoreData() async throws -> [ProcessedDocument] {
         return try await withCheckedThrowingContinuation { continuation in
-            let context = dataService.persistenceController.container.viewContext
+            let context = dataService.persistenceContainer.container.viewContext
             
             context.perform {
                 do {
@@ -227,16 +249,16 @@ class DocumentBrowserViewModel: ObservableObject {
                     
                     let processedDocuments = documents.compactMap { document in
                         ProcessedDocument(
-                            id: document.id?.uuidString ?? UUID().uuidString,
-                            title: document.title ?? "Untitled",
-                            fileName: document.filename ?? "Unknown",
-                            fileURL: document.fileURL ?? URL(fileURLWithPath: ""),
+                            id: document.id.uuidString,
+                            title: document.title,
+                            fileName: document.fileName,
+                            fileURL: document.fileURL,
                             fileSize: document.fileSize,
-                            type: DocumentType(rawValue: document.mimeType ?? "") ?? .unknown,
+                            type: DocumentType(rawValue: document.mimeType) ?? .unknown,
                             pageCount: document.pageCount,
-                            content: document.content ?? "",
+                            content: document.extractedText ?? "",
                             detectedLanguage: document.detectedLanguage,
-                            createdAt: document.createdAt ?? Date()
+                            createdAt: document.createdAt
                         )
                     }
                     
@@ -251,7 +273,7 @@ class DocumentBrowserViewModel: ObservableObject {
     /// Delete document from Core Data
     private func performDocumentDeletion(documentID: String) async throws {
         return try await withCheckedThrowingContinuation { continuation in
-            let context = dataService.persistenceController.container.viewContext
+            let context = dataService.persistenceContainer.container.newBackgroundContext()
             
             context.perform {
                 do {
@@ -277,7 +299,7 @@ class DocumentBrowserViewModel: ObservableObject {
     /// Archive document in Core Data
     private func performDocumentArchiving(documentID: String) async throws {
         return try await withCheckedThrowingContinuation { continuation in
-            let context = dataService.persistenceController.container.newBackgroundContext()
+            let context = dataService.persistenceContainer.container.newBackgroundContext()
             
             context.perform {
                 do {
@@ -290,7 +312,7 @@ class DocumentBrowserViewModel: ObservableObject {
                         return
                     }
                     
-                    // TODO: Add archived flag to DocumentModel
+                    // TODO: Add archived flag to DocumentModel when schema is updated
                     // document.isArchived = true
                     // document.archivedAt = Date()
                     
@@ -300,6 +322,13 @@ class DocumentBrowserViewModel: ObservableObject {
                     continuation.resume(throwing: error)
                 }
             }
+        }
+    }
+    
+    /// Manual trigger for filtering documents
+    private func filterDocuments() {
+        Task { @MainActor in
+            await refreshDocuments()
         }
     }
 }
@@ -387,20 +416,5 @@ enum DocumentError: LocalizedError {
         case .archiveError(let error):
             return "Failed to archive: \(error.localizedDescription)"
         }
-    }
-}
-*/
-
-// MARK: - Temporary Simplified ViewModel
-import Foundation
-import SwiftUI
-
-@MainActor
-class DocumentBrowserViewModel: ObservableObject {
-    @Published var documents: [String] = [] // Temporary placeholder
-    @Published var isLoading = false
-    
-    func initialize() async {
-        // TODO: Implement when ready
     }
 } 

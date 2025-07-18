@@ -1,4 +1,5 @@
 import XCTest
+import CoreData
 @testable import OpenChatbot
 
 @MainActor
@@ -12,9 +13,9 @@ final class DocumentManagementIntegrationTests: XCTestCase {
         super.setUp()
         
         // Setup test services
-        dataService = DataService()
+        dataService = DataService(inMemory: true)
         documentProcessingService = DocumentProcessingService()
-        embeddingService = EmbeddingService()
+        embeddingService = EmbeddingService(context: dataService.persistenceContainer.container.viewContext)
     }
     
     override func tearDown() {

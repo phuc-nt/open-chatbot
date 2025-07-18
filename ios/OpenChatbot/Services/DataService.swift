@@ -6,6 +6,11 @@ class DataService: ObservableObject {
     
     private let persistenceController: PersistenceController
     
+    /// Expose persistenceController cho ViewModels access
+    var persistenceContainer: PersistenceController {
+        return persistenceController
+    }
+    
     init(persistenceController: PersistenceController = .shared) {
         self.persistenceController = persistenceController
     }

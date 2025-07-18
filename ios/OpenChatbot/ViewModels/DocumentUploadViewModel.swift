@@ -8,8 +8,15 @@ class DocumentUploadViewModel: ObservableObject {
     @Published var processingProgress: Double = 0.0
     @Published var uploadedDocuments: [ProcessedDocument] = []
     @Published var backgroundTasks: [String: ProcessingTask] = [:]
+    @Published var selectedDocuments: [URL] = []
+    @Published var errorMessage: String?
     
     private let documentService = DocumentProcessingService()
+    
+    /// Computed property để backward compatibility với tests
+    var processingTasks: [ProcessingTask] {
+        return Array(backgroundTasks.values)
+    }
     
     func handleFileSelection(_ result: Result<[URL], Error>, completion: @escaping (Error) -> Void) {
         switch result {

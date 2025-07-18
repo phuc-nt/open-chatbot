@@ -94,9 +94,7 @@ struct DocumentUploadView: View {
                 Text(errorMessage)
             }
             .sheet(isPresented: $showingBrowserView) {
-                // DocumentBrowserView() // Temporarily commented out for build
-                Text("Document Browser - Under Development")
-                    .padding()
+                DocumentBrowserView()
             }
         }
         .animation(.spring(response: 0.6, dampingFraction: 0.8), value: viewModel.isProcessing)

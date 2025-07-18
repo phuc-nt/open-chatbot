@@ -24,7 +24,7 @@ class DocumentDetailViewModel: ObservableObject {
     
     /// Save document metadata changes
     func saveChanges(title: String, tags: [String]) async {
-        guard let document = currentDocument else { return }
+        guard currentDocument != nil else { return }
         
         isLoading = true
         defer { isLoading = false }
@@ -33,6 +33,19 @@ class DocumentDetailViewModel: ObservableObject {
         self.tags = tags
         
         // TODO: Implement actual Core Data saving when DocumentEntity structure is confirmed
+    }
+    
+    /// Update document title
+    func updateTitle(_ newTitle: String) {
+        // TODO: Implement title update logic
+        print("Updating title to: \(newTitle)")
+    }
+    
+    /// Update document tags
+    func updateTags(_ newTags: [String]) {
+        tags = newTags
+        // TODO: Implement tags update persistence
+        print("Updating tags to: \(newTags)")
     }
     
     // MARK: - Tag Management
