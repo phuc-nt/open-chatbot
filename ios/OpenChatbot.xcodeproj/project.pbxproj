@@ -27,6 +27,7 @@
 		485395E62E23A9A20078EE38 /* BasicMemoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395E52E23A9A20078EE38 /* BasicMemoryTests.swift */; };
 		48D79B6B2E2BF319007F8966 /* TestConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D79B6A2E2BF319007F8966 /* TestConfig.swift */; };
 		48D79B6D2E2BF3CE007F8966 /* test_openrouter_api_key.txt in Resources */ = {isa = PBXBuildFile; fileRef = 48D79B6C2E2BF3CE007F8966 /* test_openrouter_api_key.txt */; };
+		48D79B6F2E2C0979007F8966 /* KeychainServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D79B6E2E2C0979007F8966 /* KeychainServiceTests.swift */; };
 		48E0DC912E2694A30033A0D8 /* DocumentEmbedding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DC8E2E2694A30033A0D8 /* DocumentEmbedding.swift */; };
 		48E0DC922E2694A30033A0D8 /* DocumentTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DC902E2694A30033A0D8 /* DocumentTypes.swift */; };
 		48E0DC932E2694A30033A0D8 /* DocumentModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DC8F2E2694A30033A0D8 /* DocumentModel.swift */; };
@@ -106,6 +107,7 @@
 		485395E52E23A9A20078EE38 /* BasicMemoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BasicMemoryTests.swift; path = OpenChatbot/Tests/BasicMemoryTests.swift; sourceTree = SOURCE_ROOT; };
 		48D79B6A2E2BF319007F8966 /* TestConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TestConfig.swift; path = OpenChatbot/Tests/TestConfig.swift; sourceTree = SOURCE_ROOT; };
 		48D79B6C2E2BF3CE007F8966 /* test_openrouter_api_key.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = test_openrouter_api_key.txt; path = OpenChatbot/Tests/test_openrouter_api_key.txt; sourceTree = SOURCE_ROOT; };
+		48D79B6E2E2C0979007F8966 /* KeychainServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KeychainServiceTests.swift; path = OpenChatbot/Tests/KeychainServiceTests.swift; sourceTree = SOURCE_ROOT; };
 		48E0DC8E2E2694A30033A0D8 /* DocumentEmbedding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentEmbedding.swift; sourceTree = "<group>"; };
 		48E0DC8F2E2694A30033A0D8 /* DocumentModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentModel.swift; sourceTree = "<group>"; };
 		48E0DC902E2694A30033A0D8 /* DocumentTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentTypes.swift; sourceTree = "<group>"; };
@@ -213,6 +215,7 @@
 				48E0DCD12E2B9F8E0033A0D8 /* LLMAPIServiceTests.swift */,
 				48D79B6A2E2BF319007F8966 /* TestConfig.swift */,
 				48D79B6C2E2BF3CE007F8966 /* test_openrouter_api_key.txt */,
+				48D79B6E2E2C0979007F8966 /* KeychainServiceTests.swift */,
 			);
 			path = OpenChatbotTests;
 			sourceTree = "<group>";
@@ -478,6 +481,7 @@
 				48E0DCA72E26A01F0033A0D8 /* EmbeddingServiceTests.swift in Sources */,
 				48E0DCD42E2BCCB20033A0D8 /* OpenRouterAPIServiceTests.swift in Sources */,
 				48E0DCC02E294EFF0033A0D8 /* DocumentUploadViewTests.swift in Sources */,
+				48D79B6F2E2C0979007F8966 /* KeychainServiceTests.swift in Sources */,
 				485395C82E214D850078EE38 /* MemoryServiceTests.swift in Sources */,
 				48E0DCA92E27C76E0033A0D8 /* EmbeddingServiceTests.swift in Sources */,
 				485395E42E22B9930078EE38 /* SmartContextRelevanceTests.swift in Sources */,
