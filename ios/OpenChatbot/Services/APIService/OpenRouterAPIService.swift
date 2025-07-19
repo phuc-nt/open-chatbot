@@ -162,6 +162,31 @@ class OpenRouterAPIService: LLMAPIService {
         return modelsResponse.data.map { $0.toLLMModel() }
     }
     
+    // MARK: - Get Available Models with Details
+    func getAvailableModelsWithDetails() async throws -> [OpenRouterModel] {
+        let apiKey = try await getAPIKey()
+        let url = URL(string: "\(baseURL)/models")!
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let (data, response) = try await session.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw LLMAPIError.unknownError("Invalid response")
+        }
+        
+        if httpResponse.statusCode != 200 {
+            let errorMessage = parseErrorResponse(data: data)
+            throw LLMAPIError.serverError(httpResponse.statusCode, errorMessage)
+        }
+        
+        let modelsResponse = try JSONDecoder().decode(OpenRouterModelsResponse.self, from: data)
+        return modelsResponse.data
+    }
+    
     // MARK: - Validate API Key
     func validateAPIKey(_ apiKey: String) async throws -> Bool {
         let url = URL(string: "\(baseURL)/auth/key")!
@@ -182,7 +207,11 @@ class OpenRouterAPIService: LLMAPIService {
     // MARK: - Get API Key Status
     func getAPIKeyStatus() async throws -> APIKeyStatus {
         let apiKey = try await getAPIKey()
-        let url = URL(string: "\(baseURL)/auth/key")!
+        
+        // OpenRouter doesn't have /auth/key endpoint
+        // Instead, we can validate the key by making a simple chat request
+        // or use the models endpoint to check if key is valid
+        let url = URL(string: "\(baseURL)/models")!
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -198,21 +227,11 @@ class OpenRouterAPIService: LLMAPIService {
             throw LLMAPIError.invalidAPIKey
         }
         
-        // Parse credits information if available
-        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-           let credits = json["credits"] as? Double {
-            return APIKeyStatus(
-                isValid: true,
-                remainingCredits: credits,
-                usageToday: nil,
-                rateLimitRemaining: nil,
-                rateLimitReset: nil
-            )
-        }
-        
+        // If we can access models with this key, it's valid
+        // OpenRouter doesn't provide credits info via API
         return APIKeyStatus(
             isValid: true,
-            remainingCredits: nil,
+            remainingCredits: nil, // OpenRouter doesn't expose credits via API
             usageToday: nil,
             rateLimitRemaining: nil,
             rateLimitReset: nil

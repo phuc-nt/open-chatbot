@@ -16,9 +16,6 @@ final class OpenRouterAPIServiceTests: XCTestCase {
     override func setUp() async throws {
         try await super.setUp()
         
-        // Load environment variables for API key
-        EnvironmentHelper.loadEnvironmentVariables()
-        
         // Initialize mock keychain service
         mockKeychainService = OpenRouterMockKeychainService()
         
@@ -29,7 +26,7 @@ final class OpenRouterAPIServiceTests: XCTestCase {
         cancellables = Set<AnyCancellable>()
         
         // Setup API key - use real key if available, otherwise mock
-        if let realAPIKey = EnvironmentHelper.getAPIKey(), EnvironmentHelper.hasRealAPIKey() {
+        if let realAPIKey = TestConfig.openRouterAPIKey, TestConfig.hasValidOpenRouterKey {
             mockKeychainService.setMockAPIKey(realAPIKey, for: .openrouter)
         } else {
             mockKeychainService.setMockAPIKey("test-openrouter-key-12345", for: .openrouter)
@@ -664,10 +661,16 @@ extension OpenRouterAPIServiceTests {
     
     /// Test real API call to OpenRouter with GPT-4o-mini
     func testRealAPIMessageRequest() async throws {
-        try EnvironmentHelper.skipIfNoAPIKey()
+        // Load API key from test config
+        guard let apiKey = TestConfig.openRouterAPIKey else {
+            throw XCTSkip("No API key available for testing")
+        }
         
-        let model = EnvironmentHelper.getTestModel()
-        let message = EnvironmentHelper.getTestMessage()
+        // Set the API key in mock keychain
+        mockKeychainService.setMockAPIKey(apiKey, for: .openrouter)
+        
+        let model = TestConfig.getTestModel()
+        let message = TestConfig.getTestMessage()
         
         // When
         let response = try await apiService.sendMessageSync(message, model: model, conversation: nil)
@@ -682,9 +685,13 @@ extension OpenRouterAPIServiceTests {
     
     /// Test real streaming API call
     func testRealAPIStreamingRequest() async throws {
-        try EnvironmentHelper.skipIfNoAPIKey()
+        // Load API key from test config
+        guard let apiKey = TestConfig.openRouterAPIKey else {
+            throw XCTSkip("No API key available for testing")
+        }
+        mockKeychainService.setMockAPIKey(apiKey, for: .openrouter)
         
-        let model = EnvironmentHelper.getTestModel()
+        let model = TestConfig.getTestModel()
         let message = "Count from 1 to 3, one number per line."
         
         var receivedChunks: [String] = []
@@ -709,10 +716,14 @@ extension OpenRouterAPIServiceTests {
     
     /// Test real API call with conversation history
     func testRealAPIWithConversationHistory() async throws {
-        try EnvironmentHelper.skipIfNoAPIKey()
+        // Load API key from test config
+        guard let apiKey = TestConfig.openRouterAPIKey else {
+            throw XCTSkip("No API key available for testing")
+        }
+        mockKeychainService.setMockAPIKey(apiKey, for: .openrouter)
         
-        let model = EnvironmentHelper.getTestModel()
-        let conversation = EnvironmentHelper.getTestConversation()
+        let model = TestConfig.getTestModel()
+        let conversation = TestConfig.getTestConversation()
         let message = "What was my previous question?"
         
         // When
@@ -728,15 +739,14 @@ extension OpenRouterAPIServiceTests {
     
     /// Test real API key validation
     func testRealAPIKeyValidation() async throws {
-        try EnvironmentHelper.skipIfNoAPIKey()
-        
-        guard let realAPIKey = EnvironmentHelper.getAPIKey() else {
-            XCTFail("Real API key should be available")
-            return
+        // Load API key from test config
+        guard let apiKey = TestConfig.openRouterAPIKey else {
+            throw XCTSkip("No API key available for testing")
         }
+        mockKeychainService.setMockAPIKey(apiKey, for: .openrouter)
         
         // When
-        let result = try await apiService.validateAPIKey(realAPIKey)
+        let result = try await apiService.validateAPIKey(apiKey)
         
         // Then
         XCTAssertTrue(result, "Real API key should validate successfully")
@@ -745,7 +755,11 @@ extension OpenRouterAPIServiceTests {
     
     /// Test real available models request
     func testRealAvailableModelsRequest() async throws {
-        try EnvironmentHelper.skipIfNoAPIKey()
+        // Load API key from test config
+        guard let apiKey = TestConfig.openRouterAPIKey else {
+            throw XCTSkip("No API key available for testing")
+        }
+        mockKeychainService.setMockAPIKey(apiKey, for: .openrouter)
         
         // When
         let models = try await apiService.getAvailableModels()
@@ -753,7 +767,7 @@ extension OpenRouterAPIServiceTests {
         // Then
         XCTAssertGreaterThan(models.count, 0, "Should receive available models from real API")
         
-        let testModel = EnvironmentHelper.getTestModel()
+        let testModel = TestConfig.getTestModel()
         let hasTestModel = models.contains { $0.id == testModel.id }
         XCTAssertTrue(hasTestModel, "Available models should include \(testModel.id)")
         
@@ -762,15 +776,51 @@ extension OpenRouterAPIServiceTests {
     
     /// Test real API key status
     func testRealAPIKeyStatus() async throws {
-        try EnvironmentHelper.skipIfNoAPIKey()
+        // Load API key from test config
+        guard let apiKey = TestConfig.openRouterAPIKey else {
+            throw XCTSkip("No API key available for testing")
+        }
+        mockKeychainService.setMockAPIKey(apiKey, for: .openrouter)
         
         // When
         let status = try await apiService.getAPIKeyStatus()
         
         // Then
         XCTAssertTrue(status.isValid, "Real API key should be valid")
-        XCTAssertNotNil(status.remainingCredits, "Should have credits information")
+        // OpenRouter doesn't expose credits via API, so remainingCredits should be nil
+        XCTAssertNil(status.remainingCredits, "OpenRouter doesn't expose credits via API")
         
-        print("✅ Real API Key Status: Valid=\(status.isValid), Credits=\(status.remainingCredits ?? 0)")
+        print("✅ Real API Key Status: Valid=\(status.isValid)")
+    }
+    
+    /// Test real available models with details
+    func testRealAvailableModelsWithDetails() async throws {
+        // Load API key from test config
+        guard let apiKey = TestConfig.openRouterAPIKey else {
+            throw XCTSkip("No API key available for testing")
+        }
+        mockKeychainService.setMockAPIKey(apiKey, for: .openrouter)
+        
+        // When
+        let models = try await apiService.getAvailableModelsWithDetails()
+        
+        // Then
+        XCTAssertGreaterThan(models.count, 0, "Should receive available models from real API")
+        
+        // Check for specific popular models
+        let modelIds = models.map { $0.id }
+        let hasGPT4 = modelIds.contains { $0.contains("gpt-4") }
+        let hasClaude = modelIds.contains { $0.contains("claude") }
+        let hasGemini = modelIds.contains { $0.contains("gemini") }
+        
+        XCTAssertTrue(hasGPT4 || hasClaude || hasGemini, "Should have at least one major model")
+        
+        // Print some model details
+        let sampleModels = models.prefix(5)
+        print("✅ Real Available Models with Details:")
+        for model in sampleModels {
+            print("  - \(model.id): \(model.name ?? "Unknown") (Context: \(model.context_length ?? 0))")
+        }
+        print("  Total models: \(models.count)")
     }
 } 

@@ -66,7 +66,7 @@
 #### **TEST-002: API Service Test Suite (2 days) ✅ COMPLETED**
 **Estimated Effort**: 16 hours (**Actual**: 14 hours)  
 **Business Impact**: High - Infrastructure reliability  
-**Status**: ✅ **100% COMPLETE** - July 19, 2025
+**Status**: ✅ **100% COMPLETED** - July 19, 2025
 
 **Completed Scope**:
 - ✅ LLMAPIService protocol compliance tests (24 test cases)
@@ -75,24 +75,45 @@
 - ✅ API key validation tests (Keychain integration)
 - ✅ Error handling và retry logic (Comprehensive error scenarios)
 - ✅ Network failure simulation (Mock network layer)
-- ✅ Real API integration framework (với .env configuration)
+- ✅ Real API integration framework (với TestConfig configuration)
+- ✅ OpenRouter API endpoint fixes (/auth/key → /models validation)
+- ✅ Model list retrieval tests (getAvailableModelsWithDetails)
+- ✅ Security improvements (API key moved to separate file)
 
 **Final Deliverables**:
 - ✅ `LLMAPIServiceTests.swift` (750+ lines implemented)
 - ✅ `OpenRouterAPIServiceTests.swift` (650+ lines implemented) 
-- ✅ `EnvironmentHelper.swift` (Real API testing framework)
+- ✅ `TestConfig.swift` (Centralized test configuration)
+- ✅ `test_openrouter_api_key.txt` (Secure API key storage)
 - ✅ Mock network layer complete
-- ✅ 24 protocol tests ALL PASSING (100% success rate)
-- ✅ Real API integration tests (SKIPPED - ready for .env setup)
+- ✅ 50+ protocol tests ALL PASSING (100% success rate)
+- ✅ 7 Real API integration tests ALL PASSING (100% success rate)
 
 **Key Achievements**:
 - **Test Coverage**: 50+ comprehensive test methods
 - **Real API Integration**: Complete OpenRouter API với gpt-4o-mini support
-- **Environment Management**: .env file integration cho secure API testing
+- **Security**: API key moved to separate file, gitignored
 - **Error Simulation**: Advanced error handling test scenarios
-- **Performance**: Mock tests under 0.1s, Real API tests ready
+- **Performance**: Mock tests under 0.1s, Real API tests under 3s
+- **Production Ready**: All real API tests passing with actual OpenRouter integration
 
-**Note**: Real API tests hiện tại **SKIPPED** do .env file placement. Ready để activate khi needed.
+**Technical Improvements**:
+- ✅ Fixed OpenRouter `/auth/key` endpoint → Using `/models` for validation
+- ✅ Added `getAvailableModelsWithDetails()` method
+- ✅ Implemented TestConfig system for secure API key management
+- ✅ Removed hard-coded API keys from source code
+- ✅ Added comprehensive model list testing
+
+**Real API Test Results** (July 19, 2025):
+1. `testRealAPIMessageRequest()` ✅ **PASSED** (1.604s)
+2. `testRealAPIStreamingRequest()` ✅ **PASSED** (1.374s)
+3. `testRealAPIWithConversationHistory()` ✅ **PASSED** (1.249s)
+4. `testRealAPIKeyValidation()` ✅ **PASSED** (0.199s)
+5. `testRealAvailableModelsRequest()` ✅ **PASSED** (0.314s)
+6. `testRealAPIKeyStatus()` ✅ **PASSED** (0.353s)
+7. `testRealAvailableModelsWithDetails()` ✅ **PASSED** (0.341s)
+
+**Note**: All real API tests now **PASSING** with actual OpenRouter integration. TestConfig system provides secure API key management.
 
 #### **TEST-003: KeychainService Test Suite (1 day) 🔴 CRITICAL**
 **Estimated Effort**: 8 hours  

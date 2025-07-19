@@ -94,4 +94,4 @@ docs/build/
 **/*-secrets.json 
 
 # Ignore VSCode settings
-.vscode/ 
+.vscode/ ios/OpenChatbot/Tests/test_openrouter_api_key.txt
