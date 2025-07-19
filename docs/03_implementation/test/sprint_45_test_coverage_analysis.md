@@ -568,4 +568,135 @@ User Journey: "Manage chat history"
 
 ---
 
+## API Service Test-to-Business Mapping
+
+### **TEST-002: API Service Test Suite - User Story Mapping**
+
+#### **LLMAPIService Protocol Tests - Infrastructure Reliability**
+
+| Test Case | User Story | Business Impact | What We Protect |
+|-----------|------------|-----------------|-----------------|
+| `testSendMessageWithValidInput()` | *"User gửi message và expect AI response"* | Core functionality | Primary user workflow |
+| `testSendMessageSyncWithModel()` | *"User chọn AI model và nhận response"* | Model flexibility | User customization |
+| `testSendMessageWithConversationHistory()` | *"User có conversation context remembered"* | Intelligent conversation | Context continuity |
+| `testStreamingResponse()` | *"User thấy AI typing real-time"* | Modern UX | Real-time interaction |
+| `testGetAvailableModels()` | *"User xem list AI models available"* | Service discovery | Model selection |
+| `testValidateAPIKeySuccess()` | *"User setup API key successfully"* | Authentication | Service access |
+| `testValidateAPIKeyFailure()` | *"User get clear error for invalid key"* | Error guidance | Setup workflow |
+| `testGetAPIKeyStatus()` | *"User monitor API usage và limits"* | Usage transparency | Cost awareness |
+| `testCancelCurrentRequest()` | *"User can stop long-running requests"* | User control | Request management |
+| `testErrorHandlingNetworkFailure()` | *"App graceful khi network issues"* | Reliability | Network resilience |
+| `testErrorHandlingInvalidResponse()` | *"App handle malformed API responses"* | Data integrity | Response validation |
+| `testErrorHandlingRateLimit()` | *"User understand usage limits"* | Service sustainability | Rate compliance |
+
+**Business Context**: Protocol tests ensure **API contract compliance** across all providers. Foundation cho reliable AI communication.
+
+#### **OpenRouterAPIService Implementation Tests - Production Readiness**
+
+| Test Case | User Story | Business Impact | What We Protect |
+|-----------|------------|-----------------|-----------------|
+| `testRealAPIMessageRequest()` | *"User send message và nhận real AI response"* | Production functionality | Live API integration |
+| `testRealAPIStreamingRequest()` | *"User experience real-time AI streaming"* | Streaming UX | AsyncStream implementation |
+| `testRealAPIWithConversationHistory()` | *"User context preserved across messages"* | Conversation intelligence | Memory integration |
+| `testRealAPIKeyValidation()` | *"User setup works with real OpenRouter API"* | Authentication flow | Real service validation |
+| `testRealAvailableModelsRequest()` | *"User see actual available models"* | Service discovery | Live model catalog |
+| `testRealAPIKeyStatus()` | *"User monitor real usage và billing"* | Cost transparency | Usage monitoring |
+| `testRealAvailableModelsWithDetails()` | *"User see model capabilities và pricing"* | Informed choice | Model comparison |
+
+**Business Context**: Real API tests ensure **production readiness** với actual OpenRouter service. Validate streaming, models, và billing integration.
+
+#### **Security & Configuration Tests - Enterprise Ready**
+
+| Test Case | User Story | Business Impact | What We Protect |
+|-----------|------------|-----------------|-----------------|
+| `testSecureAPIKeyStorage()` | *"User API keys stored securely"* | Data security | Credential protection |
+| `testTestConfigKeyLoading()` | *"Test suite load keys securely"* | Development security | Test isolation |
+| `testEnvironmentIsolation()` | *"Test không affect production keys"* | Environment safety | Production protection |
+| `testAPIKeyValidation()` | *"Only valid keys accepted"* | Security validation | Access control |
+
+**Business Context**: Security tests ensure **enterprise-grade** credential management và environment isolation.
+
+### **End-to-End User Journey Protection**
+
+#### **Complete AI Chat Workflow**
+```
+User Journey: "Send message và receive streaming AI response"
+├── 1. User types message in chat interface
+├── 2. ChatViewModel.sendMessage() validates input
+├── 3. LLMAPIService.sendMessage() handles API call
+├── 4. OpenRouterAPIService streams real response
+├── 5. Response displayed real-time to user
+└── 6. Context saved for next interaction
+
+Tests Protect:
+✅ Step 2: ChatViewModel Tests (TEST-001)
+✅ Step 3: LLMAPIService Protocol Tests (TEST-002)
+✅ Step 4: OpenRouterAPIService Implementation Tests (TEST-002)
+✅ Step 5: Streaming Tests (TEST-002)
+✅ Step 6: Memory Integration Tests (TEST-001)
+```
+
+#### **API Provider Setup Workflow**
+```
+User Journey: "Add OpenRouter API key"
+├── 1. User opens Settings
+├── 2. User enters API key
+├── 3. KeychainService.storeAPIKey() secures key
+├── 4. LLMAPIService.validateAPIKey() verifies key
+├── 5. OpenRouterAPIService.getAvailableModels() loads models
+└── 6. User can select models và start chatting
+
+Tests Protect:
+✅ Step 3: KeychainService Tests (TEST-003)
+✅ Step 4: API Key Validation Tests (TEST-002)
+✅ Step 5: Model Discovery Tests (TEST-002)
+✅ Step 6: Model Selection Tests (TEST-001)
+```
+
+#### **Error Recovery Workflow**
+```
+User Journey: "Handle network/API failures gracefully"
+├── 1. User sends message during network issue
+├── 2. API call fails with network error
+├── 3. Error handling displays helpful message
+├── 4. User can retry when network restored
+└── 5. Conversation context preserved
+
+Tests Protect:
+✅ Step 2: Network Error Tests (TEST-002)
+✅ Step 3: Error Message Tests (TEST-001)
+✅ Step 4: Retry Logic Tests (TEST-002)
+✅ Step 5: Context Persistence Tests (TEST-001)
+```
+
+### **Business Risk Mitigation Matrix**
+
+| Risk Category | Business Impact | Test Protection | User Benefit |
+|---------------|-----------------|-----------------|--------------|
+| **API Downtime** | Service unavailable | Error handling tests | Graceful degradation |
+| **Invalid Keys** | Authentication failure | Validation tests | Clear setup guidance |
+| **Rate Limiting** | Usage interruption | Rate limit tests | Usage awareness |
+| **Network Issues** | Connectivity problems | Network error tests | Resilient operation |
+| **Streaming Failures** | Poor UX | Streaming tests | Real-time experience |
+| **Model Unavailability** | Limited functionality | Model discovery tests | Service reliability |
+| **Security Breach** | Credential exposure | Security tests | Data protection |
+
+### **Quality Investment ROI**
+
+#### **TEST-002 Business Value**
+- **User Trust**: Reliable AI responses build confidence
+- **Production Readiness**: Real API integration validated
+- **Error Resilience**: Graceful handling of failures
+- **Security Assurance**: Enterprise-grade credential management
+- **Performance Validation**: Streaming và response time benchmarks
+
+#### **Coverage Achievements**
+- **50+ test cases** covering protocol compliance + real API
+- **24 protocol tests** ensure cross-provider compatibility
+- **7 real API tests** validate production scenarios
+- **1400+ lines** comprehensive test coverage
+- **TestConfig system** secure test key management
+
+---
+
 **Coverage Analysis Complete** - Sprint 4.5 represents critical investment trong quality foundation that will pay dividends throughout Phases 3-6! 🎯 

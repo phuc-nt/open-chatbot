@@ -91,7 +91,12 @@ docs/build/
 # API Keys (security)
 **/APIKeys.plist
 **/secrets.plist
-**/*-secrets.json 
+**/*-secrets.json
+**/*api_key.txt
+**/test_*_api_key.txt
 
 # Ignore VSCode settings
-.vscode/ ios/OpenChatbot/Tests/test_openrouter_api_key.txt
+.vscode/
+
+# Test API Keys (development security)
+ios/OpenChatbot/Tests/test_openrouter_api_key.txt
