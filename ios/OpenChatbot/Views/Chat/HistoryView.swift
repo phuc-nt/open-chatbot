@@ -12,7 +12,7 @@ struct HistoryView: View {
         animation: .default
     ) private var fetchedConversations: FetchedResults<ConversationEntity>
     
-    // Computed property for filtered conversations
+    // Computed property for filtered conversations - USE ONLY @FetchRequest data
     private var filteredConversations: [ConversationEntity] {
         if searchText.isEmpty {
             return Array(fetchedConversations)
@@ -21,7 +21,7 @@ struct HistoryView: View {
                 let title = conversation.title ?? ""
                 let titleMatches = title.localizedCaseInsensitiveContains(searchText)
                 
-                // Check if any message content matches
+                // Check if any message content matches - use Core Data directly
                 let messages = viewModel.dataService.getMessagesForConversation(conversation)
                 let messageMatches = messages.contains { message in
                     message.content.localizedCaseInsensitiveContains(searchText)
@@ -32,11 +32,12 @@ struct HistoryView: View {
         }
     }
     
-    // Delete conversations function
+    // Delete conversations function - work directly with Core Data
     private func deleteConversations(offsets: IndexSet) {
         let conversationsToDelete = offsets.map { filteredConversations[$0] }
         for conversation in conversationsToDelete {
-            viewModel.deleteConversation(conversation)
+            // Use DataService directly instead of ViewModel array manipulation
+            viewModel.dataService.deleteConversation(conversation)
         }
     }
     
@@ -53,7 +54,7 @@ struct HistoryView: View {
                     }
                 }
                 
-                // Conversations Section
+                // Conversations Section - USE ONLY @FetchRequest data
                 if !fetchedConversations.isEmpty {
                     Section("Recent Conversations") {
                         ForEach(filteredConversations, id: \.id) { conversation in
@@ -99,34 +100,46 @@ struct HistoryView: View {
                 titleVisibility: .visible
             ) {
                 Button("Clear All", role: .destructive) {
-                    viewModel.clearAllConversations()
+                    // Clear all using DataService directly
+                    for conversation in fetchedConversations {
+                        viewModel.dataService.deleteConversation(conversation)
+                    }
+                    // Send notification to ChatViewModel
+                    NotificationCenter.default.post(name: Notification.Name("AllConversationsCleared"), object: nil)
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
                 Text("This will permanently delete all conversation history. This action cannot be undone.")
             }
-            .onAppear {
-                viewModel.loadConversations()
-            }
-            .refreshable {
-                viewModel.refreshConversations()
-            }
-            .onChange(of: appState.selectedTab) { newTab in
-                // Refresh when switching to History tab
-                if newTab == 1 { // History tab
-                    viewModel.refreshConversations()
-                }
-            }
+            // Remove unnecessary refresh calls - @FetchRequest handles this automatically
         }
     }
 }
-
-
 
 struct ConversationRow: View {
     let conversation: ConversationEntity
     let viewModel: HistoryViewModel
     let appState: AppState
+    
+    // 🔥 ADD: Real-time message count using @FetchRequest
+    @FetchRequest private var messages: FetchedResults<MessageEntity>
+    
+    // Initialize @FetchRequest with conversation-specific predicate
+    init(conversation: ConversationEntity, viewModel: HistoryViewModel, appState: AppState) {
+        self.conversation = conversation
+        self.viewModel = viewModel
+        self.appState = appState
+        
+        // Create predicate for this specific conversation
+        let predicate = NSPredicate(format: "conversationId == %@", conversation.id! as CVarArg)
+        
+        // Initialize @FetchRequest with conversation-specific filter
+        self._messages = FetchRequest(
+            sortDescriptors: [NSSortDescriptor(keyPath: \MessageEntity.timestamp, ascending: true)],
+            predicate: predicate,
+            animation: .default
+        )
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -145,7 +158,8 @@ struct ConversationRow: View {
                 
                 Spacer()
                 
-                Text("\(viewModel.getMessageCount(conversation)) messages")
+                // 🔥 FIXED: Use real-time @FetchRequest count instead of method call
+                Text("\(messages.count) messages")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -162,4 +176,4 @@ struct ConversationRow: View {
 
 #Preview {
     HistoryView()
-} 
+}

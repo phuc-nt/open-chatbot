@@ -133,10 +133,12 @@ class DataService: ObservableObject {
         messageEntity.conversationId = message.conversationId
         messageEntity.conversation = conversation
         
-        // Update conversation timestamp
+        // 🔥 CRITICAL: Update conversation timestamp to trigger @FetchRequest refresh
         conversation.updatedAt = Date()
         
-        saveContext()
+        // 🔥 CRITICAL: Force context to process changes immediately
+        try? context.save()
+        
         return messageEntity
     }
     
