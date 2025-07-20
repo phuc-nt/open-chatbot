@@ -428,6 +428,8 @@ class ChatViewModel: ObservableObject {
                     handleMemoryError(error, context: "adding assistant message to memory")
                 }
                 
+                // Core Data notification will automatically trigger HistoryViewModel refresh
+                
                 // Update local array with final message
                 if let lastIndex = messages.lastIndex(where: { $0.role == .assistant }) {
                     messages[lastIndex] = finalAssistantMessage

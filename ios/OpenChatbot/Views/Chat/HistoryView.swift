@@ -6,6 +6,40 @@ struct HistoryView: View {
     @State private var showClearAllConfirmation = false
     @EnvironmentObject var appState: AppState
     
+    // Direct Core Data fetch request for automatic refresh
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(keyPath: \ConversationEntity.updatedAt, ascending: false)],
+        animation: .default
+    ) private var fetchedConversations: FetchedResults<ConversationEntity>
+    
+    // Computed property for filtered conversations
+    private var filteredConversations: [ConversationEntity] {
+        if searchText.isEmpty {
+            return Array(fetchedConversations)
+        } else {
+            return fetchedConversations.filter { conversation in
+                let title = conversation.title ?? ""
+                let titleMatches = title.localizedCaseInsensitiveContains(searchText)
+                
+                // Check if any message content matches
+                let messages = viewModel.dataService.getMessagesForConversation(conversation)
+                let messageMatches = messages.contains { message in
+                    message.content.localizedCaseInsensitiveContains(searchText)
+                }
+                
+                return titleMatches || messageMatches
+            }
+        }
+    }
+    
+    // Delete conversations function
+    private func deleteConversations(offsets: IndexSet) {
+        let conversationsToDelete = offsets.map { filteredConversations[$0] }
+        for conversation in conversationsToDelete {
+            viewModel.deleteConversation(conversation)
+        }
+    }
+    
     var body: some View {
         NavigationView {
             Form {
@@ -20,12 +54,12 @@ struct HistoryView: View {
                 }
                 
                 // Conversations Section
-                if !viewModel.conversations.isEmpty {
+                if !fetchedConversations.isEmpty {
                     Section("Recent Conversations") {
-                        ForEach(viewModel.filteredConversations(searchText: searchText), id: \.id) { conversation in
+                        ForEach(filteredConversations, id: \.id) { conversation in
                             ConversationRow(conversation: conversation, viewModel: viewModel, appState: appState)
                         }
-                        .onDelete(perform: viewModel.deleteConversations)
+                        .onDelete(perform: deleteConversations)
                     }
                 } else {
                     Section {
@@ -51,7 +85,7 @@ struct HistoryView: View {
             .navigationTitle("History")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    if !viewModel.conversations.isEmpty {
+                    if !fetchedConversations.isEmpty {
                         Button("Clear All") {
                             showClearAllConfirmation = true
                         }
@@ -76,6 +110,12 @@ struct HistoryView: View {
             }
             .refreshable {
                 viewModel.refreshConversations()
+            }
+            .onChange(of: appState.selectedTab) { newTab in
+                // Refresh when switching to History tab
+                if newTab == 1 { // History tab
+                    viewModel.refreshConversations()
+                }
             }
         }
     }

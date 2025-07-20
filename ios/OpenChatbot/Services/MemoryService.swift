@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import SwiftUI
+import CoreData
 
 // MARK: - Supporting Types
 struct MemoryStatistics {
@@ -131,8 +132,8 @@ class MemoryService: ObservableObject {
             return newConversation
         }()
         
-        // Save the message to persistence first
-        dataService.addMessage(message, to: conversation)
+        // Note: Message is already saved to persistence by ChatViewModel
+        // We only need to add to memory cache here
         
         // Then add to memory cache
         guard let memory = memoryCache[conversationId] else {
@@ -144,7 +145,7 @@ class MemoryService: ObservableObject {
         
         memory.addMessage(message)
         
-        print("🧠 Added message to memory and persistence: \(message.role.rawValue)")
+        print("🧠 Added message to memory cache: \(message.role.rawValue)")
     }
     
     /// Get context for API call - equivalent to memory.chatMemory.messages

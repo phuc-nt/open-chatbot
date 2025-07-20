@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import CoreData
+import Combine
 
 @MainActor
 class HistoryViewModel: ObservableObject {
@@ -9,11 +10,45 @@ class HistoryViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
     
-    private let dataService: DataService
+    let dataService: DataService  // Make it public for HistoryView access
     
     init(dataService: DataService = DataService()) {
         self.dataService = dataService
         loadConversations()
+        
+        // Listen for Core Data context changes
+        NotificationCenter.default.addObserver(
+            forName: .NSManagedObjectContextObjectsDidChange,
+            object: dataService.viewContext,
+            queue: .main
+        ) { [weak self] notification in
+            self?.handleCoreDataChanges(notification)
+        }
+    }
+    
+    // MARK: - Core Data Change Handling
+    
+    private func handleCoreDataChanges(_ notification: Notification) {
+        // Check if any ConversationEntity or MessageEntity was changed
+        guard let userInfo = notification.userInfo else { return }
+        
+        let insertedObjects = userInfo[NSInsertedObjectsKey] as? Set<NSManagedObject> ?? Set()
+        let updatedObjects = userInfo[NSUpdatedObjectsKey] as? Set<NSManagedObject> ?? Set()
+        let deletedObjects = userInfo[NSDeletedObjectsKey] as? Set<NSManagedObject> ?? Set()
+        
+        let allChangedObjects = insertedObjects.union(updatedObjects).union(deletedObjects)
+        
+        // Check if any of the changed objects affect conversations or messages
+        let hasRelevantChanges = allChangedObjects.contains { object in
+            return String(describing: type(of: object)).contains("Conversation") || 
+                   String(describing: type(of: object)).contains("Message")
+        }
+        
+        if hasRelevantChanges {
+            Task { @MainActor in
+                refreshConversations()
+            }
+        }
     }
     
     // MARK: - Public Methods
