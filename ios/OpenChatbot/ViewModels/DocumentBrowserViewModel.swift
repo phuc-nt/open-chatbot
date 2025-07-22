@@ -244,21 +244,21 @@ class DocumentBrowserViewModel: ObservableObject {
             
             context.perform {
                 do {
-                    let fetchRequest: NSFetchRequest<DocumentModel> = DocumentModel.fetchRequest()
+                    let fetchRequest: NSFetchRequest<DocumentEntity> = DocumentEntity.fetchRequest()
                     let documents = try context.fetch(fetchRequest)
                     
                     let processedDocuments = documents.compactMap { document in
                         ProcessedDocument(
-                            id: document.id.uuidString,
-                            title: document.title,
-                            fileName: document.fileName,
-                            fileURL: document.fileURL,
+                            id: document.id?.uuidString ?? UUID().uuidString,
+                            title: document.title ?? "Untitled",
+                            fileName: document.fileURL?.lastPathComponent ?? "Unknown",
+                            fileURL: document.fileURL ?? URL(fileURLWithPath: ""),
                             fileSize: document.fileSize,
-                            type: DocumentType(rawValue: document.mimeType) ?? .unknown,
+                            type: DocumentType(rawValue: document.type ?? "") ?? .unknown,
                             pageCount: document.pageCount,
-                            content: document.extractedText ?? "",
+                            content: document.textContent ?? "",
                             detectedLanguage: document.detectedLanguage,
-                            createdAt: document.createdAt
+                            createdAt: document.createdAt ?? Date()
                         )
                     }
                     

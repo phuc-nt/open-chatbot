@@ -33,12 +33,19 @@ struct ContentView: View {
                 .tag(1)
                 .environmentObject(appState)
             
+            DocumentBrowserView()
+                .tabItem {
+                    Image(systemName: "doc.text")
+                    Text("Documents")
+                }
+                .tag(2)
+            
             SettingsView(chatViewModel: sharedChatViewModel)
                 .tabItem {
                     Image(systemName: "gearshape")
                     Text("Settings")
                 }
-                .tag(2)
+                .tag(3)
         }
     }
 }
