@@ -28,6 +28,8 @@
 		48D79B6B2E2BF319007F8966 /* TestConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D79B6A2E2BF319007F8966 /* TestConfig.swift */; };
 		48D79B6D2E2BF3CE007F8966 /* test_openrouter_api_key.txt in Resources */ = {isa = PBXBuildFile; fileRef = 48D79B6C2E2BF3CE007F8966 /* test_openrouter_api_key.txt */; };
 		48D79B6F2E2C0979007F8966 /* KeychainServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D79B6E2E2C0979007F8966 /* KeychainServiceTests.swift */; };
+		48D79B712E30FAD5007F8966 /* DocumentPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D79B702E30FAD5007F8966 /* DocumentPickerView.swift */; };
+		48D79B732E30FC35007F8966 /* DocumentEmbeddingProcessingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D79B722E30FC35007F8966 /* DocumentEmbeddingProcessingService.swift */; };
 		48E0DC912E2694A30033A0D8 /* DocumentEmbedding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DC8E2E2694A30033A0D8 /* DocumentEmbedding.swift */; };
 		48E0DC922E2694A30033A0D8 /* DocumentTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DC902E2694A30033A0D8 /* DocumentTypes.swift */; };
 		48E0DC932E2694A30033A0D8 /* DocumentModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E0DC8F2E2694A30033A0D8 /* DocumentModel.swift */; };
@@ -108,6 +110,8 @@
 		48D79B6A2E2BF319007F8966 /* TestConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TestConfig.swift; path = OpenChatbot/Tests/TestConfig.swift; sourceTree = SOURCE_ROOT; };
 		48D79B6C2E2BF3CE007F8966 /* test_openrouter_api_key.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = test_openrouter_api_key.txt; path = OpenChatbot/Tests/test_openrouter_api_key.txt; sourceTree = SOURCE_ROOT; };
 		48D79B6E2E2C0979007F8966 /* KeychainServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KeychainServiceTests.swift; path = OpenChatbot/Tests/KeychainServiceTests.swift; sourceTree = SOURCE_ROOT; };
+		48D79B702E30FAD5007F8966 /* DocumentPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPickerView.swift; sourceTree = "<group>"; };
+		48D79B722E30FC35007F8966 /* DocumentEmbeddingProcessingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentEmbeddingProcessingService.swift; sourceTree = "<group>"; };
 		48E0DC8E2E2694A30033A0D8 /* DocumentEmbedding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentEmbedding.swift; sourceTree = "<group>"; };
 		48E0DC8F2E2694A30033A0D8 /* DocumentModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentModel.swift; sourceTree = "<group>"; };
 		48E0DC902E2694A30033A0D8 /* DocumentTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentTypes.swift; sourceTree = "<group>"; };
@@ -320,6 +324,7 @@
 				48E0DC942E2694E40033A0D8 /* DocumentProcessingService.swift */,
 				48E0DCA42E26A0140033A0D8 /* EmbeddingService.swift */,
 				48E0DCB52E28043B0033A0D8 /* CoreDataVectorService.swift */,
+				48D79B722E30FC35007F8966 /* DocumentEmbeddingProcessingService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -337,6 +342,7 @@
 			children = (
 				A10001051D000000001D0000 /* ChatView.swift */,
 				A10001071D000000001D0000 /* HistoryView.swift */,
+				48D79B702E30FAD5007F8966 /* DocumentPickerView.swift */,
 			);
 			path = Chat;
 			sourceTree = "<group>";
@@ -515,8 +521,10 @@
 				A1000110D000000001D0000 /* MessageBubbleView.swift in Sources */,
 				485395C02E214D320078EE38 /* LangChainMemoryService.swift in Sources */,
 				A1000112D000000001D0000 /* Message.swift in Sources */,
+				48D79B712E30FAD5007F8966 /* DocumentPickerView.swift in Sources */,
 				A1000114D000000001D0000 /* Conversation.swift in Sources */,
 				A1000116D000000001D0000 /* APIKey.swift in Sources */,
+				48D79B732E30FC35007F8966 /* DocumentEmbeddingProcessingService.swift in Sources */,
 				48E0DC952E2694E40033A0D8 /* DocumentProcessingService.swift in Sources */,
 				A1000118D000000001D0000 /* CoreDataExtensions.swift in Sources */,
 				485395C42E214D5C0078EE38 /* ConversationMemoryExtensions.swift in Sources */,

@@ -4,6 +4,7 @@ struct ChatView: View {
     @ObservedObject var viewModel: ChatViewModel
     @State private var messageText = ""
     @State private var showModelPicker = false
+    @State private var showDocumentPicker = false
     @EnvironmentObject var appState: AppState
     
     // Default initializer for when no viewModel is provided (like in previews)
@@ -93,6 +94,9 @@ struct ChatView: View {
             .sheet(isPresented: $showModelPicker) {
                 ModelPickerView(viewModel: viewModel)
             }
+            .sheet(isPresented: $showDocumentPicker) {
+                DocumentPickerView()
+            }
             .onChange(of: appState.selectedConversationID) { conversationID in
                 if let id = conversationID, let uuid = UUID(uuidString: id) {
                     // Load conversation by ID when coming from History tab
@@ -128,6 +132,16 @@ struct ChatView: View {
     
     private var inputArea: some View {
         HStack(spacing: 12) {
+            // Document selection button
+            Button(action: {
+                showDocumentPicker = true
+            }) {
+                Image(systemName: "doc.text.magnifyingglass")
+                    .font(.title2)
+                    .foregroundColor(.blue)
+            }
+            .disabled(viewModel.isStreaming)
+            
             TextField("Nhập tin nhắn...", text: $messageText, axis: .vertical)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .lineLimit(1...5)
