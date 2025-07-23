@@ -7,6 +7,27 @@ import UniformTypeIdentifiers
 import CoreData
 import NaturalLanguage
 
+// MARK: - Document Processing Errors
+enum DocumentExtractionError: Error, LocalizedError {
+    case failedToReadPDF
+    case failedToReadImage
+    case unsupportedFileType
+    case extractionFailed
+    
+    var errorDescription: String? {
+        switch self {
+        case .failedToReadPDF:
+            return "Failed to read PDF document"
+        case .failedToReadImage:
+            return "Failed to read image file"
+        case .unsupportedFileType:
+            return "Unsupported file type"
+        case .extractionFailed:
+            return "Failed to extract text content"
+        }
+    }
+}
+
 // MARK: - Document Upload View Model with RAG Pipeline Foundation
 class DocumentUploadViewModel: ObservableObject {
     @Published var isProcessing = false
@@ -16,6 +37,9 @@ class DocumentUploadViewModel: ObservableObject {
     @Published var uploadedCount: Int = 0
     @Published var embeddingProgress: String = ""
     @Published var processedDocuments: [ProcessedDocumentInfo] = []
+    
+    // Services
+    private let dataService = DataService()
     
     // MARK: - Document Processing Methods
     
@@ -119,11 +143,11 @@ class DocumentUploadViewModel: ObservableObject {
         case .text:
             content = try String(contentsOf: url, encoding: .utf8)
         case .pdf:
-            // Simulate PDF text extraction
-            content = "PDF document content extracted from \(url.lastPathComponent)\n\nThis is simulated text content that would be extracted from a PDF document using PDFKit. In a real implementation, this would contain the actual text content of the PDF file."
+            // Extract real PDF text content using PDFKit
+            content = try await extractPDFText(from: url)
         case .image:
-            // Simulate OCR text extraction
-            content = "Image text content extracted from \(url.lastPathComponent)\n\nThis is simulated text content that would be extracted from an image using Vision framework OCR. In a real implementation, this would contain the actual text recognized from the image."
+            // Extract real text from image using Vision OCR
+            content = try await extractImageText(from: url)
         case .unknown:
             content = "Document content from \(url.lastPathComponent)"
         }
@@ -281,13 +305,13 @@ class DocumentUploadViewModel: ObservableObject {
     /// Save processed document to Core Data
     private func saveDocumentToCoreData(_ document: ProcessedDocumentInfo) async {
         return await withCheckedContinuation { continuation in
-            let context = PersistenceController.shared.newBackgroundContext()
+            let context = dataService.persistenceContainer.container.newBackgroundContext()
             
             context.perform {
                 do {
                     // Create DocumentEntity using NSEntityDescription
-                    guard let entityDescription = NSEntityDescription.entity(forEntityName: "DocumentEntity", in: context) else {
-                        print("❌ Failed to get DocumentEntity description")
+                    guard let entityDescription = NSEntityDescription.entity(forEntityName: "Document", in: context) else {
+                        print("❌ Failed to get Document entity description")
                         continuation.resume()
                         return
                     }
@@ -307,11 +331,100 @@ class DocumentUploadViewModel: ObservableObject {
                     // Save context
                     try context.save()
                     print("✅ Saved document to Core Data: \(document.title)")
+                    
+                    // Post notification to refresh documents list
+                    DispatchQueue.main.async {
+                        NotificationCenter.default.post(name: .documentSaved, object: nil)
+                    }
+                    
                     continuation.resume()
                     
                 } catch {
                     print("❌ Failed to save document to Core Data: \(error)")
                     continuation.resume()
+                }
+            }
+        }
+    }
+    
+    /// Extract real text content from PDF using PDFKit
+    private func extractPDFText(from url: URL) async throws -> String {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.global(qos: .userInitiated).async {
+                guard let pdfDocument = PDFDocument(url: url) else {
+                    continuation.resume(throwing: DocumentExtractionError.failedToReadPDF)
+                    return
+                }
+                
+                var extractedText = ""
+                let pageCount = pdfDocument.pageCount
+                
+                for pageIndex in 0..<pageCount {
+                    if let page = pdfDocument.page(at: pageIndex),
+                       let pageText = page.string {
+                        extractedText += pageText + "\n\n"
+                    }
+                }
+                
+                if extractedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    extractedText = "PDF file processed but no readable text content was found. This may be a scanned document or image-based PDF."
+                }
+                
+                print("📄 Extracted \(extractedText.count) characters from PDF: \(url.lastPathComponent)")
+                continuation.resume(returning: extractedText)
+            }
+        }
+    }
+    
+    /// Extract text from image using Vision OCR
+    private func extractImageText(from url: URL) async throws -> String {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.global(qos: .userInitiated).async {
+                #if os(macOS)
+                guard let image = NSImage(contentsOf: url),
+                      let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+                    continuation.resume(throwing: DocumentError.failedToReadImage)
+                    return
+                }
+                #else
+                guard let image = UIImage(contentsOfFile: url.path),
+                      let cgImage = image.cgImage else {
+                    continuation.resume(throwing: DocumentExtractionError.failedToReadImage)
+                    return
+                }
+                #endif
+                
+                let request = VNRecognizeTextRequest { (request, error) in
+                    if let error = error {
+                        continuation.resume(throwing: error)
+                        return
+                    }
+                    
+                    guard let observations = request.results as? [VNRecognizedTextObservation] else {
+                        continuation.resume(returning: "Image processed but no text was recognized.")
+                        return
+                    }
+                    
+                    let recognizedText = observations.compactMap { observation in
+                        observation.topCandidates(1).first?.string
+                    }.joined(separator: "\n")
+                    
+                    let result = recognizedText.isEmpty ? 
+                        "Image processed but no readable text content was found." : recognizedText
+                    
+                    print("📄 Extracted \(result.count) characters from image: \(url.lastPathComponent)")
+                    continuation.resume(returning: result)
+                }
+                
+                request.recognitionLevel = .accurate
+                request.usesLanguageCorrection = true
+                
+                let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+                
+                do {
+                    try handler.perform([request])
+                } catch {
+                    continuation.resume(throwing: error)
                 }
             }
         }

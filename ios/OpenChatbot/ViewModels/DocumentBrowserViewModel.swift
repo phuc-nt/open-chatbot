@@ -2,6 +2,11 @@ import Foundation
 import SwiftUI
 import CoreData
 
+// MARK: - Notification Names
+extension Notification.Name {
+    static let documentSaved = Notification.Name("documentSaved")
+}
+
 // MARK: - Document Browser ViewModel
 @MainActor
 class DocumentBrowserViewModel: ObservableObject {
@@ -16,6 +21,19 @@ class DocumentBrowserViewModel: ObservableObject {
     @Published var showError = false
     
     private let dataService = DataService()
+    
+    init() {
+        // Listen for document saved notifications
+        NotificationCenter.default.addObserver(
+            forName: .documentSaved,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task {
+                await self?.refreshDocuments()
+            }
+        }
+    }
     
     // MARK: - Computed Properties
     
@@ -244,21 +262,21 @@ class DocumentBrowserViewModel: ObservableObject {
             
             context.perform {
                 do {
-                    let fetchRequest: NSFetchRequest<DocumentEntity> = DocumentEntity.fetchRequest()
+                    let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Document")
                     let documents = try context.fetch(fetchRequest)
                     
                     let processedDocuments = documents.compactMap { document in
                         ProcessedDocument(
-                            id: document.id?.uuidString ?? UUID().uuidString,
-                            title: document.title ?? "Untitled",
-                            fileName: document.fileURL?.lastPathComponent ?? "Unknown",
-                            fileURL: document.fileURL ?? URL(fileURLWithPath: ""),
-                            fileSize: document.fileSize,
-                            type: DocumentType(rawValue: document.type ?? "") ?? .unknown,
-                            pageCount: document.pageCount,
-                            content: document.textContent ?? "",
-                            detectedLanguage: document.detectedLanguage,
-                            createdAt: document.createdAt ?? Date()
+                            id: (document.value(forKey: "id") as? UUID)?.uuidString ?? UUID().uuidString,
+                            title: document.value(forKey: "title") as? String ?? "Untitled",
+                            fileName: (document.value(forKey: "fileURL") as? URL)?.lastPathComponent ?? "Unknown",
+                            fileURL: document.value(forKey: "fileURL") as? URL ?? URL(fileURLWithPath: ""),
+                            fileSize: document.value(forKey: "fileSize") as? Int64 ?? 0,
+                            type: DocumentType(rawValue: document.value(forKey: "type") as? String ?? "") ?? .unknown,
+                            pageCount: document.value(forKey: "pageCount") as? Int32 ?? 0,
+                            content: document.value(forKey: "textContent") as? String ?? "",
+                            detectedLanguage: document.value(forKey: "detectedLanguage") as? String,
+                            createdAt: document.value(forKey: "createdAt") as? Date ?? Date()
                         )
                     }
                     
@@ -277,7 +295,7 @@ class DocumentBrowserViewModel: ObservableObject {
             
             context.perform {
                 do {
-                    let fetchRequest: NSFetchRequest<DocumentEntity> = DocumentEntity.fetchRequest()
+                    let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Document")
                     fetchRequest.predicate = NSPredicate(format: "id == %@", UUID(uuidString: documentID)! as CVarArg)
                     
                     let documents = try context.fetch(fetchRequest)

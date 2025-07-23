@@ -12,37 +12,79 @@
 
 **Test Status**: ✅ **FULLY RESOLVED** - All issues fixed including file permissions and Core Data persistence
 
-**Latest Update (July 18, 2025)**: ✅ **DocumentUploadViewModel & DocumentUploadView COMPLETED**
-- **Build Status**: ✅ **BUILD SUCCEEDED** - App compiles và runs successfully 
-- **UI Implementation**: ✅ **FUNCTIONAL** - Complete upload interface với progress tracking
-- **Core Features**: ✅ **WORKING** - File selection, processing, và status display
-- **Architecture**: ✅ **PRODUCTION READY** - Simplified, maintainable implementation
+**Latest Update (July 23, 2025)**: ✅ **REAL PDF EXTRACTION IMPLEMENTED & WORKING**
+- **Build Status**: ✅ **BUILD SUCCEEDED** - App compiles and runs successfully on real device
+- **PDF Extraction**: ✅ **WORKING** - Real PDF text extraction using PDFKit implemented
+- **RAG Integration**: ✅ **WORKING** - RAG system now uses actual document content instead of hardcoded text
+- **Image OCR**: ✅ **IMPLEMENTED** - Vision framework OCR for image text extraction
+- **Core Features**: ✅ **WORKING** - File selection, processing, and real content extraction
+
+**Real PDF Extraction Test Results**:
+- ✅ `📄 Extracted 416 characters from PDF: SALONPAS HCMC MARATHON 2021`
+- ✅ `📄 Extracted 4415 characters from PDF: JD-AI-Solution-Architect.pdf`
+- ✅ `📄 Real document context retrieved: 1029 characters from 2 documents`
+- ✅ RAG responses now based on actual document content, not simulated text
 
 **Test Steps Executed**:
 1. ✅ Opened app on iPhone 16
 2. ✅ Navigated to Document tab
 3. ✅ Selected Upload feature
-4. ✅ Chose file from document picker
-5. ✅ **FIXED**: Resolved "permission to view it" error
-6. ✅ **FIXED**: Resolved Core Data persistence issue
-7. ✅ Verified file appears in Document list
+4. ✅ Chose PDF file from document picker
+5. ✅ **VERIFIED**: Real PDF text extraction working
+6. ✅ **VERIFIED**: Documents save to Core Data with actual content
+7. ✅ **VERIFIED**: RAG chat uses real document content
 8. ✅ Verified file metadata displays correctly
 
 **Expected Results**:
-- App should handle PDF, images, và text files correctly
-- Files should upload without permission errors
-- Uploaded files should appear in Document list
-- File metadata should be accessible
+- App should extract real text from PDF files using PDFKit
+- RAG system should use actual document content for responses
+- Files should upload and process actual content
+- Chat responses should be based on real document text
 
 **Actual Results**:
-1. **Permission Error**: ✅ **FIXED** - Security scoped resource access implemented
-2. **Core Data Persistence**: ✅ **FIXED** - Documents now save to Core Data properly
-3. **UI Display**: ✅ **WORKING** - Files appear in Document list after upload
-4. **Metadata Access**: ✅ **WORKING** - File details accessible in Document view
+1. **Real PDF Extraction**: ✅ **WORKING** - PDFKit extracts actual text from PDFs
+2. **RAG Integration**: ✅ **WORKING** - Chat responses use real document content
+3. **Core Data Storage**: ✅ **WORKING** - Documents save with actual extracted text
+4. **Chat Functionality**: ✅ **WORKING** - Can chat about real document content
+
+**Remaining Issues**:
+- ⚠️ **Multi-file selection in same conversation**: Some issues when selecting multiple files
+- 📋 **TODO**: Test remaining acceptance test cases
 
 ## Detailed Fix Attempts and Analysis
 
-### Fix Attempt #1: Security Scoped Resource Access (SUCCESSFUL)
+### Fix Attempt #3: Real PDF Text Extraction (SUCCESSFUL - July 23, 2025)
+**Problem**: RAG system was using hardcoded simulated content instead of actual PDF text
+**Root Cause**: Document extraction was using placeholder text, not real PDF content
+**Solution**: Implemented real PDF text extraction using PDFKit and Vision OCR
+```swift
+/// Extract real text content from PDF using PDFKit
+private func extractPDFText(from url: URL) async throws -> String {
+    return try await withCheckedThrowingContinuation { continuation in
+        DispatchQueue.global(qos: .userInitiated).async {
+            guard let pdfDocument = PDFDocument(url: url) else {
+                continuation.resume(throwing: DocumentExtractionError.failedToReadPDF)
+                return
+            }
+            
+            var extractedText = ""
+            let pageCount = pdfDocument.pageCount
+            
+            for pageIndex in 0..<pageCount {
+                if let page = pdfDocument.page(at: pageIndex),
+                   let pageText = page.string {
+                    extractedText += pageText + "\n\n"
+                }
+            }
+            
+            print("📄 Extracted \(extractedText.count) characters from PDF: \(url.lastPathComponent)")
+            continuation.resume(returning: extractedText)
+        }
+    }
+}
+```
+
+### Fix Attempt #2: Security Scoped Resource Access (SUCCESSFUL)
 **Problem**: "upload Error, The file ... because you done't have permission to view it."
 **Root Cause**: DocumentUploadViewModel không handle security scoped resources đúng cách
 **Solution**: Added proper security scoped resource handling

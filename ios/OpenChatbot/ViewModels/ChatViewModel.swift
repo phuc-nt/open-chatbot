@@ -187,7 +187,7 @@ class ChatViewModel: ObservableObject {
         
         // Initialize RAG Query Service simulator with real embedding service
         if let embeddingService = self.embeddingService {
-            self.ragQueryService = RAGQueryServiceSimulator(embeddingService: embeddingService)
+            self.ragQueryService = RAGQueryServiceSimulator(embeddingService: embeddingService, dataService: self.dataService)
             print("✅ RAG Services initialized successfully")
         } else {
             print("⚠️ Failed to initialize RAG services")
@@ -499,6 +499,10 @@ class ChatViewModel: ObservableObject {
                     let systemMessage = ChatMessage(role: .system, content: "Context from documents:\n\n\(ragContext)\n\nPlease use this context to help answer the user's question.")
                     chatMessages.insert(systemMessage, at: 0)
                     print("📄 Added RAG context to conversation (\(ragContext.count) characters)")
+                    print("🔍 RAG CONTEXT CONTENT:")
+                    print(String(repeating: "=", count: 50))
+                    print(ragContext)
+                    print(String(repeating: "=", count: 50))
                 }
                 
                 // Stream response from API with memory and RAG context
@@ -630,6 +634,15 @@ class ChatViewModel: ObservableObject {
             
             documentContext = ragResult.context
             print("📄 RAG query completed: \(ragResult.context.count) characters of context")
+            
+            // Log the actual context that will be sent to LLM
+            if !ragResult.context.isEmpty {
+                print("🔍 FINAL RAG CONTEXT TO BE SENT TO LLM:")
+                print(String(repeating: "-", count: 40))
+                print(ragResult.context)
+                print(String(repeating: "-", count: 40))
+            }
+            
             return ragResult.context
             
         } catch {
@@ -871,9 +884,11 @@ class RAGQueryServiceSimulator {
     }
     
     private let embeddingService: EmbeddingServiceProtocol?
+    private let dataService: DataService
     
-    init(embeddingService: EmbeddingServiceProtocol? = nil) {
+    init(embeddingService: EmbeddingServiceProtocol? = nil, dataService: DataService = DataService()) {
         self.embeddingService = embeddingService
+        self.dataService = dataService
     }
     
     /// Enhanced RAG query processing with real embedding service
@@ -881,7 +896,19 @@ class RAGQueryServiceSimulator {
         // Simulate query processing time
         try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
         
-        // Generate simulated document context
+        // Try to get real document content from Core Data first
+        let realContext = await fetchRealDocumentContext(for: query, documentIds: documentIds, topK: topK)
+        
+        if !realContext.isEmpty {
+            return RAGQueryResult(
+                query: query,
+                documentIds: documentIds,
+                context: realContext,
+                relevantChunks: min(topK, documentIds.count * 2)
+            )
+        }
+        
+        // Fallback to simulated context if no real content found
         let simulatedContext = generateSimulatedContext(for: query, documentIds: documentIds, topK: topK)
         
         return RAGQueryResult(
@@ -890,6 +917,56 @@ class RAGQueryServiceSimulator {
             context: simulatedContext,
             relevantChunks: min(topK, documentIds.count * 2)
         )
+    }
+    
+    private func fetchRealDocumentContext(for query: String, documentIds: [String], topK: Int) async -> String {
+        return await withCheckedContinuation { continuation in
+            let context = self.dataService.persistenceContainer.container.viewContext
+            
+            context.perform {
+                do {
+                    let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Document")
+                    let documents = try context.fetch(fetchRequest)
+                    
+                    print("📄 Found \(documents.count) documents in Core Data")
+                    
+                    var relevantContent: [String] = []
+                    
+                    for document in documents.prefix(topK) {
+                        if let content = document.value(forKey: "textContent") as? String,
+                           let title = document.value(forKey: "title") as? String {
+                            
+                            print("📄 Checking document: '\(title)' (\(content.count) characters)")
+                            
+                            // Simple relevance check - contains query terms
+                            let queryLower = query.lowercased()
+                            let contentLower = content.lowercased()
+                            
+                            if contentLower.contains(queryLower) || 
+                               queryLower.contains("tóm tắt") || 
+                               queryLower.contains("nói về") ||
+                               queryLower.contains("gì") {
+                                
+                                let excerpt = String(content.prefix(500)) // First 500 chars
+                                relevantContent.append("From '\(title)':\n\(excerpt)")
+                                print("✅ Document '\(title)' matched query '\(query)'")
+                                print("📄 Excerpt: \(excerpt.prefix(100))...")
+                            } else {
+                                print("❌ Document '\(title)' did not match query '\(query)'")
+                            }
+                        }
+                    }
+                    
+                    let result = relevantContent.isEmpty ? "" : relevantContent.joined(separator: "\n\n---\n\n")
+                    print("📄 Real document context retrieved: \(result.count) characters from \(relevantContent.count) documents")
+                    continuation.resume(returning: result)
+                    
+                } catch {
+                    print("❌ Failed to fetch real document context: \(error)")
+                    continuation.resume(returning: "")
+                }
+            }
+        }
     }
     
     private func generateSimulatedContext(for query: String, documentIds: [String], topK: Int) -> String {
