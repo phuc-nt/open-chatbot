@@ -1,6 +1,10 @@
 import Foundation
 import SwiftUI
+import PDFKit
+import Vision
+import VisionKit
 import UniformTypeIdentifiers
+import CoreData
 import NaturalLanguage
 
 // MARK: - Document Upload View Model with RAG Pipeline Foundation
@@ -76,7 +80,14 @@ class DocumentUploadViewModel: ObservableObject {
             
             try await simulateEmbeddingGeneration(for: documentInfo, chunks: textChunks)
             
-            // Step 5: Store processed document info
+            // Step 5: Save to Core Data
+            await MainActor.run {
+                embeddingProgress = "Saving \(fileName) to database..."
+            }
+            
+            await saveDocumentToCoreData(documentInfo)
+            
+            // Step 6: Store processed document info
             await MainActor.run {
                 processedDocuments.append(documentInfo)
                 uploadedCount += 1
@@ -156,6 +167,15 @@ class DocumentUploadViewModel: ObservableObject {
         if let docIndex = processedDocuments.firstIndex(where: { $0.id == document.id }) {
             await MainActor.run {
                 processedDocuments[docIndex].embeddingCount = chunks.count
+                
+                // TODO: Save document to Core Data after processing
+                // Need to fix DataService and DocumentEntity imports
+                // Task {
+                //     await saveDocumentToCoreData(processedDocuments[docIndex])
+                // }
+                
+                print("🏆 Document processed successfully: \(document.title)")
+                print("📊 Embedding count: \(chunks.count)")
             }
         }
     }
@@ -256,6 +276,45 @@ class DocumentUploadViewModel: ObservableObject {
     func getEmbeddingStats() -> String {
         let totalEmbeddings = processedDocuments.reduce(0) { $0 + $1.embeddingCount }
         return "\(totalEmbeddings) embeddings from \(processedDocuments.count) documents"
+    }
+    
+    /// Save processed document to Core Data
+    private func saveDocumentToCoreData(_ document: ProcessedDocumentInfo) async {
+        return await withCheckedContinuation { continuation in
+            let context = PersistenceController.shared.newBackgroundContext()
+            
+            context.perform {
+                do {
+                    // Create DocumentEntity using NSEntityDescription
+                    guard let entityDescription = NSEntityDescription.entity(forEntityName: "DocumentEntity", in: context) else {
+                        print("❌ Failed to get DocumentEntity description")
+                        continuation.resume()
+                        return
+                    }
+                    
+                    let documentEntity = NSManagedObject(entity: entityDescription, insertInto: context)
+                    documentEntity.setValue(UUID(uuidString: document.id) ?? UUID(), forKey: "id")
+                    documentEntity.setValue(document.title, forKey: "title")
+                    documentEntity.setValue(document.fileURL, forKey: "fileURL")
+                    documentEntity.setValue(document.fileSize, forKey: "fileSize")
+                    documentEntity.setValue(document.fileType.rawValue, forKey: "type")
+                    documentEntity.setValue(Int32(0), forKey: "pageCount")
+                    documentEntity.setValue(document.content, forKey: "textContent")
+                    documentEntity.setValue(document.detectedLanguage, forKey: "detectedLanguage")
+                    documentEntity.setValue(document.createdAt, forKey: "createdAt")
+                    documentEntity.setValue(Date(), forKey: "updatedAt")
+                    
+                    // Save context
+                    try context.save()
+                    print("✅ Saved document to Core Data: \(document.title)")
+                    continuation.resume()
+                    
+                } catch {
+                    print("❌ Failed to save document to Core Data: \(error)")
+                    continuation.resume()
+                }
+            }
+        }
     }
 }
 

@@ -36,8 +36,25 @@ struct HistoryView: View {
     private func deleteConversations(offsets: IndexSet) {
         let conversationsToDelete = offsets.map { filteredConversations[$0] }
         for conversation in conversationsToDelete {
+            // Store conversation ID before deletion for notification
+            let deletedConversationId = conversation.id
+            let conversationTitle = conversation.title ?? "Untitled"
+            
+            print("🗑️ Deleting conversation: '\(conversationTitle)' with ID: \(deletedConversationId?.uuidString ?? "nil")")
+            
             // Use DataService directly instead of ViewModel array manipulation
             viewModel.dataService.deleteConversation(conversation)
+            
+            // Only notify if conversation has valid ID
+            if let deletedId = deletedConversationId {
+                NotificationCenter.default.post(
+                    name: Notification.Name("ConversationDeleted"), 
+                    object: deletedId
+                )
+                print("📢 Posted ConversationDeleted notification for ID: \(deletedId.uuidString)")
+            } else {
+                print("⚠️ Cannot post deletion notification - conversation has no ID")
+            }
         }
     }
     

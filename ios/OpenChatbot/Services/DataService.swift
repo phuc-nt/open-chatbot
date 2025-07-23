@@ -92,8 +92,13 @@ class DataService: ObservableObject {
     
     /// Get messages for conversation
     func getMessagesForConversation(_ conversation: ConversationEntity) -> [Message] {
+        guard let conversationId = conversation.id else {
+            print("⚠️ Conversation has no ID")
+            return []
+        }
+        
         let request = MessageEntity.fetchRequest()
-        request.predicate = NSPredicate(format: "conversationId == %@", conversation.id! as CVarArg)
+        request.predicate = NSPredicate(format: "conversationId == %@", conversationId as CVarArg)
         request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
         
         do {
@@ -120,26 +125,72 @@ class DataService: ObservableObject {
         }
     }
     
-    /// Add message to conversation
+    /// Add message to conversation  
     @discardableResult
     func addMessage(_ message: Message, to conversation: ConversationEntity) -> MessageEntity {
         let context = persistenceController.viewContext
-        let messageEntity = MessageEntity(context: context)
         
-        messageEntity.id = message.id
-        messageEntity.content = message.content
-        messageEntity.role = message.role.rawValue
-        messageEntity.timestamp = message.timestamp
-        messageEntity.conversationId = message.conversationId
-        messageEntity.conversation = conversation
-        
-        // 🔥 CRITICAL: Update conversation timestamp to trigger @FetchRequest refresh
-        conversation.updatedAt = Date()
-        
-        // 🔥 CRITICAL: Force context to process changes immediately
-        try? context.save()
-        
-        return messageEntity
+        // 🔥 FIX: Perform operation within a single context perform block
+        return context.performAndWait {
+            let messageEntity = MessageEntity(context: context)
+            
+            messageEntity.id = message.id
+            messageEntity.content = message.content
+            messageEntity.role = message.role.rawValue
+            messageEntity.timestamp = message.timestamp
+            messageEntity.conversationId = message.conversationId
+            
+            // 🔥 FIX: Get conversation from same context or fetch it
+            let conversationInContext: ConversationEntity
+            if conversation.managedObjectContext == context {
+                conversationInContext = conversation
+            } else {
+                // Fetch conversation in current context
+                let request = ConversationEntity.fetchRequest()
+                request.predicate = NSPredicate(format: "id == %@", conversation.id! as CVarArg)
+                request.fetchLimit = 1
+                
+                do {
+                    let conversations = try context.fetch(request)
+                    if let foundConversation = conversations.first {
+                        conversationInContext = foundConversation
+                        print("✅ Fetched conversation from same context")
+                    } else {
+                        print("⚠️ Conversation not found in context, creating new reference")
+                        // Create conversation reference in current context
+                        let newConversation = ConversationEntity(context: context)
+                        newConversation.id = conversation.id
+                        newConversation.title = conversation.title
+                        newConversation.createdAt = conversation.createdAt ?? Date()
+                        newConversation.updatedAt = Date()
+                        conversationInContext = newConversation
+                    }
+                } catch {
+                    print("❌ Error fetching conversation: \(error)")
+                    // Fallback: create new conversation reference
+                    let newConversation = ConversationEntity(context: context)
+                    newConversation.id = conversation.id
+                    newConversation.title = conversation.title
+                    newConversation.createdAt = conversation.createdAt ?? Date()
+                    newConversation.updatedAt = Date()
+                    conversationInContext = newConversation
+                }
+            }
+            
+            // Set relationship and update timestamp
+            messageEntity.conversation = conversationInContext
+            conversationInContext.updatedAt = Date()
+            
+            // Save immediately
+            do {
+                try context.save()
+                print("✅ Saved message with proper conversation relationship")
+            } catch {
+                print("❌ Error saving message: \(error)")
+            }
+            
+            return messageEntity
+        }
     }
     
     /// Delete message
@@ -164,9 +215,14 @@ class DataService: ObservableObject {
     
     /// Clear all messages in conversation
     func clearMessagesInConversation(_ conversation: ConversationEntity) {
+        guard let conversationId = conversation.id else {
+            print("⚠️ Conversation has no ID")
+            return
+        }
+        
         let context = persistenceController.viewContext
         let request = MessageEntity.fetchRequest()
-        request.predicate = NSPredicate(format: "conversationId == %@", conversation.id! as CVarArg)
+        request.predicate = NSPredicate(format: "conversationId == %@", conversationId as CVarArg)
         
         do {
             let messageEntities = try context.fetch(request)

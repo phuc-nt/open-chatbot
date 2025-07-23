@@ -109,25 +109,57 @@ struct ChatView: View {
     }
     
     private var headerView: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 8) {
+            // Model selection header
             let selectedModel = viewModel.selectedModel
-                HStack {
-                    Image(systemName: "cpu")
-                        .foregroundColor(.blue)
-                    Text(selectedModel.name)
-                        .font(.caption)
-                        .fontWeight(.medium)
-                    Spacer()
-                    Text(selectedModel.provider.displayName)
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                }
-                .padding(.horizontal)
-                .padding(.vertical, 4)
-                .background(Color.blue.opacity(0.1))
-                .cornerRadius(8)
-                .padding(.horizontal)
+            HStack {
+                Image(systemName: "cpu")
+                    .foregroundColor(.blue)
+                Text(selectedModel.name)
+                    .font(.caption)
+                    .fontWeight(.medium)
+                Spacer()
+                Text(selectedModel.provider.displayName)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 4)
+            .background(Color.blue.opacity(0.1))
+            .cornerRadius(8)
+            .padding(.horizontal)
+            
+            // RAG context header (show only when documents are selected)
+            if viewModel.isRAGEnabled {
+                ragContextHeader
+            }
         }
+    }
+    
+    private var ragContextHeader: some View {
+        HStack {
+            Image(systemName: "doc.text.magnifyingglass")
+                .font(.caption)
+                .foregroundColor(.green)
+            
+            Text(viewModel.getDocumentContextSummary())
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundColor(.primary)
+            
+            Spacer()
+            
+            Button("Clear") {
+                viewModel.clearDocumentContext()
+            }
+            .font(.caption2)
+            .foregroundColor(.red)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 4)
+        .background(Color.green.opacity(0.1))
+        .cornerRadius(8)
+        .padding(.horizontal)
     }
     
     private var inputArea: some View {

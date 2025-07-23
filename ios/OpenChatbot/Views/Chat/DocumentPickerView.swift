@@ -1,19 +1,17 @@
 import SwiftUI
+import CoreData
 
 // Document Picker for RAG Context Selection
 struct DocumentPickerView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var chatViewModel: ChatViewModel
     
-    // Simulated available documents for RAG
-    @State private var availableDocuments: [SimulatedDocument] = [
-        SimulatedDocument(id: "doc1", title: "Project Requirements", type: .pdf, size: "2.3 MB"),
-        SimulatedDocument(id: "doc2", title: "Technical Specifications", type: .pdf, size: "1.8 MB"),
-        SimulatedDocument(id: "doc3", title: "User Guide", type: .text, size: "856 KB"),
-        SimulatedDocument(id: "doc4", title: "API Documentation", type: .pdf, size: "3.1 MB"),
-        SimulatedDocument(id: "doc5", title: "Meeting Notes", type: .text, size: "245 KB"),
-        SimulatedDocument(id: "doc6", title: "Design Mockups", type: .image, size: "5.2 MB")
-    ]
+    // Real uploaded documents from Core Data instead of simulated
+    @State private var availableDocuments: [ProcessedDocument] = []
+    @State private var isLoading = true
+    
+    // Data service to fetch real documents
+    private let dataService = DataService()
     
     var body: some View {
         NavigationView {
@@ -21,8 +19,14 @@ struct DocumentPickerView: View {
                 // Header with context info
                 ragContextHeader
                 
-                // Document list
-                documentList
+                // Document list or loading/empty state
+                if isLoading {
+                    loadingState
+                } else if availableDocuments.isEmpty {
+                    emptyState
+                } else {
+                    documentList
+                }
             }
             .navigationTitle("Select Documents")
             .toolbar {
@@ -37,6 +41,89 @@ struct DocumentPickerView: View {
                         dismiss()
                     }
                     .fontWeight(.semibold)
+                }
+            }
+            .task {
+                await loadRealDocuments()
+            }
+        }
+    }
+    
+    // MARK: - Loading and Empty States
+    private var loadingState: some View {
+        VStack(spacing: 16) {
+            ProgressView()
+                .scaleEffect(1.2)
+            Text("Loading documents...")
+                .font(.body)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    
+    private var emptyState: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "doc.text.below.ecg")
+                .font(.largeTitle)
+                .foregroundColor(.gray)
+            
+            Text("No Documents Available")
+                .font(.headline)
+            
+            Text("Upload documents in the Documents tab to use them for context")
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    
+    // MARK: - Load Real Documents
+    private func loadRealDocuments() async {
+        isLoading = true
+        defer { isLoading = false }
+        
+        do {
+            let documents = try await fetchDocumentsFromCoreData()
+            await MainActor.run {
+                self.availableDocuments = documents
+            }
+        } catch {
+            print("Failed to load documents: \(error)")
+            await MainActor.run {
+                self.availableDocuments = []
+            }
+        }
+    }
+    
+    private func fetchDocumentsFromCoreData() async throws -> [ProcessedDocument] {
+        return try await withCheckedThrowingContinuation { continuation in
+            let context = dataService.persistenceContainer.container.viewContext
+            
+            context.perform {
+                do {
+                    let fetchRequest: NSFetchRequest<DocumentEntity> = DocumentEntity.fetchRequest()
+                    let documents = try context.fetch(fetchRequest)
+                    
+                    let processedDocuments = documents.compactMap { document in
+                        ProcessedDocument(
+                            id: document.id?.uuidString ?? UUID().uuidString,
+                            title: document.title ?? "Untitled",
+                            fileName: document.fileURL?.lastPathComponent ?? "Unknown",
+                            fileURL: document.fileURL ?? URL(fileURLWithPath: ""),
+                            fileSize: document.fileSize,
+                            type: DocumentType(rawValue: document.type ?? "") ?? .unknown,
+                            pageCount: document.pageCount,
+                            content: document.textContent ?? "",
+                            detectedLanguage: document.detectedLanguage,
+                            createdAt: document.createdAt ?? Date()
+                        )
+                    }
+                    
+                    continuation.resume(returning: processedDocuments)
+                } catch {
+                    continuation.resume(throwing: error)
                 }
             }
         }
@@ -103,7 +190,7 @@ struct DocumentPickerView: View {
     private var documentList: some View {
         List {
             Section(header: sectionHeader) {
-                ForEach(availableDocuments) { document in
+                ForEach(availableDocuments, id: \ProcessedDocument.id) { document in
                     DocumentRow(
                         document: document,
                         isSelected: chatViewModel.selectedDocuments.contains(document.id),
@@ -139,7 +226,7 @@ struct DocumentPickerView: View {
 
 // MARK: - Document Row Component
 struct DocumentRow: View {
-    let document: SimulatedDocument
+    let document: ProcessedDocument
     let isSelected: Bool
     let onToggle: (Bool) -> Void
     
@@ -172,7 +259,7 @@ struct DocumentRow: View {
                         .foregroundColor(document.type.foregroundColor)
                         .cornerRadius(4)
                     
-                    Text(document.size)
+                    Text(ByteCountFormatter.string(fromByteCount: document.fileSize, countStyle: .file))
                         .font(.caption)
                         .foregroundColor(.secondary)
                     

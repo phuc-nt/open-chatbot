@@ -277,7 +277,7 @@ class DocumentBrowserViewModel: ObservableObject {
             
             context.perform {
                 do {
-                    let fetchRequest: NSFetchRequest<DocumentModel> = DocumentModel.fetchRequest()
+                    let fetchRequest: NSFetchRequest<DocumentEntity> = DocumentEntity.fetchRequest()
                     fetchRequest.predicate = NSPredicate(format: "id == %@", UUID(uuidString: documentID)! as CVarArg)
                     
                     let documents = try context.fetch(fetchRequest)
@@ -303,7 +303,7 @@ class DocumentBrowserViewModel: ObservableObject {
             
             context.perform {
                 do {
-                    let fetchRequest: NSFetchRequest<DocumentModel> = DocumentModel.fetchRequest()
+                    let fetchRequest: NSFetchRequest<DocumentEntity> = DocumentEntity.fetchRequest()
                     fetchRequest.predicate = NSPredicate(format: "id == %@", UUID(uuidString: documentID)! as CVarArg)
                     
                     let documents = try context.fetch(fetchRequest)
@@ -312,7 +312,7 @@ class DocumentBrowserViewModel: ObservableObject {
                         return
                     }
                     
-                    // TODO: Add archived flag to DocumentModel when schema is updated
+                    // TODO: Add archived flag to DocumentEntity when schema is updated
                     // document.isArchived = true
                     // document.archivedAt = Date()
                     

@@ -14,6 +14,9 @@ class ChatViewModel: ObservableObject {
     @Published var selectedModel: LLMModel = LLMModel.defaultModel
     @Published var availableModels: [LLMModel] = []
     
+    // Track conversation ID for deletion detection
+    private var currentConversationId: UUID?
+    
     // RAG-related properties
     @Published var selectedDocuments: [String] = [] // Document IDs for RAG context
     @Published var isRAGEnabled: Bool = false
@@ -128,6 +131,39 @@ class ChatViewModel: ObservableObject {
             print("📞 Received AllConversationsCleared notification, resetting ChatViewModel")
             self?.resetToNewConversation()
         }
+        
+        // Listen for individual conversation deletion
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("ConversationDeleted"),
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            print("📞 Received ConversationDeleted notification")
+            
+            if let deletedConversationId = notification.object as? UUID {
+                print("📞 Deleted conversation ID: \(deletedConversationId.uuidString)")
+                
+                let currentId = self?.currentConversation?.id
+                let trackedId = self?.currentConversationId
+                
+                print("📞 Current conversation ID: \(currentId?.uuidString ?? "nil")")
+                print("📞 Tracked conversation ID: \(trackedId?.uuidString ?? "nil")")
+                
+                // Check both current conversation and tracked ID
+                let shouldReset = (currentId == deletedConversationId) || 
+                                 (trackedId == deletedConversationId) ||
+                                 (!(self?.messages.isEmpty ?? true)) // If we have messages but no current conversation
+                
+                if shouldReset {
+                    print("📞 Resetting chat view - conversation was deleted")
+                    self?.resetToNewConversation()
+                } else {
+                    print("📞 Different conversation was deleted, no action needed")
+                }
+            } else {
+                print("⚠️ ConversationDeleted notification received but no valid UUID found")
+            }
+        }
     }
     
     deinit {
@@ -221,6 +257,7 @@ class ChatViewModel: ObservableObject {
     /// Load the most recent conversation on app startup
     private func loadRecentConversation(_ conversation: ConversationEntity) {
         currentConversation = conversation
+        currentConversationId = conversation.id
         
         // Load messages for this conversation
         messages = dataService.getMessagesForConversation(conversation)
@@ -235,6 +272,25 @@ class ChatViewModel: ObservableObject {
         }
         
         print("✅ Loaded recent conversation: \(conversation.title ?? "Untitled"), Model: \(selectedModel.name)")
+    }
+    
+    /// Update model for conversation after available models are loaded
+    private func updateModelForConversation(_ conversation: ConversationEntity) {
+        // Load saved model for this conversation (if any)
+        if let savedModelID = conversation.selectedModelID,
+           let savedModel = availableModels.first(where: { $0.id == savedModelID }) {
+            if selectedModel.id != savedModel.id {
+                selectedModel = savedModel
+                print("🔄 Updated conversation model: \(savedModel.name)")
+            }
+        } else {
+            // Use default model if no saved model found
+            let defaultModel = getDefaultModel() ?? LLMModel.defaultModel  
+            if selectedModel.id != defaultModel.id {
+                selectedModel = defaultModel
+                print("🔄 Using default model for conversation: \(defaultModel.name)")
+            }
+        }
     }
     
     /// Load messages for current conversation
@@ -260,6 +316,7 @@ class ChatViewModel: ObservableObject {
             let conversations = try context.fetch(request)
             if let conversation = conversations.first {
                 currentConversation = conversation
+                currentConversationId = conversation.id
                 messages = dataService.getMessagesForConversation(conversation)
                 
                 // Load saved model for this conversation (if any)
@@ -292,6 +349,7 @@ class ChatViewModel: ObservableObject {
     func startNewConversation() {
         // Create new conversation using DataService
         currentConversation = dataService.createConversation()
+        currentConversationId = currentConversation?.id
         
         // Clear messages and RAG context
         messages = []
@@ -307,6 +365,7 @@ class ChatViewModel: ObservableObject {
     func resetToNewConversation() {
         // Clear current state
         currentConversation = nil
+        currentConversationId = nil
         messages = []
         currentInput = ""
         errorMessage = nil
@@ -641,11 +700,24 @@ class ChatViewModel: ObservableObject {
     
     func loadAvailableModels() async {
         do {
+            print("🔄 Loading available models...")
             let models = try await apiService.getAvailableModels()
             await MainActor.run {
-                self.availableModels = models // Remove .prefix(10) limitation
+                self.availableModels = models
+                print("✅ Loaded \(models.count) available models")
+                
+                // Update selected model after models are loaded (only if needed)
                 if self.selectedModel == LLMModel.defaultModel {
-                    self.selectedModel = self.getDefaultModel() ?? LLMModel.defaultModel
+                    let newSelectedModel = self.getDefaultModel() ?? LLMModel.defaultModel
+                    if self.selectedModel.id != newSelectedModel.id {
+                        self.selectedModel = newSelectedModel
+                        print("🔄 Updated selected model after loading: \(newSelectedModel.name)")
+                    }
+                }
+                
+                // Also update for current conversation if needed
+                if let conversation = self.currentConversation {
+                    self.updateModelForConversation(conversation)
                 }
             }
         } catch {
@@ -698,25 +770,41 @@ class ChatViewModel: ObservableObject {
     
     /// Get default model from UserDefaults
     func getDefaultModel() -> LLMModel? {
+        // If availableModels is empty (still loading), return static default
+        guard !availableModels.isEmpty else {
+            // Only log once when models are still loading
+            if selectedModel == LLMModel.defaultModel {
+                #if DEBUG
+                print("🔄 Available models still loading (\(availableModels.count) models), using static default")
+                #endif
+            }
+            return LLMModel.defaultModel
+        }
+        
         // Try to get from UserDefaults using consistent format
         guard let modelData = UserDefaults.standard.dictionary(forKey: defaultModelKey),
               let id = modelData["id"] as? String,
               let name = modelData["name"] as? String,
               let providerRaw = modelData["provider"] as? String,
               let provider = LLMProvider(rawValue: providerRaw) else {
-            print("⚠️ No default model found in UserDefaults")
-            // Return first available model as fallback
+            // Only log when no default found in UserDefaults
             return availableModels.first ?? LLMModel.defaultModel
         }
         
-        print("📱 Found default model in UserDefaults: \(name)")
-        
         // Find the default model in available models
         if let foundModel = availableModels.first(where: { $0.id == id }) {
-            print("✅ Default model found in available models: \(foundModel.name)")
+            // Only log if different from current selected model
+            if selectedModel.id != foundModel.id {
+                #if DEBUG
+                print("✅ Default model found in available models: \(foundModel.name)")
+                #endif
+            }
             return foundModel
         } else {
-            print("⚠️ Default model not found in available models, using fallback")
+            #if DEBUG
+            print("⚠️ Default model '\(name)' (ID: \(id)) not found in \(availableModels.count) available models")
+            print("🔄 Using fallback: \(availableModels.first?.name ?? "static default")")
+            #endif
             return availableModels.first ?? LLMModel.defaultModel
         }
     }
