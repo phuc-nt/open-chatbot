@@ -95,7 +95,7 @@ struct ChatView: View {
                 ModelPickerView(viewModel: viewModel)
             }
             .sheet(isPresented: $showDocumentPicker) {
-                DocumentPickerView()
+                DocumentPickerView(chatViewModel: viewModel)
             }
             .onChange(of: appState.selectedConversationID) { conversationID in
                 if let id = conversationID, let uuid = UUID(uuidString: id) {

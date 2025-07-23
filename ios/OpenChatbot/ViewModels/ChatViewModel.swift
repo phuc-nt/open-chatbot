@@ -14,6 +14,12 @@ class ChatViewModel: ObservableObject {
     @Published var selectedModel: LLMModel = LLMModel.defaultModel
     @Published var availableModels: [LLMModel] = []
     
+    // RAG-related properties
+    @Published var selectedDocuments: [String] = [] // Document IDs for RAG context
+    @Published var isRAGEnabled: Bool = false
+    @Published var documentContext: String = ""
+    @Published var ragQueryInProgress: Bool = false
+    
     // UserDefaults keys for persistence
     private let selectedModelKey = "selectedModel"
     private let defaultModelKey = "defaultModel"
@@ -27,6 +33,10 @@ class ChatViewModel: ObservableObject {
     private let memoryService: MemoryService  // 🧠 Memory service for context-aware conversations
     private let memoryPersistenceService: MemoryPersistenceService // 💾 Memory persistence across sessions
     private let tokenWindowService: TokenWindowManagementService? // 🪟 Token window management
+    
+    // RAG Services - Initialize lazily to avoid dependency issues
+    private var ragQueryService: RAGQueryServiceSimulator?
+    
     private var currentStreamingMessage: Message?
     private var streamingTask: Task<Void, Never>?  // Memory management cho streaming tasks
     private var currentStreamTask: Task<Void, Never>?  // Task for current streaming operation
@@ -37,7 +47,7 @@ class ChatViewModel: ObservableObject {
          memoryService: MemoryService? = nil,
          memoryPersistenceService: MemoryPersistenceService? = nil,
          tokenWindowService: TokenWindowManagementService? = nil) {
-        // Use dependency injection or create default service
+        
         if let service = apiService {
             self.apiService = service
         } else {
@@ -81,6 +91,9 @@ class ChatViewModel: ObservableObject {
             )
         }
         
+        // Initialize RAG Query Service simulator
+        self.ragQueryService = RAGQueryServiceSimulator()
+        
         // Initialize with a new conversation or load existing one
         loadOrCreateConversation()
         
@@ -119,6 +132,49 @@ class ChatViewModel: ObservableObject {
         // Clean up streaming task and notification observers
         streamingTask?.cancel()
         NotificationCenter.default.removeObserver(self)
+    }
+    
+    // MARK: - RAG Document Management
+    
+    /// Add document to RAG context
+    func addDocumentToContext(_ documentId: String) {
+        if !selectedDocuments.contains(documentId) {
+            selectedDocuments.append(documentId)
+            updateRAGStatus()
+            print("📄 Added document \(documentId) to RAG context")
+        }
+    }
+    
+    /// Remove document from RAG context
+    func removeDocumentFromContext(_ documentId: String) {
+        selectedDocuments.removeAll { $0 == documentId }
+        updateRAGStatus()
+        print("📄 Removed document \(documentId) from RAG context")
+    }
+    
+    /// Clear all documents from RAG context
+    func clearDocumentContext() {
+        selectedDocuments.removeAll()
+        documentContext = ""
+        updateRAGStatus()
+        print("📄 Cleared all documents from RAG context")
+    }
+    
+    /// Update RAG enabled status based on selected documents
+    private func updateRAGStatus() {
+        isRAGEnabled = !selectedDocuments.isEmpty
+        if !isRAGEnabled {
+            documentContext = ""
+        }
+    }
+    
+    /// Get document context for display
+    func getDocumentContextSummary() -> String {
+        if selectedDocuments.isEmpty {
+            return "No documents selected"
+        } else {
+            return "\(selectedDocuments.count) document(s) selected for context"
+        }
     }
     
     // MARK: - Conversation Management
@@ -213,8 +269,9 @@ class ChatViewModel: ObservableObject {
         // Create new conversation using DataService
         currentConversation = dataService.createConversation()
         
-        // Clear messages
+        // Clear messages and RAG context
         messages = []
+        clearDocumentContext()
         
         // Use default model for new conversations
         selectedModel = getDefaultModel() ?? LLMModel.defaultModel
@@ -231,6 +288,9 @@ class ChatViewModel: ObservableObject {
         errorMessage = nil
         isLoading = false
         isStreaming = false
+        
+        // Clear RAG context
+        clearDocumentContext()
         
         // Cancel any ongoing requests
         apiService.cancelCurrentRequest()
@@ -253,9 +313,9 @@ class ChatViewModel: ObservableObject {
         dataService.updateConversation(conversation, title: title.isEmpty ? "Untitled" : title)
     }
     
-    // MARK: - Message Handling
+    // MARK: - Message Handling with RAG Integration
     
-    /// Send a new message
+    /// Send a new message with optional RAG integration
     func sendMessage() async {
         guard !currentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         
@@ -266,6 +326,7 @@ class ChatViewModel: ObservableObject {
         currentInput = ""
         isLoading = true
         isStreaming = false  // Start with typing indicator only
+        ragQueryInProgress = false
         
         // Ensure we have a conversation
         if currentConversation == nil {
@@ -302,11 +363,19 @@ class ChatViewModel: ObservableObject {
             updateConversationTitle()
         }
         
-        // Create a cancellable task for streaming
+        // Create a cancellable task for streaming with RAG integration
         currentStreamTask = Task { @MainActor in
             do {
                 var assistantResponse = ""
                 var assistantMessageCreated = false
+                
+                // RAG Query Phase: Get document context if RAG is enabled
+                var ragContext = ""
+                if isRAGEnabled && !selectedDocuments.isEmpty {
+                    ragQueryInProgress = true
+                    ragContext = await performRAGQuery(query: userMessageContent)
+                    ragQueryInProgress = false
+                }
                 
                 // Get context-aware messages from memory system with token window management
                 let contextMessages: [Message]
@@ -336,13 +405,20 @@ class ChatViewModel: ObservableObject {
                 }
                 
                 // Convert context messages to ChatMessage format for API
-                let chatMessages = contextMessages.compactMap { message -> ChatMessage? in
+                var chatMessages = contextMessages.compactMap { message -> ChatMessage? in
                     guard message.role != .system else { return nil }
                     let apiRole: ChatMessage.MessageRole = message.role == .user ? .user : .assistant
                     return ChatMessage(role: apiRole, content: message.content)
                 }
                 
-                // Stream response from API with memory context
+                // Insert RAG context as system message if available
+                if !ragContext.isEmpty {
+                    let systemMessage = ChatMessage(role: .system, content: "Context from documents:\n\n\(ragContext)\n\nPlease use this context to help answer the user's question.")
+                    chatMessages.insert(systemMessage, at: 0)
+                    print("📄 Added RAG context to conversation (\(ragContext.count) characters)")
+                }
+                
+                // Stream response from API with memory and RAG context
                 let stream = try await apiService.sendMessage(userMessageContent, model: selectedModel, conversation: chatMessages.isEmpty ? nil : chatMessages)
                 
                 for try await chunk in stream {
@@ -351,91 +427,92 @@ class ChatViewModel: ObservableObject {
                         print("🛑 Streaming task was cancelled")
                         break
                     }
-                // Check for error messages from API service
-                if chunk.hasPrefix("__NETWORK_ERROR__:") {
-                    let errorMsg = String(chunk.dropFirst("__NETWORK_ERROR__:".count)).trimmingCharacters(in: .whitespaces)
-                    await handleError("🌐 Lỗi kết nối mạng: \(errorMsg)")
-                    return
-                } else if chunk.hasPrefix("__HTTP_ERROR__") {
-                    let errorMsg = String(chunk.dropFirst("__HTTP_ERROR__".count))
-                    await handleError("🚨 Lỗi từ server: \(errorMsg)")
-                    return
-                } else if chunk.hasPrefix("__ERROR__:") {
-                    let errorMsg = String(chunk.dropFirst("__ERROR__:".count)).trimmingCharacters(in: .whitespaces)
-                    await handleError("❌ Lỗi: \(errorMsg)")
-                    return
+                    
+                    // Check for error messages from API service
+                    if chunk.hasPrefix("__NETWORK_ERROR__:") {
+                        let errorMsg = String(chunk.dropFirst("__NETWORK_ERROR__:".count)).trimmingCharacters(in: .whitespaces)
+                        await handleError("🌐 Lỗi kết nối mạng: \(errorMsg)")
+                        return
+                    } else if chunk.hasPrefix("__HTTP_ERROR__") {
+                        let errorMsg = String(chunk.dropFirst("__HTTP_ERROR__".count))
+                        await handleError("🚨 Lỗi từ server: \(errorMsg)")
+                        return
+                    } else if chunk.hasPrefix("__ERROR__:") {
+                        let errorMsg = String(chunk.dropFirst("__ERROR__:".count)).trimmingCharacters(in: .whitespaces)
+                        await handleError("❌ Lỗi: \(errorMsg)")
+                        return
+                    }
+                    
+                    // Switch from loading to streaming when we receive first chunk
+                    if isLoading {
+                        isLoading = false
+                        isStreaming = true
+                    }
+                    
+                    assistantResponse += chunk
+                    
+                    // Create assistant message only when we have content
+                    if !assistantMessageCreated {
+                        let assistantMessage = Message(
+                            content: assistantResponse,
+                            role: .assistant,
+                            conversationId: conversation.id ?? UUID()
+                        )
+                        
+                        await MainActor.run {
+                            messages.append(assistantMessage)
+                            assistantMessageCreated = true
+                            print("🔄 Streaming started, isStreaming = \(isStreaming)")
+                        }
+                    } else {
+                        // Update existing assistant message
+                        await MainActor.run {
+                            if let lastIndex = messages.lastIndex(where: { $0.role == .assistant }) {
+                                var updatedMessage = Message(
+                                    content: assistantResponse,
+                                    role: .assistant,
+                                    conversationId: conversation.id ?? UUID()
+                                )
+                                updatedMessage.id = messages[lastIndex].id
+                                updatedMessage.timestamp = messages[lastIndex].timestamp
+                                
+                                // Update with smooth animation
+                                withAnimation(.easeOut(duration: 0.1)) {
+                                    messages[lastIndex] = updatedMessage
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Small delay for smoother character-by-character effect
+                    try? await Task.sleep(nanoseconds: 50_000_000) // 0.05 seconds
                 }
                 
-                // Switch from loading to streaming when we receive first chunk
-                if isLoading {
-                    isLoading = false
-                    isStreaming = true
-                }
-                
-                assistantResponse += chunk
-                
-                // Create assistant message only when we have content
-                if !assistantMessageCreated {
-                    let assistantMessage = Message(
+                // Save final assistant message to Core Data and memory system
+                if assistantMessageCreated {
+                    let finalAssistantMessage = Message(
                         content: assistantResponse,
                         role: .assistant,
                         conversationId: conversation.id ?? UUID()
                     )
                     
-                    await MainActor.run {
-                        messages.append(assistantMessage)
-                        assistantMessageCreated = true
-                        print("🔄 Streaming started, isStreaming = \(isStreaming)")
+                    dataService.addMessage(finalAssistantMessage, to: conversation)
+                    
+                    // Add assistant response to memory system for future context
+                    do {
+                        await memoryService.addMessageToMemory(finalAssistantMessage, conversationId: conversation.id ?? UUID())
+                    } catch {
+                        handleMemoryError(error, context: "adding assistant message to memory")
                     }
-                } else {
-                    // Update existing assistant message
-                    await MainActor.run {
-                        if let lastIndex = messages.lastIndex(where: { $0.role == .assistant }) {
-                            var updatedMessage = Message(
-                                content: assistantResponse,
-                                role: .assistant,
-                                conversationId: conversation.id ?? UUID()
-                            )
-                            updatedMessage.id = messages[lastIndex].id
-                            updatedMessage.timestamp = messages[lastIndex].timestamp
-                            
-                            // Update with smooth animation
-                            withAnimation(.easeOut(duration: 0.1)) {
-                                messages[lastIndex] = updatedMessage
-                            }
-                        }
+                    
+                    // Core Data notification will automatically trigger HistoryViewModel refresh
+                    
+                    // Update local array with final message
+                    if let lastIndex = messages.lastIndex(where: { $0.role == .assistant }) {
+                        messages[lastIndex] = finalAssistantMessage
                     }
                 }
                 
-                // Small delay for smoother character-by-character effect
-                try? await Task.sleep(nanoseconds: 50_000_000) // 0.05 seconds
-            }
-            
-            // Save final assistant message to Core Data and memory system
-            if assistantMessageCreated {
-                let finalAssistantMessage = Message(
-                    content: assistantResponse,
-                    role: .assistant,
-                    conversationId: conversation.id ?? UUID()
-                )
-                
-                dataService.addMessage(finalAssistantMessage, to: conversation)
-                
-                // Add assistant response to memory system for future context
-                do {
-                    await memoryService.addMessageToMemory(finalAssistantMessage, conversationId: conversation.id ?? UUID())
-                } catch {
-                    handleMemoryError(error, context: "adding assistant message to memory")
-                }
-                
-                // Core Data notification will automatically trigger HistoryViewModel refresh
-                
-                // Update local array with final message
-                if let lastIndex = messages.lastIndex(where: { $0.role == .assistant }) {
-                    messages[lastIndex] = finalAssistantMessage
-                }
-            }
-            
             } catch {
                 // No need to remove placeholder since we don't create it upfront
                 print("Error sending message: \(error)")
@@ -444,11 +521,37 @@ class ChatViewModel: ObservableObject {
             
             isLoading = false
             isStreaming = false  // Stop streaming indicator (backup)
+            ragQueryInProgress = false
             print("✅ Streaming completed, isStreaming = false")
         }
         
         // Wait for task completion
         await currentStreamTask?.value
+    }
+    
+    /// Perform RAG query to get document context
+    private func performRAGQuery(query: String) async -> String {
+        guard let ragService = ragQueryService else {
+            print("⚠️ RAG Query Service not available")
+            return ""
+        }
+        
+        do {
+            print("🔍 Performing RAG query: \(query)")
+            let ragResult = await ragService.simulateRAGQuery(
+                query: query,
+                documentIds: selectedDocuments,
+                topK: 3
+            )
+            
+            documentContext = ragResult.context
+            print("📄 RAG query completed: \(ragResult.context.count) characters of context")
+            return ragResult.context
+            
+        } catch {
+            print("❌ RAG query failed: \(error)")
+            return ""
+        }
     }
     
     /// Clear all messages in current conversation
@@ -480,6 +583,7 @@ class ChatViewModel: ObservableObject {
         
         isLoading = false
         isStreaming = false  // Stop streaming indicator
+        ragQueryInProgress = false
         print("✅ Streaming canceled, isStreaming = false")
         
         // No need to remove placeholder since we don't create empty ones anymore
@@ -541,39 +645,33 @@ class ChatViewModel: ObservableObject {
     }
     
     /// Restore selected model from UserDefaults
-    private func restoreSelectedModel() async {
+    private func restoreSelectedModel() {
         guard let modelData = UserDefaults.standard.dictionary(forKey: selectedModelKey),
               let id = modelData["id"] as? String,
               let name = modelData["name"] as? String,
               let providerRaw = modelData["provider"] as? String,
               let provider = LLMProvider(rawValue: providerRaw) else {
-            // No saved model, use default
-            await MainActor.run {
-                self.selectedModel = self.getDefaultModel() ?? LLMModel.defaultModel
-            }
             return
         }
         
-        // Find the model in available models or create from saved data
-        await MainActor.run {
-            if let savedModel = availableModels.first(where: { $0.id == id }) {
-                self.selectedModel = savedModel
-            } else {
-                // Create model from saved data (in case it's no longer available)
-                self.selectedModel = LLMModel(
-                    id: id,
-                    name: name,
-                    provider: provider,
-                    contextLength: 128000,
-                    pricing: ModelPricing(inputTokens: 0.0, outputTokens: 0.0, imageInputs: nil),
-                    description: "Previously selected model",
-                    capabilities: .basic
-                )
-            }
+        // Try to find the model in available models
+        if let foundModel = availableModels.first(where: { $0.id == id }) {
+            selectedModel = foundModel
+        } else {
+            // Model not found, create a temporary one to maintain consistency
+            selectedModel = LLMModel(
+                id: id,
+                name: name,
+                provider: provider,
+                contextLength: 4096,
+                                 pricing: ModelPricing(inputTokens: 0, outputTokens: 0, imageInputs: nil),
+                description: "Previously selected model",
+                capabilities: .basic
+            )
         }
     }
     
-    /// Get user's default model preference
+    /// Get default model from UserDefaults
     func getDefaultModel() -> LLMModel? {
         // Try to get from UserDefaults using consistent format
         guard let modelData = UserDefaults.standard.dictionary(forKey: defaultModelKey),
@@ -638,6 +736,7 @@ class ChatViewModel: ObservableObject {
             self.errorMessage = message
             self.isLoading = false
             self.isStreaming = false
+            self.ragQueryInProgress = false
         }
     }
     
@@ -646,5 +745,48 @@ class ChatViewModel: ObservableObject {
         print("🧠 Memory Error in \(context): \(error.localizedDescription)")
         // Continue with conversation even if memory fails
         // This ensures the chat remains functional
+    }
+}
+
+// MARK: - RAG Query Service Simulator
+class RAGQueryServiceSimulator {
+    struct RAGQueryResult {
+        let query: String
+        let documentIds: [String]
+        let context: String
+        let relevantChunks: Int
+    }
+    
+    /// Simulate RAG query processing
+    func simulateRAGQuery(query: String, documentIds: [String], topK: Int = 3) async -> RAGQueryResult {
+        // Simulate query processing time
+        try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+        
+        // Generate simulated document context
+        let simulatedContext = generateSimulatedContext(for: query, documentIds: documentIds, topK: topK)
+        
+        return RAGQueryResult(
+            query: query,
+            documentIds: documentIds,
+            context: simulatedContext,
+            relevantChunks: min(topK, documentIds.count * 2)
+        )
+    }
+    
+    private func generateSimulatedContext(for query: String, documentIds: [String], topK: Int) -> String {
+        let contexts = [
+            "Based on the uploaded documents, here are relevant excerpts that address your question about \(query.prefix(50))...",
+            "From Document Analysis: The materials contain information related to \(query.prefix(30)) which suggests...",
+            "According to the document sources, key findings show that \(query.prefix(40)) is discussed in detail...",
+            "The uploaded content provides context about \(query.prefix(35)) with several important points...",
+            "Document excerpts relevant to '\(query.prefix(25))' indicate that the subject involves..."
+        ]
+        
+        let selectedContexts = Array(contexts.prefix(min(topK, contexts.count)))
+        let contextText = selectedContexts.joined(separator: "\n\n")
+        
+        let metadata = "\n\n[Context source: \(documentIds.count) document(s), \(topK) relevant chunks analyzed]"
+        
+        return contextText + metadata
     }
 } 
