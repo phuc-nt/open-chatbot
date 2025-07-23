@@ -36,6 +36,8 @@ class ChatViewModel: ObservableObject {
     
     // RAG Services - Initialize lazily to avoid dependency issues
     private var ragQueryService: RAGQueryServiceSimulator?
+    private var embeddingService: EmbeddingServiceProtocol?
+    private var coreDataVectorService: CoreDataVectorService?
     
     private var currentStreamingMessage: Message?
     private var streamingTask: Task<Void, Never>?  // Memory management cho streaming tasks
@@ -91,8 +93,8 @@ class ChatViewModel: ObservableObject {
             )
         }
         
-        // Initialize RAG Query Service simulator
-        self.ragQueryService = RAGQueryServiceSimulator()
+        // Initialize RAG Services
+        initializeRAGServices()
         
         // Initialize with a new conversation or load existing one
         loadOrCreateConversation()
@@ -132,6 +134,28 @@ class ChatViewModel: ObservableObject {
         // Clean up streaming task and notification observers
         streamingTask?.cancel()
         NotificationCenter.default.removeObserver(self)
+    }
+    
+    // MARK: - RAG Services Initialization
+    
+    /// Initialize RAG services with proper dependency injection
+    private func initializeRAGServices() {
+        // Initialize Core Data Vector Service
+        self.coreDataVectorService = CoreDataVectorService(context: persistenceController.container.viewContext)
+        
+        // Initialize Embedding Service with hybrid strategy
+        self.embeddingService = EmbeddingService(
+            strategy: .hybrid,
+            context: persistenceController.container.viewContext
+        )
+        
+        // Initialize RAG Query Service simulator with real embedding service
+        if let embeddingService = self.embeddingService {
+            self.ragQueryService = RAGQueryServiceSimulator(embeddingService: embeddingService)
+            print("✅ RAG Services initialized successfully")
+        } else {
+            print("⚠️ Failed to initialize RAG services")
+        }
     }
     
     // MARK: - RAG Document Management
@@ -538,6 +562,7 @@ class ChatViewModel: ObservableObject {
         
         do {
             print("🔍 Performing RAG query: \(query)")
+            
             let ragResult = await ragService.simulateRAGQuery(
                 query: query,
                 documentIds: selectedDocuments,
@@ -748,7 +773,7 @@ class ChatViewModel: ObservableObject {
     }
 }
 
-// MARK: - RAG Query Service Simulator
+// MARK: - Enhanced RAG Query Service Simulator with Real Embedding
 class RAGQueryServiceSimulator {
     struct RAGQueryResult {
         let query: String
@@ -757,7 +782,13 @@ class RAGQueryServiceSimulator {
         let relevantChunks: Int
     }
     
-    /// Simulate RAG query processing
+    private let embeddingService: EmbeddingServiceProtocol?
+    
+    init(embeddingService: EmbeddingServiceProtocol? = nil) {
+        self.embeddingService = embeddingService
+    }
+    
+    /// Enhanced RAG query processing with real embedding service
     func simulateRAGQuery(query: String, documentIds: [String], topK: Int = 3) async -> RAGQueryResult {
         // Simulate query processing time
         try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
