@@ -99,9 +99,18 @@ struct DocumentUploadView: View {
                     .fontWeight(.medium)
             }
             
-            Text("Uploaded: \(viewModel.uploadedCount)")
-                .font(.caption)
-                .foregroundColor(.secondary)
+            VStack(spacing: 4) {
+                Text("Uploaded: \(viewModel.uploadedCount)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                
+                if !viewModel.embeddingProgress.isEmpty {
+                    Text(viewModel.embeddingProgress)
+                        .font(.caption2)
+                        .foregroundColor(.blue)
+                        .lineLimit(2)
+                }
+            }
         }
         .padding()
         .background(Color.blue.opacity(0.1))
