@@ -1,25 +1,19 @@
 import SwiftUI
 import PDFKit
 import QuickLook
+import Foundation
 
 struct DocumentDetailView: View {
     let document: ProcessedDocument
     @StateObject private var viewModel = DocumentDetailViewModel()
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var appState: AppState
     @State private var showingEditSheet = false
-    @State private var showingQuickLook = false
-    @State private var selectedTab: DetailTab = .preview
+    @State private var selectedTab: DetailTab = .info
     
     var body: some View {
         NavigationView {
             TabView(selection: $selectedTab) {
-                // Preview Tab
-                previewTab
-                    .tabItem {
-                        Label("Preview", systemImage: "doc.text")
-                    }
-                    .tag(DetailTab.preview)
-                
                 // Info Tab
                 infoTab
                     .tabItem {
@@ -44,15 +38,11 @@ struct DocumentDetailView: View {
                 }
                 
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    shareButton
                     editButton
                 }
             }
             .sheet(isPresented: $showingEditSheet) {
                 DocumentEditView(document: document, viewModel: viewModel)
-            }
-            .sheet(isPresented: $showingQuickLook) {
-                QuickLookView(url: document.fileURL)
             }
         }
         .onAppear {
@@ -60,26 +50,6 @@ struct DocumentDetailView: View {
         }
     }
     
-    // MARK: - Preview Tab
-    @ViewBuilder
-    private var previewTab: some View {
-        GeometryReader { geometry in
-            ScrollView {
-                VStack(spacing: 16) {
-                    // Document Header
-                    documentHeaderSection
-                    
-                    // Preview Content
-                    previewContentSection(geometry: geometry)
-                    
-                    // Quick Actions
-                    quickActionsSection
-                }
-                .padding()
-            }
-        }
-        .background(Color(UIColor.systemGroupedBackground))
-    }
     
     @ViewBuilder
     private var documentHeaderSection: some View {
@@ -121,130 +91,34 @@ struct DocumentDetailView: View {
         .cornerRadius(12)
     }
     
-    @ViewBuilder
-    private func previewContentSection(geometry: GeometryProxy) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Preview")
-                .font(.headline)
-            
-            Group {
-                switch document.type {
-                case .pdf:
-                    pdfPreview(geometry: geometry)
-                case .image, .imagePNG:
-                    imagePreview(geometry: geometry)
-                case .text:
-                    textPreview()
-                case .unknown:
-                    unknownFilePreview()
-                }
-            }
-            .background(Color(UIColor.systemBackground))
-            .cornerRadius(12)
-        }
-    }
     
-    @ViewBuilder
-    private func pdfPreview(geometry: GeometryProxy) -> some View {
-        VStack {
-            if let pdfDocument = PDFDocument(url: document.fileURL) {
-                PDFKitView(document: pdfDocument)
-                    .frame(height: min(geometry.size.height * 0.6, 400))
-                    .cornerRadius(8)
-                    .onTapGesture {
-                        showingQuickLook = true
-                    }
-            } else {
-                fallbackPreview()
-            }
-        }
-    }
-    
-    @ViewBuilder
-    private func imagePreview(geometry: GeometryProxy) -> some View {
-        AsyncImage(url: document.fileURL) { image in
-            image
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(maxHeight: min(geometry.size.height * 0.6, 400))
-                .cornerRadius(8)
-                .onTapGesture {
-                    showingQuickLook = true
-                }
-        } placeholder: {
-            ProgressView()
-                .frame(height: 200)
-        }
-    }
-    
-    @ViewBuilder
-    private func textPreview() -> some View {
-        ScrollView {
-            Text(String(document.content.prefix(1000)) + (document.content.count > 1000 ? "..." : ""))
-                .font(.system(.body, design: .monospaced))
-                .padding()
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .frame(maxHeight: 300)
-        .onTapGesture {
-            showingQuickLook = true
-        }
-    }
-    
-    @ViewBuilder
-    private func unknownFilePreview() -> some View {
-        fallbackPreview()
-    }
-    
-    @ViewBuilder
-    private func fallbackPreview() -> some View {
-        VStack(spacing: 16) {
-            Image(systemName: "doc.fill")
-                .font(.system(size: 40))
-                .foregroundColor(.gray)
-            
-            Text("Preview not available")
-                .font(.headline)
-                .foregroundColor(.secondary)
-            
-            Button("Open in External App") {
-                showingQuickLook = true
-            }
-            .buttonStyle(.bordered)
-        }
-        .frame(height: 200)
-    }
-    
-    @ViewBuilder
-    private var quickActionsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Quick Actions")
-                .font(.headline)
-            
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
-                ActionButton(title: "Open", icon: "arrow.up.right.square") {
-                    showingQuickLook = true
-                }
-                
-                ActionButton(title: "Share", icon: "square.and.arrow.up") {
-                    shareDocument()
-                }
-                
-                ActionButton(title: "Chat", icon: "bubble.left.and.bubble.right") {
-                    openChatWithDocument()
-                }
-                
-                ActionButton(title: "Edit Info", icon: "pencil") {
-                    showingEditSheet = true
-                }
-            }
-        }
-    }
     
     // MARK: - Info Tab
     @ViewBuilder
     private var infoTab: some View {
         List {
+            Section("Actions") {
+                Button(action: openChatWithDocument) {
+                    HStack {
+                        Image(systemName: "bubble.left.and.bubble.right")
+                            .foregroundColor(.blue)
+                            .font(.title2)
+                        Text("Chat with Document")
+                            .foregroundColor(.primary)
+                            .font(.headline)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.vertical, 4)
+                }
+                
+                Button("Edit Info") {
+                    showingEditSheet = true
+                }
+            }
+            
             Section("File Information") {
                 InfoRow(label: "Name", value: document.fileName)
                 InfoRow(label: "Title", value: document.title)
@@ -273,10 +147,6 @@ struct DocumentDetailView: View {
                             TagView(tag: tag)
                         }
                     }
-                }
-                
-                Button("Edit Tags") {
-                    showingEditSheet = true
                 }
             }
             
@@ -316,13 +186,6 @@ struct DocumentDetailView: View {
     
     // MARK: - Toolbar Buttons
     @ViewBuilder
-    private var shareButton: some View {
-        Button(action: shareDocument) {
-            Image(systemName: "square.and.arrow.up")
-        }
-    }
-    
-    @ViewBuilder
     private var editButton: some View {
         Button("Edit") {
             showingEditSheet = true
@@ -330,46 +193,25 @@ struct DocumentDetailView: View {
     }
     
     // MARK: - Actions
-    private func shareDocument() {
-        let activityVC = UIActivityViewController(activityItems: [document.fileURL], applicationActivities: [])
-        
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let rootViewController = windowScene.windows.first?.rootViewController {
-            rootViewController.present(activityVC, animated: true)
-        }
-    }
     
     private func openChatWithDocument() {
-        // TODO: Navigate to chat with document context
+        // Navigate to chat with document context
         dismiss()
+        
+        // Switch to Chat tab
+        appState.switchToChatTab()
+        
+        // Post notification để ChatView add document to context
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            NotificationCenter.default.post(
+                name: NSNotification.Name("OpenChatWithDocument"),
+                object: document
+            )
+        }
     }
 }
 
 // MARK: - Supporting Views
-struct ActionButton: View {
-    let title: String
-    let icon: String
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 8) {
-                Image(systemName: icon)
-                    .font(.title2)
-                
-                Text(title)
-                    .font(.caption)
-                    .fontWeight(.medium)
-            }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color(.systemGray6))
-            .cornerRadius(12)
-        }
-        .buttonStyle(.plain)
-    }
-}
-
 struct InfoRow: View {
     let label: String
     let value: String
@@ -422,9 +264,8 @@ struct PDFKitView: UIViewRepresentable {
 
 // MARK: - Supporting Types
 enum DetailTab: Int, CaseIterable {
-    case preview = 0
-    case info = 1
-    case content = 2
+    case info = 0
+    case content = 1
 }
 
 // MARK: - Date Formatter Extension

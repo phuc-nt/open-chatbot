@@ -39,6 +39,7 @@ struct ContentView: View {
                     Text("Documents")
                 }
                 .tag(2)
+                .environmentObject(appState)
             
             SettingsView(chatViewModel: sharedChatViewModel)
                 .tabItem {

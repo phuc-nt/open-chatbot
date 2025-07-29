@@ -139,6 +139,7 @@ struct DocumentOrganizationView: View {
     private func organizedDocumentsView(for organization: DocumentOrganization) -> some View {
         DocumentBrowserView()
             .navigationTitle(organization.rawValue)
+            .environmentObject(AppState()) // Fix: Add AppState for DocumentOrganizationView usage
     }
 }
 

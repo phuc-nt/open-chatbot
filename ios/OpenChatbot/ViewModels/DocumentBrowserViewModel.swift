@@ -272,7 +272,7 @@ class DocumentBrowserViewModel: ObservableObject {
                             fileName: (document.value(forKey: "fileURL") as? URL)?.lastPathComponent ?? "Unknown",
                             fileURL: document.value(forKey: "fileURL") as? URL ?? URL(fileURLWithPath: ""),
                             fileSize: document.value(forKey: "fileSize") as? Int64 ?? 0,
-                            type: DocumentType(rawValue: document.value(forKey: "type") as? String ?? "") ?? .unknown,
+                            type: self.mapSimpleFileTypeToDocumentType(document.value(forKey: "type") as? String ?? ""),
                             pageCount: document.value(forKey: "pageCount") as? Int32 ?? 0,
                             content: document.value(forKey: "textContent") as? String ?? "",
                             detectedLanguage: document.value(forKey: "detectedLanguage") as? String,
@@ -347,6 +347,20 @@ class DocumentBrowserViewModel: ObservableObject {
     private func filterDocuments() {
         Task { @MainActor in
             await refreshDocuments()
+        }
+    }
+    
+    /// Map SimpleFileType (stored in Core Data) to DocumentType (used by UI)
+    private func mapSimpleFileTypeToDocumentType(_ simpleType: String) -> DocumentType {
+        switch simpleType {
+        case "pdf":
+            return .pdf
+        case "image":
+            return .image
+        case "text":
+            return .text
+        default:
+            return .unknown
         }
     }
 }

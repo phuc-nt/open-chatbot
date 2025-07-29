@@ -105,6 +105,16 @@ struct ChatView: View {
                     appState.selectedConversationID = nil
                 }
             }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("OpenChatWithDocument"))) { notification in
+                if let document = notification.object as? ProcessedDocument {
+                    print("📄 Opening chat with document: \(document.title)")
+                    // Create new conversation and clear all existing documents
+                    viewModel.createNewConversation()
+                    viewModel.clearDocumentContext() // Clear all existing documents first
+                    viewModel.addDocumentToContext(document.id) // Then add only this document
+                    print("📄 Chat started with only document: \(document.title)")
+                }
+            }
         }
     }
     

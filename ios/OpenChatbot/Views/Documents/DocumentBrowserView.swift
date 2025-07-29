@@ -3,6 +3,7 @@ import CoreData
 
 struct DocumentBrowserView: View {
     @StateObject private var viewModel = DocumentBrowserViewModel()
+    @EnvironmentObject private var appState: AppState
     @State private var searchText = ""
     @State private var selectedFilter: DocumentFilter = .all
     @State private var selectedSortOption: DocumentSortOption = .dateModified
@@ -41,6 +42,7 @@ struct DocumentBrowserView: View {
             .sheet(isPresented: $showingDocumentDetail) {
                 if let selectedDocument = selectedDocument {
                     DocumentDetailView(document: selectedDocument)
+                        .environmentObject(appState) // Fix: Pass shared AppState
                 }
             }
             .alert("Delete Document", isPresented: $showingDeleteConfirmation) {
