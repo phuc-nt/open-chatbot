@@ -1,0 +1,30 @@
+project_name: OpenChatbot iOS
+language: typescript
+description: "AI-powered iOS chatbot app with LangChain integration, smart memory system, and document intelligence"
+
+# Source code directories - chỉ iOS folder
+source_directories:
+  - "ios/"
+
+# Directories to ignore
+ignore_patterns:
+  - "ios/build/"
+  - "ios/DerivedData/"
+  - "ios/*.xcworkspace/"
+  - "ios/OpenChatbot.xcodeproj/"
+  - "ios/Pods/"
+  - ".git/"
+  - "*.DS_Store"
+  - "node_modules/"
+  - "docs/"
+
+# File types to include - focus Swift code
+file_extensions:
+  - ".swift"
+  - ".json"
+  - ".plist"
+
+# Project specific settings
+settings:
+  max_file_size_mb: 5
+  max_files_per_directory: 100
