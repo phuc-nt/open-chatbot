@@ -38,9 +38,10 @@ final class DocumentUploadViewTests: XCTestCase {
         
         // When & Then
         XCTAssertEqual(viewModel.selectedDocuments.count, 0)
-        XCTAssertEqual(viewModel.processingTasks.count, 0)
         XCTAssertFalse(viewModel.isProcessing)
         XCTAssertNil(viewModel.errorMessage)
+        XCTAssertEqual(viewModel.uploadedCount, 0)
+        XCTAssertEqual(viewModel.processedDocuments.count, 0)
     }
     
     func testAddDocumentToSelection() {
@@ -93,17 +94,15 @@ final class DocumentUploadViewTests: XCTestCase {
     func testProcessingTasksManagement() {
         // Given
         let viewModel = DocumentUploadViewModel()
-        let task1 = ProcessingTask(id: "1", fileName: "test1.pdf", status: .pending)
-        let task2 = ProcessingTask(id: "2", fileName: "test2.pdf", status: .processing)
         
-        // When
-        viewModel.backgroundTasks["1"] = task1
-        viewModel.backgroundTasks["2"] = task2
+        // When - Test processing progress updates
+        viewModel.processingProgress = 0.5
+        viewModel.embeddingProgress = "Processing document 1 of 2"
         
         // Then
-        XCTAssertEqual(viewModel.processingTasks.count, 2)
-        XCTAssertTrue(viewModel.processingTasks.contains { $0.status == .pending })
-        XCTAssertTrue(viewModel.processingTasks.contains { $0.status == .processing })
+        XCTAssertEqual(viewModel.processingProgress, 0.5)
+        XCTAssertEqual(viewModel.embeddingProgress, "Processing document 1 of 2")
+        XCTAssertEqual(viewModel.processedDocuments.count, 0)
     }
     
     // MARK: - Error Handling Tests

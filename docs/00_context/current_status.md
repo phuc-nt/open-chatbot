@@ -1,30 +1,38 @@
 # Current Project Status - OpenChatbot iOS
 
-**Last Updated**: 2025-07-23  
-**Current Phase**: 🚀 **Sprint 4.5 IN PROGRESS** - Real PDF Extraction & Acceptance Testing  
+**Last Updated**: 2025-07-29  
+**Current Phase**: 🚀 **Sprint 4.5 IN PROGRESS** - Acceptance Testing với AT-4.1 & AT-4.2 hoàn thành  
 **Previous Phase**: ✅ **Sprint 4 COMPLETED** - Document Intelligence System Complete 🎉 **100% SUCCESS**  
 **Build Status**: ✅ **BUILD SUCCESS** - Real PDF extraction working on real device  
 **Branch**: `sprint-4-document-intelligence` - Production ready với real document processing  
-**Sprint 4.5 Progress**: 85% (Major breakthrough achieved) - Real PDF extraction implemented and working
+**Sprint 4.5 Progress**: 90% (AT-4.1 & AT-4.2 completed successfully) - RAG system fully functional
 
-## 🎉 **LATEST ACHIEVEMENT: Real PDF Text Extraction COMPLETED**
+## 🎉 **LATEST ACHIEVEMENT: Acceptance Testing AT-4.1 & AT-4.2 COMPLETED**
 
-**Date**: July 23, 2025  
-**Status**: ✅ **PRODUCTION READY** - Real PDF content extraction implemented and tested  
+**Date**: July 29, 2025  
+**Status**: ✅ **AT-4.1 & AT-4.2 COMPLETED** - Document Intelligence & RAG system fully validated  
 
-### **Major Breakthrough**
-- ✅ **Real PDF Extraction**: PDFKit integration working with actual document content
-- ✅ **RAG with Real Content**: Chat system now uses actual document text, not simulated content
-- ✅ **Image OCR**: Vision framework implementation for text extraction from images
-- ✅ **Device Testing**: Successfully tested on real iPhone device
-- ✅ **Build Success**: App compiles and runs on real device with PDF extraction
+### **Acceptance Test Results**
+- ✅ **AT-4.1: Multi-Format Document Upload** - Individual file selection và RAG context working perfectly
+- ✅ **AT-4.2: Cross-Document Analysis** - Multi-document comparison và analysis working with enhanced query matching
+- ✅ **Document Selection Filtering**: Fixed NSPredicate filtering để chỉ load selected documents
+- ✅ **Enhanced System Prompt**: AI now utilizes document context properly với Vietnamese support
+- ✅ **Query Matching Logic**: Enhanced với Vietnamese comparison keywords và multi-document rules
+- ✅ **LLM Response Logging**: Added comprehensive logging cho debugging future issues
 
-### **Real Test Results**
-```
-📄 Extracted 416 characters from PDF: SALONPAS HCMC MARATHON 2021
-📄 Extracted 4415 characters from PDF: JD-AI-Solution-Architect.pdf
-📄 Real document context retrieved: 1029 characters from 2 documents
-✅ RAG responses now based on actual document content
+### **Technical Fixes Implemented**
+```swift
+// Document filtering fix
+if !documentIds.isEmpty {
+    fetchRequest.predicate = NSPredicate(format: "id IN %@", documentIds)
+}
+
+// Enhanced query matching
+let isRelevant = contentLower.contains(queryLower) ||
+               queryLower.contains("so sánh") ||
+               queryLower.contains("khác biệt") ||
+               queryLower.contains("phân tích") ||
+               documentIds.count > 1
 ```
 
 ### **Document Processing Features**

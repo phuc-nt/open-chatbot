@@ -496,7 +496,13 @@ class ChatViewModel: ObservableObject {
                 
                 // Insert RAG context as system message if available
                 if !ragContext.isEmpty {
-                    let systemMessage = ChatMessage(role: .system, content: "Context from documents:\n\n\(ragContext)\n\nPlease use this context to help answer the user's question.")
+                    let systemMessage = ChatMessage(role: .system, content: """
+DOCUMENT CONTEXT:
+
+\(ragContext)
+
+IMPORTANT: Base your response ONLY on the document context provided above. If asked to summarize, provide a summary based on this specific document content. Answer in Vietnamese if the user asks in Vietnamese.
+""")
                     chatMessages.insert(systemMessage, at: 0)
                     print("📄 Added RAG context to conversation (\(ragContext.count) characters)")
                     print("🔍 RAG CONTEXT CONTENT:")
@@ -582,6 +588,17 @@ class ChatViewModel: ObservableObject {
                         role: .assistant,
                         conversationId: conversation.id ?? UUID()
                     )
+                    
+                    // Log LLM response for debugging
+                    print("🤖 LLM RESPONSE COMPLETED:")
+                    print(String(repeating: "=", count: 50))
+                    print("Query: \(userMessageContent)")
+                    print("RAG Enabled: \(isRAGEnabled)")
+                    print("Selected Documents: \(selectedDocuments.count)")
+                    print("Response Length: \(assistantResponse.count) characters")
+                    print("Response Content:")
+                    print(assistantResponse)
+                    print(String(repeating: "=", count: 50))
                     
                     dataService.addMessage(finalAssistantMessage, to: conversation)
                     
@@ -926,9 +943,16 @@ class RAGQueryServiceSimulator {
             context.perform {
                 do {
                     let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Document")
+                    
+                    // Filter by selected document IDs if provided
+                    if !documentIds.isEmpty {
+                        fetchRequest.predicate = NSPredicate(format: "id IN %@", documentIds)
+                        print("📄 Filtering documents by IDs: \(documentIds)")
+                    }
+                    
                     let documents = try context.fetch(fetchRequest)
                     
-                    print("📄 Found \(documents.count) documents in Core Data")
+                    print("📄 Found \(documents.count) documents matching filter (from \(documentIds.count) requested)")
                     
                     var relevantContent: [String] = []
                     
@@ -938,14 +962,25 @@ class RAGQueryServiceSimulator {
                             
                             print("📄 Checking document: '\(title)' (\(content.count) characters)")
                             
-                            // Simple relevance check - contains query terms
+                            // Enhanced relevance check for various query types
                             let queryLower = query.lowercased()
                             let contentLower = content.lowercased()
                             
-                            if contentLower.contains(queryLower) || 
-                               queryLower.contains("tóm tắt") || 
-                               queryLower.contains("nói về") ||
-                               queryLower.contains("gì") {
+                            // Check if query is for cross-document analysis, summary, or contains document content
+                            let isRelevant = contentLower.contains(queryLower) ||
+                                           queryLower.contains("tóm tắt") ||
+                                           queryLower.contains("nói về") ||
+                                           queryLower.contains("gì") ||
+                                           queryLower.contains("so sánh") ||
+                                           queryLower.contains("khác biệt") ||
+                                           queryLower.contains("giá trị") ||
+                                           queryLower.contains("phân tích") ||
+                                           queryLower.contains("compare") ||
+                                           queryLower.contains("analysis") ||
+                                           // For multi-document queries, always include all selected documents
+                                           documentIds.count > 1
+                            
+                            if isRelevant {
                                 
                                 let excerpt = String(content.prefix(500)) // First 500 chars
                                 relevantContent.append("From '\(title)':\n\(excerpt)")
