@@ -25,6 +25,8 @@
 		485395E22E22B9710078EE38 /* SmartContextRelevanceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395E12E22B9710078EE38 /* SmartContextRelevanceService.swift */; };
 		485395E42E22B9930078EE38 /* SmartContextRelevanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395E32E22B9930078EE38 /* SmartContextRelevanceTests.swift */; };
 		485395E62E23A9A20078EE38 /* BasicMemoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395E52E23A9A20078EE38 /* BasicMemoryTests.swift */; };
+		48D57C2A2E3A3B5F00755D9A /* ContextSizeCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D57C292E3A3B5E00755D9A /* ContextSizeCalculator.swift */; };
+		48D57C2C2E3A3C8700755D9A /* ContextSizeCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D57C2B2E3A3C8700755D9A /* ContextSizeCalculatorTests.swift */; };
 		48D79B6B2E2BF319007F8966 /* TestConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D79B6A2E2BF319007F8966 /* TestConfig.swift */; };
 		48D79B6D2E2BF3CE007F8966 /* test_openrouter_api_key.txt in Resources */ = {isa = PBXBuildFile; fileRef = 48D79B6C2E2BF3CE007F8966 /* test_openrouter_api_key.txt */; };
 		48D79B6F2E2C0979007F8966 /* KeychainServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D79B6E2E2C0979007F8966 /* KeychainServiceTests.swift */; };
@@ -107,6 +109,8 @@
 		485395E12E22B9710078EE38 /* SmartContextRelevanceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartContextRelevanceService.swift; sourceTree = "<group>"; };
 		485395E32E22B9930078EE38 /* SmartContextRelevanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SmartContextRelevanceTests.swift; path = OpenChatbot/Tests/SmartContextRelevanceTests.swift; sourceTree = SOURCE_ROOT; };
 		485395E52E23A9A20078EE38 /* BasicMemoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BasicMemoryTests.swift; path = OpenChatbot/Tests/BasicMemoryTests.swift; sourceTree = SOURCE_ROOT; };
+		48D57C292E3A3B5E00755D9A /* ContextSizeCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextSizeCalculator.swift; sourceTree = "<group>"; };
+		48D57C2B2E3A3C8700755D9A /* ContextSizeCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContextSizeCalculatorTests.swift; path = OpenChatbot/Tests/ContextSizeCalculatorTests.swift; sourceTree = SOURCE_ROOT; };
 		48D79B6A2E2BF319007F8966 /* TestConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TestConfig.swift; path = OpenChatbot/Tests/TestConfig.swift; sourceTree = SOURCE_ROOT; };
 		48D79B6C2E2BF3CE007F8966 /* test_openrouter_api_key.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = test_openrouter_api_key.txt; path = OpenChatbot/Tests/test_openrouter_api_key.txt; sourceTree = SOURCE_ROOT; };
 		48D79B6E2E2C0979007F8966 /* KeychainServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KeychainServiceTests.swift; path = OpenChatbot/Tests/KeychainServiceTests.swift; sourceTree = SOURCE_ROOT; };
@@ -220,6 +224,7 @@
 				48D79B6A2E2BF319007F8966 /* TestConfig.swift */,
 				48D79B6C2E2BF3CE007F8966 /* test_openrouter_api_key.txt */,
 				48D79B6E2E2C0979007F8966 /* KeychainServiceTests.swift */,
+				48D57C2B2E3A3C8700755D9A /* ContextSizeCalculatorTests.swift */,
 			);
 			path = OpenChatbotTests;
 			sourceTree = "<group>";
@@ -325,6 +330,7 @@
 				48E0DCA42E26A0140033A0D8 /* EmbeddingService.swift */,
 				48E0DCB52E28043B0033A0D8 /* CoreDataVectorService.swift */,
 				48D79B722E30FC35007F8966 /* DocumentEmbeddingProcessingService.swift */,
+				48D57C292E3A3B5E00755D9A /* ContextSizeCalculator.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -489,6 +495,7 @@
 				48E0DCC02E294EFF0033A0D8 /* DocumentUploadViewTests.swift in Sources */,
 				48D79B6F2E2C0979007F8966 /* KeychainServiceTests.swift in Sources */,
 				485395C82E214D850078EE38 /* MemoryServiceTests.swift in Sources */,
+				48D57C2C2E3A3C8700755D9A /* ContextSizeCalculatorTests.swift in Sources */,
 				48E0DCA92E27C76E0033A0D8 /* EmbeddingServiceTests.swift in Sources */,
 				485395E42E22B9930078EE38 /* SmartContextRelevanceTests.swift in Sources */,
 				485395DE2E22B1B70078EE38 /* TokenWindowManagementTests.swift in Sources */,
@@ -531,6 +538,7 @@
 				48E0DCB62E28043B0033A0D8 /* CoreDataVectorService.swift in Sources */,
 				A100011AD000000001D0000 /* LLMModel.swift in Sources */,
 				A100011CD000000001D0000 /* KeychainService.swift in Sources */,
+				48D57C2A2E3A3B5F00755D9A /* ContextSizeCalculator.swift in Sources */,
 				48E0DC912E2694A30033A0D8 /* DocumentEmbedding.swift in Sources */,
 				48E0DC922E2694A30033A0D8 /* DocumentTypes.swift in Sources */,
 				48E0DC932E2694A30033A0D8 /* DocumentModel.swift in Sources */,
