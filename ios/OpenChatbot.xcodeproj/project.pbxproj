@@ -27,6 +27,8 @@
 		485395E62E23A9A20078EE38 /* BasicMemoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485395E52E23A9A20078EE38 /* BasicMemoryTests.swift */; };
 		48D57C2A2E3A3B5F00755D9A /* ContextSizeCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D57C292E3A3B5E00755D9A /* ContextSizeCalculator.swift */; };
 		48D57C2C2E3A3C8700755D9A /* ContextSizeCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D57C2B2E3A3C8700755D9A /* ContextSizeCalculatorTests.swift */; };
+		48D57C2E2E3A3FB400755D9A /* DocumentContextManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D57C2D2E3A3FB400755D9A /* DocumentContextManager.swift */; };
+		48D57C302E3A3FC300755D9A /* DocumentContextManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D57C2F2E3A3FC300755D9A /* DocumentContextManagerTests.swift */; };
 		48D79B6B2E2BF319007F8966 /* TestConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D79B6A2E2BF319007F8966 /* TestConfig.swift */; };
 		48D79B6D2E2BF3CE007F8966 /* test_openrouter_api_key.txt in Resources */ = {isa = PBXBuildFile; fileRef = 48D79B6C2E2BF3CE007F8966 /* test_openrouter_api_key.txt */; };
 		48D79B6F2E2C0979007F8966 /* KeychainServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D79B6E2E2C0979007F8966 /* KeychainServiceTests.swift */; };
@@ -111,6 +113,8 @@
 		485395E52E23A9A20078EE38 /* BasicMemoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BasicMemoryTests.swift; path = OpenChatbot/Tests/BasicMemoryTests.swift; sourceTree = SOURCE_ROOT; };
 		48D57C292E3A3B5E00755D9A /* ContextSizeCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextSizeCalculator.swift; sourceTree = "<group>"; };
 		48D57C2B2E3A3C8700755D9A /* ContextSizeCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContextSizeCalculatorTests.swift; path = OpenChatbot/Tests/ContextSizeCalculatorTests.swift; sourceTree = SOURCE_ROOT; };
+		48D57C2D2E3A3FB400755D9A /* DocumentContextManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentContextManager.swift; sourceTree = "<group>"; };
+		48D57C2F2E3A3FC300755D9A /* DocumentContextManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DocumentContextManagerTests.swift; path = OpenChatbot/Tests/DocumentContextManagerTests.swift; sourceTree = SOURCE_ROOT; };
 		48D79B6A2E2BF319007F8966 /* TestConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TestConfig.swift; path = OpenChatbot/Tests/TestConfig.swift; sourceTree = SOURCE_ROOT; };
 		48D79B6C2E2BF3CE007F8966 /* test_openrouter_api_key.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = test_openrouter_api_key.txt; path = OpenChatbot/Tests/test_openrouter_api_key.txt; sourceTree = SOURCE_ROOT; };
 		48D79B6E2E2C0979007F8966 /* KeychainServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KeychainServiceTests.swift; path = OpenChatbot/Tests/KeychainServiceTests.swift; sourceTree = SOURCE_ROOT; };
@@ -225,6 +229,7 @@
 				48D79B6C2E2BF3CE007F8966 /* test_openrouter_api_key.txt */,
 				48D79B6E2E2C0979007F8966 /* KeychainServiceTests.swift */,
 				48D57C2B2E3A3C8700755D9A /* ContextSizeCalculatorTests.swift */,
+				48D57C2F2E3A3FC300755D9A /* DocumentContextManagerTests.swift */,
 			);
 			path = OpenChatbotTests;
 			sourceTree = "<group>";
@@ -331,6 +336,7 @@
 				48E0DCB52E28043B0033A0D8 /* CoreDataVectorService.swift */,
 				48D79B722E30FC35007F8966 /* DocumentEmbeddingProcessingService.swift */,
 				48D57C292E3A3B5E00755D9A /* ContextSizeCalculator.swift */,
+				48D57C2D2E3A3FB400755D9A /* DocumentContextManager.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -488,6 +494,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				485395CC2E2170E00078EE38 /* ConversationSummaryMemoryTests.swift in Sources */,
+				48D57C302E3A3FC300755D9A /* DocumentContextManagerTests.swift in Sources */,
 				485395D82E22AE3E0078EE38 /* ContextCompressionTests.swift in Sources */,
 				48E0DCA32E269B0D0033A0D8 /* DocumentTypesTests.swift in Sources */,
 				48E0DCA72E26A01F0033A0D8 /* EmbeddingServiceTests.swift in Sources */,
@@ -560,6 +567,7 @@
 				A1000128D000000001D0000 /* DataService.swift in Sources */,
 				485395E22E22B9710078EE38 /* SmartContextRelevanceService.swift in Sources */,
 				485395C22E214D3F0078EE38 /* MemoryIntegrationDemo.swift in Sources */,
+				48D57C2E2E3A3FB400755D9A /* DocumentContextManager.swift in Sources */,
 				48E0DCCE2E2A91B80033A0D8 /* QuickLookView.swift in Sources */,
 				A1000130D000000001D0000 /* OpenChatbot.xcdatamodeld in Sources */,
 				48E0DCB92E29414B0033A0D8 /* DocumentBrowserViewModel.swift in Sources */,

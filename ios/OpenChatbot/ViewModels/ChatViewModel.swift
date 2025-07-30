@@ -23,6 +23,10 @@ class ChatViewModel: ObservableObject {
     @Published var documentContext: String = ""
     @Published var ragQueryInProgress: Bool = false
     
+    // Document Context Manager for dual chat mode
+    @Published var documentContextManager: DocumentContextManager = DocumentContextManager()
+    @Published var currentChatMode: ChatMode = .rag
+    
     // UserDefaults keys for persistence
     private let selectedModelKey = "selectedModel"
     private let defaultModelKey = "defaultModel"
@@ -192,7 +196,40 @@ class ChatViewModel: ObservableObject {
         } else {
             print("⚠️ Failed to initialize RAG services")
         }
+        
+        // Initialize DocumentContextManager with current model
+        setupDocumentContextManager()
     }
+    
+    /// Setup DocumentContextManager integration
+    private func setupDocumentContextManager() {
+        // Update DocumentContextManager with current model
+        documentContextManager.updateCurrentModel(selectedModel.name)
+        
+        // Sync existing selectedDocuments with DocumentContextManager
+        if !selectedDocuments.isEmpty {
+            // Convert document IDs to ProcessedDocument objects if available
+            syncSelectedDocumentsWithContextManager()
+        }
+        
+        // Listen for chat mode changes
+        documentContextManager.$currentChatMode
+            .sink { [weak self] newMode in
+                self?.currentChatMode = newMode
+            }
+            .store(in: &cancellables)
+        
+        print("✅ DocumentContextManager integration setup completed")
+    }
+    
+    /// Sync existing selectedDocuments with DocumentContextManager
+    private func syncSelectedDocumentsWithContextManager() {
+        // This would ideally fetch ProcessedDocument objects from Core Data
+        // For now, we'll clear and let user re-select through the new system
+        print("🔄 Syncing document selection with DocumentContextManager")
+    }
+    
+    private var cancellables = Set<AnyCancellable>()
     
     // MARK: - RAG Document Management
     
@@ -230,11 +267,32 @@ class ChatViewModel: ObservableObject {
     
     /// Get document context for display
     func getDocumentContextSummary() -> String {
-        if selectedDocuments.isEmpty {
-            return "No documents selected"
-        } else {
-            return "\(selectedDocuments.count) document(s) selected for context"
-        }
+        // Use DocumentContextManager for enhanced summary
+        return documentContextManager.getContextSummary()
+    }
+    
+    // MARK: - Enhanced Document Management with DocumentContextManager
+    
+    /// Update chat mode through DocumentContextManager
+    func updateChatMode(_ mode: ChatMode) {
+        documentContextManager.updateChatMode(mode)
+        currentChatMode = mode
+        print("🔄 Updated chat mode to: \(mode)")
+    }
+    
+    /// Get current context info from DocumentContextManager
+    func getDetailedContextInfo() -> DocumentContextInfo {
+        return documentContextManager.getDetailedContextInfo()
+    }
+    
+    /// Check if can use full context mode
+    var canUseFullContext: Bool {
+        return documentContextManager.canUseFullContext
+    }
+    
+    /// Get recommended chat mode
+    var recommendedChatMode: ChatMode {
+        return documentContextManager.recommendedMode
     }
     
     // MARK: - Conversation Management
@@ -863,6 +921,9 @@ IMPORTANT: Base your response ONLY on the document context provided above. If as
     func updateSelectedModel(_ model: LLMModel) {
         selectedModel = model
         
+        // Update DocumentContextManager with new model
+        documentContextManager.updateCurrentModel(model.name)
+        
         // Save to UserDefaults (global preference)
         saveSelectedModel()
         
@@ -872,6 +933,8 @@ IMPORTANT: Base your response ONLY on the document context provided above. If as
             dataService.saveContext()
             print("✅ Saved model \(model.name) to conversation: \(conversation.title ?? "Untitled")")
         }
+        
+        print("🔄 Updated DocumentContextManager with model: \(model.name)")
     }
     
     private func handleError(_ message: String) async {
