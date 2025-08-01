@@ -691,6 +691,364 @@ IMPORTANT: Base your response ONLY on the document context provided above. If as
         await currentStreamTask?.value
     }
     
+    // MARK: - Full Context Mode Processing
+    
+    /// Process message with Full Context mode - includes complete document content
+    func processFullContextMessage() async {
+        guard !currentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        
+        // Cancel any existing streaming task
+        currentStreamTask?.cancel()
+        
+        let userMessageContent = currentInput
+        currentInput = ""
+        isLoading = true
+        isStreaming = false
+        ragQueryInProgress = false
+        
+        // Ensure we have a conversation
+        if currentConversation == nil {
+            currentConversation = dataService.createConversation(title: "New Conversation")
+        }
+        
+        guard let conversation = currentConversation else {
+            isLoading = false
+            isStreaming = false
+            return
+        }
+        
+        // Create and save user message
+        let userMessage = Message(
+            content: userMessageContent,
+            role: .user,
+            conversationId: conversation.id ?? UUID()
+        )
+        
+        dataService.addMessage(userMessage, to: conversation)
+        
+        // Add user message to memory system
+        do {
+            await memoryService.addMessageToMemory(userMessage, conversationId: conversation.id ?? UUID())
+        } catch {
+            handleMemoryError(error, context: "adding user message to memory")
+        }
+        
+        // Update local messages array
+        messages.append(userMessage)
+        
+        // Update conversation title if this is the first message
+        if messages.count == 1 {
+            updateConversationTitle()
+        }
+        
+        // Create a cancellable task for Full Context processing
+        currentStreamTask = Task { @MainActor in
+            do {
+                var assistantResponse = ""
+                var assistantMessageCreated = false
+                
+                // Full Context Phase: Build complete document context
+                var fullDocumentContext = ""
+                if currentChatMode == .fullContext && !documentContextManager.selectedDocuments.isEmpty {
+                    fullDocumentContext = await buildFullDocumentContext()
+                    print("📄 Full Context mode: \(fullDocumentContext.count) characters of complete document content")
+                } else if currentChatMode == .rag && !selectedDocuments.isEmpty {
+                    // Fallback to RAG if Full Context is not selected
+                    ragQueryInProgress = true
+                    fullDocumentContext = await performRAGQuery(query: userMessageContent)
+                    ragQueryInProgress = false
+                }
+                
+                // Get context-aware messages from memory system
+                let contextMessages: [Message]
+                do {
+                    // Apply token window management with Full Context consideration
+                    if let tokenWindowService = tokenWindowService {
+                        let reserveTokens = currentChatMode == .fullContext ? 3000 : 1500 // More reserve for Full Context
+                        let tokenResult = try await tokenWindowService.manageTokenWindow(
+                            for: conversation.id ?? UUID(),
+                            model: selectedModel,
+                            reserveTokens: reserveTokens
+                        )
+                        
+                        if tokenResult.optimized {
+                            print("🪟 Token window optimized for \(currentChatMode): \(tokenResult.originalTokens) → \(tokenResult.finalTokens) tokens")
+                        }
+                    }
+                    
+                    contextMessages = await memoryService.getContextForAPICall(
+                        conversationId: conversation.id ?? UUID(),
+                        maxTokens: selectedModel.contextLength
+                    )
+                } catch {
+                    handleMemoryError(error, context: "getting context for API call")
+                    contextMessages = messages
+                }
+                
+                // Convert context messages to ChatMessage format
+                var chatMessages = contextMessages.compactMap { message -> ChatMessage? in
+                    guard message.role != .system else { return nil }
+                    let apiRole: ChatMessage.MessageRole = message.role == .user ? .user : .assistant
+                    return ChatMessage(role: apiRole, content: message.content)
+                }
+                
+                // Insert document context based on chat mode
+                if !fullDocumentContext.isEmpty {
+                    let systemMessage: ChatMessage
+                    
+                    if currentChatMode == .fullContext {
+                        systemMessage = ChatMessage(role: .system, content: """
+COMPLETE DOCUMENT CONTENT:
+
+\(fullDocumentContext)
+
+INSTRUCTIONS: You have access to the complete content of the selected documents above. Use this information to provide comprehensive, accurate answers. Answer in Vietnamese if the user asks in Vietnamese. Reference specific sections or details from the documents when relevant.
+""")
+                        print("📄 Added Full Context to conversation (\(fullDocumentContext.count) characters)")
+                    } else {
+                        systemMessage = ChatMessage(role: .system, content: """
+DOCUMENT CONTEXT:
+
+\(fullDocumentContext)
+
+IMPORTANT: Base your response ONLY on the document context provided above. If asked to summarize, provide a summary based on this specific document content. Answer in Vietnamese if the user asks in Vietnamese.
+""")
+                        print("📄 Added RAG context to conversation (\(fullDocumentContext.count) characters)")
+                    }
+                    
+                    chatMessages.insert(systemMessage, at: 0)
+                }
+                
+                // Stream response from API
+                let stream = try await apiService.sendMessage(userMessageContent, model: selectedModel, conversation: chatMessages.isEmpty ? nil : chatMessages)
+                
+                for try await chunk in stream {
+                    // Check if task was cancelled
+                    if Task.isCancelled {
+                        print("🛑 Full Context streaming task was cancelled")
+                        break
+                    }
+                    
+                    // Handle error messages
+                    if chunk.hasPrefix("__NETWORK_ERROR__:") {
+                        let errorMsg = String(chunk.dropFirst("__NETWORK_ERROR__:".count)).trimmingCharacters(in: .whitespaces)
+                        await handleError("🌐 Lỗi kết nối mạng: \(errorMsg)")
+                        return
+                    } else if chunk.hasPrefix("__HTTP_ERROR__") {
+                        let errorMsg = String(chunk.dropFirst("__HTTP_ERROR__".count))
+                        await handleError("🚨 Lỗi từ server: \(errorMsg)")
+                        return
+                    } else if chunk.hasPrefix("__ERROR__:") {
+                        let errorMsg = String(chunk.dropFirst("__ERROR__:".count)).trimmingCharacters(in: .whitespaces)
+                        await handleError("❌ Lỗi: \(errorMsg)")
+                        return
+                    }
+                    
+                    // Switch from loading to streaming
+                    if isLoading {
+                        isLoading = false
+                        isStreaming = true
+                    }
+                    
+                    assistantResponse += chunk
+                    
+                    // Create assistant message when we have content
+                    if !assistantMessageCreated {
+                        let assistantMessage = Message(
+                            content: assistantResponse,
+                            role: .assistant,
+                            conversationId: conversation.id ?? UUID()
+                        )
+                        
+                        await MainActor.run {
+                            messages.append(assistantMessage)
+                            assistantMessageCreated = true
+                            print("🔄 Full Context streaming started")
+                        }
+                    } else {
+                        // Update existing assistant message
+                        await MainActor.run {
+                            if let lastIndex = messages.lastIndex(where: { $0.role == .assistant }) {
+                                var updatedMessage = Message(
+                                    content: assistantResponse,
+                                    role: .assistant,
+                                    conversationId: conversation.id ?? UUID()
+                                )
+                                updatedMessage.id = messages[lastIndex].id
+                                updatedMessage.timestamp = messages[lastIndex].timestamp
+                                
+                                withAnimation(.easeOut(duration: 0.1)) {
+                                    messages[lastIndex] = updatedMessage
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Slightly slower streaming for Full Context to allow processing time
+                    let delay = currentChatMode == .fullContext ? 75_000_000 : 50_000_000 // 0.075s vs 0.05s
+                    try? await Task.sleep(nanoseconds: UInt64(delay))
+                }
+                
+                // Save final assistant message
+                if assistantMessageCreated {
+                    let finalAssistantMessage = Message(
+                        content: assistantResponse,
+                        role: .assistant,
+                        conversationId: conversation.id ?? UUID()
+                    )
+                    
+                    // Log response details
+                    print("🤖 FULL CONTEXT RESPONSE COMPLETED:")
+                    print(String(repeating: "=", count: 50))
+                    print("Query: \(userMessageContent)")
+                    print("Chat Mode: \(currentChatMode)")
+                    print("Selected Documents: \(documentContextManager.selectedDocuments.count)")
+                    print("Context Size: \(fullDocumentContext.count) characters")
+                    print("Response Length: \(assistantResponse.count) characters")
+                    print("Context Status: \(documentContextManager.contextSizeResult?.status.displayName ?? "Unknown")")
+                    print(String(repeating: "=", count: 50))
+                    
+                    dataService.addMessage(finalAssistantMessage, to: conversation)
+                    
+                    // Add to memory system
+                    do {
+                        await memoryService.addMessageToMemory(finalAssistantMessage, conversationId: conversation.id ?? UUID())
+                    } catch {
+                        handleMemoryError(error, context: "adding assistant message to memory")
+                    }
+                    
+                    // Update local array
+                    if let lastIndex = messages.lastIndex(where: { $0.role == .assistant }) {
+                        messages[lastIndex] = finalAssistantMessage
+                    }
+                }
+                
+            } catch {
+                print("Error in Full Context processing: \(error)")
+                await handleError("Failed to process Full Context message: \(error.localizedDescription)")
+            }
+            
+            isLoading = false
+            isStreaming = false
+            ragQueryInProgress = false
+            print("✅ Full Context processing completed")
+        }
+        
+        // Wait for completion
+        await currentStreamTask?.value
+    }
+    
+    /// Build complete document context for Full Context mode
+    private func buildFullDocumentContext() async -> String {
+        var fullContext = ""
+        let selectedDocuments = documentContextManager.selectedDocuments
+        
+        guard !selectedDocuments.isEmpty else {
+            print("⚠️ No documents selected for Full Context mode")
+            return ""
+        }
+        
+        // Check if we can use Full Context mode safely
+        guard documentContextManager.canUseFullContext else {
+            print("⚠️ Cannot use Full Context mode - falling back to RAG")
+            // Fallback to RAG query
+            return await performRAGQuery(query: "Provide comprehensive information from these documents")
+        }
+        
+        print("📄 Building Full Context from \(selectedDocuments.count) documents...")
+        
+        // Fetch complete document content from Core Data
+        _ = await fetchCompleteDocumentContent(documentIds: selectedDocuments.map { $0.id })
+        
+        // Build structured context with document metadata
+        for (index, document) in selectedDocuments.enumerated() {
+            let separator = index == 0 ? "" : "\n\n" + String(repeating: "-", count: 50) + "\n\n"
+            
+            fullContext += """
+\(separator)DOCUMENT \(index + 1): \(document.title)
+File: \(document.fileName)
+Type: \(document.type.displayName)
+Language: \(document.detectedLanguage ?? "Unknown")
+Size: \(ByteCountFormatter.string(fromByteCount: document.fileSize, countStyle: .file))
+
+CONTENT:
+\(document.content)
+"""
+        }
+        
+        // Add context usage information
+        if let contextResult = documentContextManager.contextSizeResult {
+            fullContext += """
+
+\n\n==== CONTEXT INFORMATION ====
+Total Characters: \(contextResult.totalCharacters)
+Estimated Tokens: \(contextResult.estimatedTokens)
+Context Status: \(contextResult.status.displayName)
+Model: \(documentContextManager.currentModel)
+Utilization: \(String(format: "%.1f%%", contextResult.percentage * 100))
+"""
+        }
+        
+        print("📄 Full Context built: \(fullContext.count) characters from \(selectedDocuments.count) documents")
+        return fullContext
+    }
+    
+    /// Fetch complete document content from Core Data
+    private func fetchCompleteDocumentContent(documentIds: [String]) async -> [String: String] {
+        return await withCheckedContinuation { continuation in
+            let context = dataService.persistenceContainer.container.viewContext
+            
+            context.perform {
+                var documentContent: [String: String] = [:]
+                
+                do {
+                    let fetchRequest: NSFetchRequest<DocumentEntity> = DocumentEntity.fetchRequest()
+                    
+                    // Filter by document IDs if provided
+                    if !documentIds.isEmpty {
+                        fetchRequest.predicate = NSPredicate(format: "id IN %@", documentIds.compactMap { UUID(uuidString: $0) })
+                    }
+                    
+                    let documents = try context.fetch(fetchRequest)
+                    
+                    for document in documents {
+                        if let id = document.id?.uuidString,
+                           let content = document.textContent {
+                            documentContent[id] = content
+                        }
+                    }
+                    
+                    print("📄 Fetched content for \(documentContent.count) documents from Core Data")
+                    
+                } catch {
+                    print("❌ Error fetching document content: \(error)")
+                }
+                
+                continuation.resume(returning: documentContent)
+            }
+        }
+    }
+    
+    /// Enhanced message processing that automatically chooses between RAG and Full Context
+    func sendMessageWithOptimalMode() async {
+        // Determine optimal mode based on context size and user preference
+        let optimalMode = documentContextManager.recommendedMode
+        
+        // Update current mode if it differs from optimal
+        if currentChatMode != optimalMode && documentContextManager.hasDocuments {
+            print("🔄 Switching to optimal mode: \(optimalMode) (was \(currentChatMode))")
+            currentChatMode = optimalMode
+            documentContextManager.updateChatMode(optimalMode)
+        }
+        
+        // Process message based on selected mode
+        if currentChatMode == .fullContext && documentContextManager.canUseFullContext {
+            await processFullContextMessage()
+        } else {
+            await sendMessage() // Regular RAG processing
+        }
+    }
+    
     /// Perform RAG query to get document context
     private func performRAGQuery(query: String) async -> String {
         guard let ragService = ragQueryService else {

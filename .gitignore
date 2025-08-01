@@ -100,3 +100,37 @@ docs/build/
 
 # Test API Keys (development security)
 ios/OpenChatbot/Tests/test_openrouter_api_key.txt
+
+# AI/MCP Support Files
+.serena/
+**/.serena/
+*.serena
+CLAUDE.md
+.claude/
+**/.claude/
+
+# AI Assistant Files
+.cursor/
+**/.cursor/
+.cursorrules
+**/.cursorrules
+.aider*
+**/.aider*
+
+# MCP Server Files
+mcp-server-*/
+**mcp*.json
+mcp.json
+**/.mcp/
+
+# AI Generated Files
+**/ai-generated/
+**/*-ai-generated.*
+**/claude-*
+**/cursor-*
+
+# Development Assistant Logs
+assistant*.log
+ai*.log
+claude*.log
+cursor*.log

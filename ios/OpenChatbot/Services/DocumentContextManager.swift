@@ -353,4 +353,9 @@ extension DocumentContextManager {
     var contextUtilization: Double {
         return contextSizeResult?.percentage ?? 0.0
     }
+    
+    /// Get current model name for external access
+    var currentModel: String {
+        return currentModelName
+    }
 }

@@ -6,10 +6,13 @@ import Foundation
 struct DocumentDetailView: View {
     let document: ProcessedDocument
     @StateObject private var viewModel = DocumentDetailViewModel()
+    @StateObject private var documentContextManager = DocumentContextManager()
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appState: AppState
     @State private var showingEditSheet = false
     @State private var selectedTab: DetailTab = .info
+    @State private var selectedChatMode: ChatMode = .rag
+    @State private var showingModeSelector = false
     
     var body: some View {
         NavigationView {
@@ -47,6 +50,7 @@ struct DocumentDetailView: View {
         }
         .onAppear {
             viewModel.loadDocument(document)
+            setupDocumentContext()
         }
     }
     
@@ -98,21 +102,14 @@ struct DocumentDetailView: View {
     private var infoTab: some View {
         List {
             Section("Actions") {
-                Button(action: openChatWithDocument) {
-                    HStack {
-                        Image(systemName: "bubble.left.and.bubble.right")
-                            .foregroundColor(.blue)
-                            .font(.title2)
-                        Text("Chat with Document")
-                            .foregroundColor(.primary)
-                            .font(.headline)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.vertical, 4)
-                }
+                // Context Size Status Card
+                contextSizeStatusCard
+                
+                // Chat Mode Selector  
+                chatModeSelectionRow
+                
+                // Enhanced Chat Button
+                enhancedChatButton
                 
                 Button("Edit Info") {
                     showingEditSheet = true
@@ -192,7 +189,205 @@ struct DocumentDetailView: View {
         }
     }
     
+    // MARK: - Enhanced UI Components
+    
+    @ViewBuilder
+    private var contextSizeStatusCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "doc.text.magnifyingglass")
+                    .foregroundColor(.blue)
+                    .font(.title3)
+                
+                Text("Context Analysis")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                
+                Spacer()
+                
+                contextStatusIndicator
+            }
+            
+            if let contextResult = documentContextManager.contextSizeResult {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("Size:")
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(contextResult.formattedSize)
+                            .fontWeight(.medium)
+                    }
+                    .font(.caption)
+                    
+                    HStack {
+                        Text("Status:")
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(contextResult.status.displayName)
+                            .fontWeight(.medium)
+                            .foregroundColor(contextStatusColor)
+                    }
+                    .font(.caption)
+                    
+                    HStack {
+                        Text("Recommended:")
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(documentContextManager.recommendedMode.displayName)
+                            .fontWeight(.medium)
+                            .foregroundColor(.blue)
+                    }
+                    .font(.caption)
+                }
+                .padding(.top, 4)
+            }
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background(Color(.systemGray6))
+        .cornerRadius(8)
+    }
+    
+    @ViewBuilder
+    private var contextStatusIndicator: some View {
+        HStack(spacing: 4) {
+            Circle()
+                .fill(contextStatusColor)
+                .frame(width: 8, height: 8)
+            
+            Text(contextStatusText)
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundColor(contextStatusColor)
+        }
+    }
+    
+    @ViewBuilder
+    private var chatModeSelectionRow: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "switch.2")
+                    .foregroundColor(.blue)
+                    .font(.title3)
+                
+                Text("Chat Mode")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                
+                Spacer()
+                
+                Button("Configure") {
+                    showingModeSelector.toggle()
+                }
+                .font(.caption)
+                .foregroundColor(.blue)
+            }
+            
+            if showingModeSelector {
+                ChatModeSelector(
+                    documentContextManager: documentContextManager,
+                    selectedMode: $selectedChatMode
+                )
+                .transition(.opacity.combined(with: .scale))
+            } else {
+                HStack {
+                    Text("Selected Mode:")
+                        .foregroundColor(.secondary)
+                        .font(.caption)
+                    
+                    Spacer()
+                    
+                    Text(selectedChatMode.displayName)
+                        .fontWeight(.medium)
+                        .font(.caption)
+                        .foregroundColor(.primary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(Color.blue.opacity(0.1))
+                        .cornerRadius(4)
+                }
+            }
+        }
+        .padding(.vertical, 8)
+        .animation(.easeInOut(duration: 0.3), value: showingModeSelector)
+    }
+    
+    @ViewBuilder
+    private var enhancedChatButton: some View {
+        Button(action: openChatWithDocument) {
+            HStack {
+                Image(systemName: selectedChatMode == .fullContext ? "doc.text.fill" : "bubble.left.and.bubble.right")
+                    .foregroundColor(.white)
+                    .font(.title2)
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Chat with Document")
+                        .foregroundColor(.white)
+                        .font(.headline)
+                    
+                    Text("Using \(selectedChatMode.displayName) mode")
+                        .foregroundColor(.white.opacity(0.8))
+                        .font(.caption)
+                }
+                
+                Spacer()
+                
+                if documentContextManager.canUseFullContext || selectedChatMode == .rag {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.white)
+                        .font(.title3)
+                } else {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.yellow)
+                        .font(.title3)
+                }
+            }
+            .padding(.vertical, 12)
+            .padding(.horizontal, 16)
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: [.blue, .blue.opacity(0.8)]),
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+            .cornerRadius(12)
+        }
+        .disabled(!documentContextManager.canUseFullContext && selectedChatMode == .fullContext)
+        .opacity((documentContextManager.canUseFullContext || selectedChatMode == .rag) ? 1.0 : 0.7)
+    }
+    
+    // MARK: - Helper Properties
+    
+    private var contextStatusColor: Color {
+        guard let result = documentContextManager.contextSizeResult else { return .gray }
+        switch result.status {
+        case .optimal:
+            return .green
+        case .large:
+            return .orange
+        case .excessive:
+            return .red
+        }
+    }
+    
+    private var contextStatusText: String {
+        guard let result = documentContextManager.contextSizeResult else { return "Calculating..." }
+        return result.status.displayName
+    }
+    
     // MARK: - Actions
+    
+    private func setupDocumentContext() {
+        // Initialize document context manager with this document
+        documentContextManager.addDocument(document)
+        
+        // Set initial mode based on document size
+        selectedChatMode = documentContextManager.recommendedMode
+        
+        // Update mode in context manager
+        documentContextManager.updateChatMode(selectedChatMode)
+    }
     
     private func openChatWithDocument() {
         // Navigate to chat with document context
@@ -201,13 +396,24 @@ struct DocumentDetailView: View {
         // Switch to Chat tab
         appState.switchToChatTab()
         
-        // Post notification để ChatView add document to context
+        // Prepare document context with selected mode
+        let documentInfo: [String: Any] = [
+            "document": document,
+            "chatMode": selectedChatMode.rawValue,
+            "contextManager": documentContextManager
+        ]
+        
+        // Post notification với enhanced document context information
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             NotificationCenter.default.post(
                 name: NSNotification.Name("OpenChatWithDocument"),
-                object: document
+                object: documentInfo
             )
         }
+        
+        print("🚀 Opening chat with document: \(document.title)")
+        print("📄 Selected mode: \(selectedChatMode.displayName)")
+        print("📊 Context status: \(documentContextManager.contextSizeResult?.status.displayName ?? "Unknown")")
     }
 }
 
