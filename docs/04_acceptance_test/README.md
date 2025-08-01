@@ -20,6 +20,11 @@
   - Document Intelligence acceptance tests  
   - Security & integration test cases
   - Step-by-step execution instructions
+- **`sprint_46_acceptance_test_cases.md`**: Detailed test scenarios cho Sprint 4.6
+  - Dual Chat Mode System acceptance tests
+  - Context size analysis & mode recommendations
+  - Enhanced UI components testing
+  - Full Context vs RAG mode validation
 
 ---
 
@@ -73,6 +78,12 @@
 - RAG-powered Q&A functionality
 - Document management UI
 - Security integration
+
+### **Sprint 4.6: Dual Chat Mode Implementation** ✅ Ready for Acceptance Testing
+- Context size analysis và intelligent recommendations
+- Dual chat modes: RAG vs Full Context
+- Enhanced UI components với mode selection
+- Model-aware context management
 
 ### **Upcoming: Sprint 5** 🔄 Planning Phase
 - LangGraph workflow automation
