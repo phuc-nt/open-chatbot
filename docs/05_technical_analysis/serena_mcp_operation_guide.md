@@ -1,20 +1,27 @@
-# 🤖 **Serena MCP - Hướng Dẫn Vận Hành Và Tính Năng**
+# 🤖 **Serena MCP - Practical Usage Guide**
 
-**Mục đích**: Tài liệu chi tiết về cách vận hành Serena MCP server trong OpenChatbot project  
-**Dựa trên**: Practical usage trong Sprint 4.6 implementation và document analysis  
-**Ngôn ngữ**: Tiếng Việt với code examples thực tế  
+**Mục đích**: Hướng dẫn sử dụng Serena MCP tools trong thực tế development  
+**Dựa trên**: 50+ tool calls trong Sprint 4.6 của OpenChatbot project  
+**Audience**: Developers sử dụng Claude Code với Serena MCP integration  
+**Format**: Practical examples với real code và workflows  
 **Ngày**: 1 tháng 8, 2025  
+
+> **Tài liệu companion**: Xem `serena_mcp_verified_analysis.md` để hiểu technical architecture chi tiết
 
 ---
 
-## 🎯 **Tổng Quan Serena MCP**
+## 🎯 **Tổng Quan Practical Usage**
 
-Serena MCP (Model Context Protocol) là một AI coding agent chuyên nghiệp được tích hợp vào Claude Code, cung cấp các tools semantic code manipulation và project management. Trong quá trình phát triển OpenChatbot, Serena đã được sử dụng extensively cho:
+**Serena MCP Role**: IDE-integrated coding assistant via Model Context Protocol, hoạt động như intelligent intermediary giữa Claude và your codebase.
 
-- **Code navigation và analysis**: Tìm hiểu cấu trúc project
-- **Semantic code editing**: Sửa đổi code theo symbol thay vì text manipulation
-- **Project exploration**: Browse files và directories một cách thông minh
-- **Memory management**: Lưu trữ và truy xuất thông tin project
+**Core Capabilities đã test thực tế**:
+- **Intelligent File Discovery**: Pattern-based file finding với gitignore respect
+- **Symbol-Based Code Navigation**: LSP-powered symbol search và hierarchy traversal  
+- **Precise Code Modification**: Regex-based editing với context awareness
+- **Project Memory**: Persistent knowledge storage across sessions
+- **Multi-Language Support**: Language server integration cho various programming languages
+
+**Workflow Integration**: Serena MCP seamlessly integrates vào Claude Code development cycle, providing structured access to codebase mà không cần manual file reading hay complex grep commands.
 
 ---
 
@@ -124,7 +131,7 @@ mcp__serena__find_symbol(
 ```
 
 **Kết quả cho thấy**:
-- ✅ Semantic understanding của code structure
+- ✅ Symbol-based understanding của code structure  
 - ✅ Chính xác hơn grep/search text-based
 - ✅ Hierarchy navigation với depth parameter
 
@@ -539,7 +546,7 @@ fallback: Read entire file + manual parsing
 Serena MCP đã chứng minh giá trị cao trong Sprint 4.6 development:
 
 ### **Core Strengths**:
-- ✅ **Semantic Code Understanding**: Goes beyond text search
+- ✅ **Structural Code Understanding**: LSP-powered symbol analysis
 - ✅ **Intelligent Navigation**: Symbol-based vs file-based
 - ✅ **Safe Modifications**: Context-aware editing
 - ✅ **Project Intelligence**: Memory và knowledge management
