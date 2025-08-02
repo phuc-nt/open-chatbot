@@ -94,7 +94,7 @@ class CoreDataVectorService {
         }
     }
     
-    /// Manual similarity search - pure Swift calculation with Core Data filtering
+    /// Optimized similarity search with batching and early termination
     private func manualSimilaritySearch(
         queryEmbedding: [Float],
         topK: Int,
@@ -102,94 +102,264 @@ class CoreDataVectorService {
         documentIDs: [UUID]?,
         language: String?
     ) throws -> [SimilarityResult] {
-        print("🔧 Starting manual similarity search...")
+        print("🚀 Starting optimized similarity search...")
         
+        // Use optimized batch search for better performance
+        return try optimizedBatchSimilaritySearch(
+            queryEmbedding: queryEmbedding,
+            topK: topK,
+            threshold: threshold,
+            documentIDs: documentIDs,
+            language: language
+        )
+    }
+    
+    /// Optimized batch similarity search with early termination and memory efficiency
+    private func optimizedBatchSimilaritySearch(
+        queryEmbedding: [Float],
+        topK: Int,
+        threshold: Float,
+        documentIDs: [UUID]?,
+        language: String?
+    ) throws -> [SimilarityResult] {
+        let startTime = CFAbsoluteTimeGetCurrent()
+        
+        // Build optimized Core Data request
         let request = NSFetchRequest<DocumentEmbeddingEntity>(entityName: "DocumentEmbedding")
         
-        // Build predicate for basic filtering (no vector search)
+        // Build predicate for pre-filtering
         var predicates: [NSPredicate] = []
         
-        // Optional document ID filter
+        // Document ID filter
         if let documentIDs = documentIDs, !documentIDs.isEmpty {
-            let documentPredicate = NSPredicate(format: "documentID IN %@", documentIDs)
-            predicates.append(documentPredicate)
-            print("📄 Filtering by document IDs: \(documentIDs.count)")
+            predicates.append(NSPredicate(format: "documentID IN %@", documentIDs))
+            print("📄 Filtering by \(documentIDs.count) document IDs")
         }
         
-        // Optional language filter
+        // Language filter
         if let language = language {
-            let languagePredicate = NSPredicate(format: "language == %@", language)
-            predicates.append(languagePredicate)
+            predicates.append(NSPredicate(format: "language == %@", language))
             print("🌐 Filtering by language: \(language)")
         }
         
-        // Combine predicates if any
+        // Add dimension filter to avoid corrupted embeddings
+        predicates.append(NSPredicate(format: "embeddingDimensions > 0"))
+        
+        // Combine predicates
         if !predicates.isEmpty {
             request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
         }
         
-        // Fetch all matching documents (no vector filtering yet)
-        let allResults = try backgroundContext.fetch(request)
-        print("📊 Fetched \(allResults.count) embeddings for manual calculation")
+        // Optimize fetch request for performance
+        request.fetchBatchSize = 100 // Process in batches to reduce memory usage
+        request.includesPropertyValues = true
+        request.returnsObjectsAsFaults = false
         
-        // Calculate similarity for each result
-        var similarityResults: [SimilarityResult] = []
+        // Priority-based sorting for faster convergence (newer embeddings first)
+        request.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
         
-        for (index, embedding) in allResults.enumerated() {
-            // Safe unwrapping of optional properties
+        // Get total count for optimization decisions
+        let countRequest = NSFetchRequest<NSNumber>(entityName: "DocumentEmbedding")
+        countRequest.predicate = request.predicate
+        countRequest.resultType = .countResultType
+        let totalCount = try backgroundContext.fetch(countRequest).first?.intValue ?? 0
+        print("📊 Total embeddings to process: \(totalCount)")
+        
+        // Use different strategies based on collection size
+        if totalCount <= 500 {
+            return try fastSmallCollectionSearch(
+                request: request,
+                queryEmbedding: queryEmbedding,
+                topK: topK,
+                threshold: threshold
+            )
+        } else {
+            return try optimizedLargeCollectionSearch(
+                request: request,
+                queryEmbedding: queryEmbedding,
+                topK: topK,
+                threshold: threshold,
+                totalCount: totalCount,
+                startTime: startTime
+            )
+        }
+    }
+    
+    /// Fast search for small collections (≤500 embeddings)
+    private func fastSmallCollectionSearch(
+        request: NSFetchRequest<DocumentEmbeddingEntity>,
+        queryEmbedding: [Float],
+        topK: Int,
+        threshold: Float
+    ) throws -> [SimilarityResult] {
+        print("⚡ Using fast small collection strategy")
+        
+        let allEmbeddings = try backgroundContext.fetch(request)
+        var results: [SimilarityResult] = []
+        results.reserveCapacity(min(topK * 2, allEmbeddings.count))
+        
+        for embedding in allEmbeddings {
             guard let embeddingData = embedding.embeddingVector,
                   let chunkText = embedding.chunkText,
                   let documentID = embedding.documentID else {
-                print("⚠️ Skipping embedding \(index) with missing data")
                 continue
             }
             
-            // Calculate cosine similarity
-            let similarity = self.calculateCosineSimilarityFromData(
+            let similarity = calculateCosineSimilarityFromData(
                 queryEmbedding: queryEmbedding,
                 embeddingData: embeddingData
             )
             
-            // Apply threshold filter
-            guard similarity >= threshold else {
-                if index < 5 { // Log first few for debugging
-                    print("📉 Embedding \(index): similarity \(String(format: "%.3f", similarity)) below threshold \(threshold)")
-                }
-                continue
+            if similarity >= threshold {
+                let result = createSimilarityResult(
+                    from: embedding,
+                    similarity: similarity,
+                    chunkText: chunkText,
+                    documentID: documentID
+                )
+                results.append(result)
             }
-            
-            // Parse metadata if available
-            var metadata: [String: Any] = [:]
-            if let metadataString = embedding.metadata {
-                if let metadataData = metadataString.data(using: .utf8),
-                   let parsedMetadata = try? JSONSerialization.jsonObject(with: metadataData) as? [String: Any] {
-                    metadata = parsedMetadata
-                }
-            }
-            
-            let result = SimilarityResult(
-                id: embedding.id?.uuidString ?? UUID().uuidString,
-                documentID: documentID.uuidString,
-                chunkText: chunkText,
-                similarity: similarity,
-                chunkIndex: Int(embedding.chunkIndex),
-                metadata: metadata
-            )
-            
-            similarityResults.append(result)
-            print("✅ Added result \(similarityResults.count): similarity=\(String(format: "%.3f", similarity))")
         }
         
-        print("🎯 Manual search found \(similarityResults.count) results above threshold")
+        return Array(results.sorted { $0.similarity > $1.similarity }.prefix(topK))
+    }
+    
+    /// Optimized search for large collections with early termination
+    private func optimizedLargeCollectionSearch(
+        request: NSFetchRequest<DocumentEmbeddingEntity>,
+        queryEmbedding: [Float],
+        topK: Int,
+        threshold: Float,
+        totalCount: Int,
+        startTime: CFAbsoluteTime
+    ) throws -> [SimilarityResult] {
+        print("🎯 Using optimized large collection strategy")
         
-        // Sort by similarity (highest first) and return top K
-        let topResults = similarityResults
+        // Priority queue to maintain top-K results efficiently
+        var topResults: [(similarity: Float, result: SimilarityResult)] = []
+        var processedCount = 0
+        let batchSize = 100
+        
+        // Dynamic threshold adjustment for early termination
+        var dynamicThreshold = threshold
+        var lastProgressTime = startTime
+        var shouldTerminateEarly = false
+        
+        // Process in batches using fetchOffset pagination
+        var offset = 0
+        
+        while offset < totalCount && !shouldTerminateEarly {
+            autoreleasepool {
+                request.fetchOffset = offset
+                request.fetchLimit = batchSize
+                
+                do {
+                    let batch = try backgroundContext.fetch(request)
+                    
+                    for embedding in batch {
+                        guard let embeddingData = embedding.embeddingVector,
+                              let chunkText = embedding.chunkText,
+                              let documentID = embedding.documentID else {
+                            continue
+                        }
+                        
+                        let similarity = calculateCosineSimilarityFromData(
+                            queryEmbedding: queryEmbedding,
+                            embeddingData: embeddingData
+                        )
+                        
+                        // Early skip if below threshold
+                        if similarity < dynamicThreshold {
+                            processedCount += 1
+                            continue
+                        }
+                        
+                        let result = createSimilarityResult(
+                            from: embedding,
+                            similarity: similarity,
+                            chunkText: chunkText,
+                            documentID: documentID
+                        )
+                        
+                        // Maintain top-K results efficiently
+                        topResults.append((similarity: similarity, result: result))
+                        
+                        // Keep only top-K + buffer for efficiency
+                        if topResults.count > topK * 2 {
+                            topResults.sort { $0.similarity > $1.similarity }
+                            topResults = Array(topResults.prefix(topK + 10))
+                            
+                            // Adjust dynamic threshold to filter out poor results
+                            if topResults.count >= topK {
+                                dynamicThreshold = max(threshold, topResults[topK - 1].similarity * 0.95)
+                            }
+                        }
+                        
+                        processedCount += 1
+                    }
+                    
+                    // Progress logging every 2 seconds
+                    let currentTime = CFAbsoluteTimeGetCurrent()
+                    if currentTime - lastProgressTime > 2.0 {
+                        let progress = Double(processedCount) / Double(totalCount) * 100
+                        print("📈 Progress: \(String(format: "%.1f", progress))% (\(processedCount)/\(totalCount)) - \(topResults.count) candidates")
+                        lastProgressTime = currentTime
+                    }
+                    
+                    // Early termination if we have enough high-quality results
+                    if topResults.count >= topK * 3 && processedCount > totalCount / 2 {
+                        let avgTopSimilarity = topResults.prefix(topK).map { $0.similarity }.reduce(0, +) / Float(topK)
+                        if avgTopSimilarity > threshold * 1.5 {
+                            print("🏁 Early termination: found enough high-quality results")
+                            shouldTerminateEarly = true
+                        }
+                    }
+                    
+                } catch {
+                    print("⚠️ Batch processing error: \(error)")
+                }
+            }
+            
+            offset += batchSize
+        }
+        
+        // Final sorting and trimming
+        let finalResults = topResults
             .sorted { $0.similarity > $1.similarity }
             .prefix(topK)
-            .map { $0 }
-            
-        print("📋 Returning top \(topResults.count) results")
-        return topResults
+            .map { $0.result }
+        
+        let totalTime = CFAbsoluteTimeGetCurrent() - startTime
+        print("🎯 Optimized search completed: \(finalResults.count) results in \(String(format: "%.2f", totalTime))s")
+        print("📊 Processed \(processedCount)/\(totalCount) embeddings (\(String(format: "%.1f", Double(processedCount)/Double(totalCount)*100))%)")
+        
+        return Array(finalResults)
+    }
+    
+    /// Helper to create SimilarityResult with parsed metadata
+    private func createSimilarityResult(
+        from embedding: DocumentEmbeddingEntity,
+        similarity: Float,
+        chunkText: String,
+        documentID: UUID
+    ) -> SimilarityResult {
+        // Parse metadata efficiently
+        var metadata: [String: Any] = [:]
+        if let metadataString = embedding.metadata {
+            if let metadataData = metadataString.data(using: .utf8),
+               let parsedMetadata = try? JSONSerialization.jsonObject(with: metadataData) as? [String: Any] {
+                metadata = parsedMetadata
+            }
+        }
+        
+        return SimilarityResult(
+            id: embedding.id?.uuidString ?? UUID().uuidString,
+            documentID: documentID.uuidString,
+            chunkText: chunkText,
+            similarity: similarity,
+            chunkIndex: Int(embedding.chunkIndex),
+            metadata: metadata
+        )
     }
     
     /// Batch insert embeddings for performance
