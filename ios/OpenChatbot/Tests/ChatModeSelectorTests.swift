@@ -1,4 +1,4 @@
-xemimport XCTest
+import XCTest
 import SwiftUI
 import Combine
 @testable import OpenChatbot

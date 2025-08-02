@@ -74,7 +74,7 @@ class DocumentProcessingService: ObservableObject {
     
     // MARK: - Private Methods
     
-    private func determineDocumentType(from url: URL) -> DocumentType {
+    internal func determineDocumentType(from url: URL) -> DocumentType {
         guard let typeIdentifier = UTType(filenameExtension: url.pathExtension) else {
             return .unknown
         }
@@ -374,7 +374,7 @@ class DocumentProcessingService: ObservableObject {
         return correctedText.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
-    private func detectLanguage(text: String) -> String? {
+    internal func detectLanguage(text: String) -> String? {
         guard !text.isEmpty else { return nil }
         
         let recognizer = NLLanguageRecognizer()
