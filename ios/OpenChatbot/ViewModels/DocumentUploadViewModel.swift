@@ -30,6 +30,10 @@ enum DocumentExtractionError: Error, LocalizedError {
 
 // MARK: - Document Upload View Model with RAG Pipeline Foundation
 class DocumentUploadViewModel: ObservableObject {
+    
+    // MARK: - Dependencies
+    private let documentProcessingService = DocumentProcessingService()
+    
     @Published var isProcessing = false
     @Published var processingProgress: Double = 0.0
     @Published var selectedDocuments: [URL] = []
@@ -146,8 +150,8 @@ class DocumentUploadViewModel: ObservableObject {
             // Extract real PDF text content using PDFKit
             content = try await extractPDFText(from: url)
         case .image:
-            // Extract real text from image using Vision OCR
-            content = try await extractImageText(from: url)
+            // Extract text from image using enhanced OCR in DocumentProcessingService
+            content = try await extractImageTextWithEnhancements(from: url)
         case .unknown:
             content = "Document content from \(url.lastPathComponent)"
         }
@@ -374,6 +378,14 @@ class DocumentUploadViewModel: ObservableObject {
                 continuation.resume(returning: extractedText)
             }
         }
+    }
+    
+    /// Extract text from image using enhanced OCR
+    private func extractImageTextWithEnhancements(from url: URL) async throws -> String {
+        // Create a temporary ProcessedDocument using DocumentProcessingService
+        let processedDocument = try await documentProcessingService.processDocument(url)
+        print("📊 Enhanced OCR completed: \(processedDocument.content.count) characters extracted")
+        return processedDocument.content
     }
     
     /// Extract text from image using Vision OCR
