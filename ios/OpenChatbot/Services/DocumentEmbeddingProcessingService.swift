@@ -159,12 +159,136 @@ class DocumentEmbeddingProcessingService {
         return chunks
     }
     
-    /// Create standard semantic chunks for non-Vietnamese languages
+    /// Create standard semantic chunks for non-Vietnamese languages with structure awareness
     private func createStandardChunks(text: String, language: String, documentType: String) -> [TextChunk] {
         let adaptiveChunkSize = determineOptimalChunkSize(for: documentType, language: language)
         
-        // Split by paragraphs first to preserve structure
-        let paragraphs = text.components(separatedBy: "\n\n").filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+        // Analyze document structure first
+        let documentStructure = analyzeDocumentStructure(text: text)
+        print("📋 Detected document structure: \(documentStructure.sections.count) sections, \(documentStructure.tables.count) tables, \(documentStructure.lists.count) lists")
+        
+        // Use structure-aware chunking
+        return createStructureAwareChunks(
+            text: text,
+            structure: documentStructure,
+            chunkSize: adaptiveChunkSize,
+            language: language
+        )
+    }
+    
+    /// Create structure-aware chunks that preserve document hierarchy
+    private func createStructureAwareChunks(
+        text: String,
+        structure: DocumentStructure,
+        chunkSize: Int,
+        language: String
+    ) -> [TextChunk] {
+        var chunks: [TextChunk] = []
+        var chunkIndex = 0
+        
+        // Process each section separately to maintain structural boundaries
+        for section in structure.sections {
+            let sectionChunks = createSectionChunks(
+                section: section,
+                chunkSize: chunkSize,
+                startIndex: chunkIndex,
+                language: language
+            )
+            chunks.append(contentsOf: sectionChunks)
+            chunkIndex += sectionChunks.count
+        }
+        
+        // If no sections detected, fall back to paragraph-based chunking
+        if chunks.isEmpty {
+            chunks = createParagraphBasedChunks(
+                text: text,
+                chunkSize: chunkSize,
+                language: language
+            )
+        }
+        
+        return chunks
+    }
+    
+    /// Create chunks for a specific document section
+    private func createSectionChunks(
+        section: DocumentSection,
+        chunkSize: Int,
+        startIndex: Int,
+        language: String
+    ) -> [TextChunk] {
+        var chunks: [TextChunk] = []
+        var currentChunk = ""
+        var chunkIndex = startIndex
+        
+        // Add section header if exists
+        if let header = section.header, !header.isEmpty {
+            currentChunk = header
+        }
+        
+        // Process section content in smaller segments
+        let segments = section.content.components(separatedBy: "\n\n").filter { 
+            !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty 
+        }
+        
+        for segment in segments {
+            let cleanSegment = segment.trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            // Check if adding this segment would exceed chunk size
+            if !currentChunk.isEmpty && (currentChunk.count + cleanSegment.count + 2) > chunkSize {
+                // Finalize current chunk with structure metadata
+                let chunk = createStructureAwareChunkWithMetadata(
+                    text: currentChunk,
+                    index: chunkIndex,
+                    language: language,
+                    sectionHeader: section.header,
+                    sectionLevel: section.level,
+                    structuralElements: identifyStructuralElements(in: currentChunk)
+                )
+                chunks.append(chunk)
+                
+                // Start new chunk with structural context
+                currentChunk = preserveStructuralContext(
+                    previousChunk: currentChunk,
+                    newSegment: cleanSegment,
+                    sectionHeader: section.header
+                )
+                chunkIndex += 1
+            } else {
+                // Add segment to current chunk
+                if currentChunk.isEmpty {
+                    currentChunk = cleanSegment
+                } else {
+                    currentChunk += "\n\n" + cleanSegment
+                }
+            }
+        }
+        
+        // Add final chunk if not empty
+        if !currentChunk.isEmpty {
+            let chunk = createStructureAwareChunkWithMetadata(
+                text: currentChunk,
+                index: chunkIndex,
+                language: language,
+                sectionHeader: section.header,
+                sectionLevel: section.level,
+                structuralElements: identifyStructuralElements(in: currentChunk)
+            )
+            chunks.append(chunk)
+        }
+        
+        return chunks
+    }
+    
+    /// Fallback paragraph-based chunking when no structure detected
+    private func createParagraphBasedChunks(
+        text: String,
+        chunkSize: Int,
+        language: String
+    ) -> [TextChunk] {
+        let paragraphs = text.components(separatedBy: "\n\n").filter { 
+            !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty 
+        }
         
         var chunks: [TextChunk] = []
         var currentChunk = ""
@@ -173,19 +297,16 @@ class DocumentEmbeddingProcessingService {
         for paragraph in paragraphs {
             let cleanParagraph = paragraph.trimmingCharacters(in: .whitespacesAndNewlines)
             
-            // If adding this paragraph would exceed chunk size, finalize current chunk
-            if !currentChunk.isEmpty && (currentChunk.count + cleanParagraph.count) > adaptiveChunkSize {
+            if !currentChunk.isEmpty && (currentChunk.count + cleanParagraph.count) > chunkSize {
                 chunks.append(createChunkWithMetadata(
                     text: currentChunk,
                     index: chunkIndex,
                     language: language
                 ))
                 
-                // Start new chunk with overlap from previous
                 currentChunk = createOverlapText(from: currentChunk) + "\n\n" + cleanParagraph
                 chunkIndex += 1
             } else {
-                // Add paragraph to current chunk
                 if currentChunk.isEmpty {
                     currentChunk = cleanParagraph
                 } else {
@@ -194,7 +315,6 @@ class DocumentEmbeddingProcessingService {
             }
         }
         
-        // Add final chunk if not empty
         if !currentChunk.isEmpty {
             chunks.append(createChunkWithMetadata(
                 text: currentChunk,
@@ -203,8 +323,7 @@ class DocumentEmbeddingProcessingService {
             ))
         }
         
-        // Handle edge case: if no chunks created, create single chunk
-        if chunks.isEmpty {
+        if chunks.isEmpty && !text.isEmpty {
             chunks.append(createChunkWithMetadata(
                 text: text,
                 index: 0,
@@ -270,6 +389,385 @@ class DocumentEmbeddingProcessingService {
         return Double(words.count) / Double(text.count) * 1000 // words per 1000 characters
     }
     
+    // MARK: - Document Structure Analysis
+    
+    /// Analyze document structure to detect sections, headers, tables, and lists
+    private func analyzeDocumentStructure(text: String) -> DocumentStructure {
+        print("📋 Analyzing document structure...")
+        
+        let lines = text.components(separatedBy: .newlines)
+        var sections: [DocumentSection] = []
+        var tables: [DocumentTable] = []
+        var lists: [DocumentList] = []
+        
+        var currentSection: DocumentSection?
+        var currentSectionLines: [String] = []
+        
+        for (index, line) in lines.enumerated() {
+            let trimmedLine = line.trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            // Skip empty lines
+            if trimmedLine.isEmpty {
+                currentSectionLines.append(line)
+                continue
+            }
+            
+            // Detect headers (lines that look like section headers)
+            if let headerLevel = detectHeaderLevel(line: trimmedLine) {
+                // Finalize previous section if exists
+                if let section = currentSection, !currentSectionLines.isEmpty {
+                    let updatedSection = DocumentSection(
+                        header: section.header,
+                        content: currentSectionLines.joined(separator: "\n"),
+                        level: section.level,
+                        startIndex: section.startIndex,
+                        endIndex: index - 1
+                    )
+                    sections.append(updatedSection)
+                }
+                
+                // Start new section
+                currentSection = DocumentSection(
+                    header: trimmedLine,
+                    content: "",
+                    level: headerLevel,
+                    startIndex: index,
+                    endIndex: index
+                )
+                currentSectionLines = []
+                continue
+            }
+            
+            // Detect tables (lines with multiple columns separated by |, tabs, or multiple spaces)
+            if detectTableRow(line: trimmedLine) {
+                let table = analyzeTable(startingAt: index, lines: lines)
+                if table.rows.count > 1 { // At least header + 1 data row
+                    tables.append(table)
+                }
+            }
+            
+            // Detect lists (lines starting with -, *, •, numbers, etc.)
+            if detectListItem(line: trimmedLine) {
+                let list = analyzeList(startingAt: index, lines: lines)
+                if list.items.count > 1 {
+                    lists.append(list)
+                }
+            }
+            
+            // Add line to current section content
+            currentSectionLines.append(line)
+        }
+        
+        // Finalize last section
+        if let section = currentSection, !currentSectionLines.isEmpty {
+            let updatedSection = DocumentSection(
+                header: section.header,
+                content: currentSectionLines.joined(separator: "\n"),
+                level: section.level,
+                startIndex: section.startIndex,
+                endIndex: lines.count - 1
+            )
+            sections.append(updatedSection)
+        }
+        
+        // If no sections detected, create a single section from entire text
+        if sections.isEmpty {
+            sections.append(DocumentSection(
+                header: nil,
+                content: text,
+                level: 0,
+                startIndex: 0,
+                endIndex: lines.count - 1
+            ))
+        }
+        
+        return DocumentStructure(
+            sections: sections,
+            tables: tables,
+            lists: lists,
+            metadata: [
+                "total_lines": lines.count,
+                "analysis_date": ISO8601DateFormatter().string(from: Date()),
+                "structure_detected": !sections.isEmpty || !tables.isEmpty || !lists.isEmpty
+            ]
+        )
+    }
+    
+    /// Detect header level based on formatting patterns
+    private func detectHeaderLevel(line: String) -> Int? {
+        let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Markdown-style headers (#, ##, ###, etc.)
+        if trimmed.hasPrefix("#") {
+            let headerMarks = trimmed.prefix(while: { $0 == "#" })
+            return min(headerMarks.count, 6) // Max 6 levels like HTML
+        }
+        
+        // All caps headers (likely section headers)
+        if trimmed.count > 5 && trimmed.count < 100 && trimmed == trimmed.uppercased() {
+            // Check if it contains mostly letters (not just punctuation)
+            let letterCount = trimmed.filter { $0.isLetter }.count
+            if letterCount > trimmed.count * 2 / 3 {
+                return 1
+            }
+        }
+        
+        // Headers followed by underlines (next line with === or ---)
+        // This would require looking ahead, implement if needed
+        
+        // Headers with specific formatting patterns
+        if trimmed.hasPrefix("CHAPTER ") || trimmed.hasPrefix("SECTION ") || 
+           trimmed.hasPrefix("Part ") || trimmed.hasPrefix("Chapter ") {
+            return 1
+        }
+        
+        // Numbered headers (1., 1.1, 1.1.1, etc.)
+        if let _ = trimmed.range(of: "^\\d+(\\.\\d+)*\\.?\\s+[A-Za-z]", options: .regularExpression) {
+            let dotCount = trimmed.filter { $0 == "." }.count
+            return min(dotCount + 1, 6)
+        }
+        
+        return nil
+    }
+    
+    /// Detect if a line is part of a table
+    private func detectTableRow(line: String) -> Bool {
+        let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Pipe-separated tables (|col1|col2|col3|)
+        if trimmed.contains("|") && trimmed.components(separatedBy: "|").count >= 3 {
+            return true
+        }
+        
+        // Tab-separated tables
+        if trimmed.contains("\t") && trimmed.components(separatedBy: "\t").count >= 2 {
+            return true
+        }
+        
+        // Multiple spaces as separators (at least 2 columns with 2+ spaces between)
+        let components = trimmed.components(separatedBy: "  ").filter { !$0.isEmpty }
+        if components.count >= 2 {
+            return true
+        }
+        
+        return false
+    }
+    
+    /// Detect if a line is a list item
+    private func detectListItem(line: String) -> Bool {
+        let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Bullet points (-, *, •, etc.)
+        if trimmed.hasPrefix("- ") || trimmed.hasPrefix("* ") || 
+           trimmed.hasPrefix("• ") || trimmed.hasPrefix("◦ ") {
+            return true
+        }
+        
+        // Numbered lists (1., 2., etc.)
+        if let _ = trimmed.range(of: "^\\d+\\.\\s+", options: .regularExpression) {
+            return true
+        }
+        
+        // Lettered lists (a., b., etc.)
+        if let _ = trimmed.range(of: "^[a-zA-Z]\\.\\s+", options: .regularExpression) {
+            return true
+        }
+        
+        return false
+    }
+    
+    /// Analyze table structure starting from a specific line
+    private func analyzeTable(startingAt startIndex: Int, lines: [String]) -> DocumentTable {
+        var rows: [DocumentTableRow] = []
+        var currentIndex = startIndex
+        
+        // Analyze consecutive table rows
+        while currentIndex < lines.count {
+            let line = lines[currentIndex]
+            if detectTableRow(line: line) {
+                let cells = parseTableCells(from: line)
+                rows.append(DocumentTableRow(cells: cells, originalLine: line))
+                currentIndex += 1
+            } else {
+                break
+            }
+        }
+        
+        return DocumentTable(
+            rows: rows,
+            startIndex: startIndex,
+            endIndex: currentIndex - 1,
+            columnCount: rows.first?.cells.count ?? 0
+        )
+    }
+    
+    /// Parse table cells from a line
+    private func parseTableCells(from line: String) -> [String] {
+        let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Handle pipe-separated tables
+        if trimmed.contains("|") {
+            return trimmed.components(separatedBy: "|")
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .filter { !$0.isEmpty }
+        }
+        
+        // Handle tab-separated tables
+        if trimmed.contains("\t") {
+            return trimmed.components(separatedBy: "\t")
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+        }
+        
+        // Handle space-separated tables (2+ spaces as delimiter)
+        return trimmed.components(separatedBy: "  ")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+    }
+    
+    /// Analyze list structure starting from a specific line
+    private func analyzeList(startingAt startIndex: Int, lines: [String]) -> DocumentList {
+        var items: [DocumentListItem] = []
+        var currentIndex = startIndex
+        
+        // Analyze consecutive list items
+        while currentIndex < lines.count {
+            let line = lines[currentIndex]
+            if detectListItem(line: line) {
+                let content = parseListItemContent(from: line)
+                let level = detectListIndentLevel(line: line)
+                items.append(DocumentListItem(
+                    content: content,
+                    level: level,
+                    originalLine: line
+                ))
+                currentIndex += 1
+            } else {
+                break
+            }
+        }
+        
+        let listType: DocumentListType = items.first?.originalLine.contains(where: { "123456789".contains($0) }) == true ? .numbered : .bulleted
+        
+        return DocumentList(
+            items: items,
+            type: listType,
+            startIndex: startIndex,
+            endIndex: currentIndex - 1
+        )
+    }
+    
+    /// Parse content from a list item line
+    private func parseListItemContent(from line: String) -> String {
+        let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Remove bullet markers
+        if trimmed.hasPrefix("- ") || trimmed.hasPrefix("* ") || 
+           trimmed.hasPrefix("• ") || trimmed.hasPrefix("◦ ") {
+            return String(trimmed.dropFirst(2)).trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        
+        // Remove numbered markers
+        if let range = trimmed.range(of: "^\\d+\\.\\s+", options: .regularExpression) {
+            return String(trimmed[range.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        
+        // Remove lettered markers
+        if let range = trimmed.range(of: "^[a-zA-Z]\\.\\s+", options: .regularExpression) {
+            return String(trimmed[range.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        
+        return trimmed
+    }
+    
+    /// Detect list indentation level
+    private func detectListIndentLevel(line: String) -> Int {
+        let leadingSpaces = line.prefix(while: { $0 == " " }).count
+        return leadingSpaces / 2 // Assuming 2 spaces per indent level
+    }
+    
+    /// Create structure-aware chunk with enhanced metadata
+    private func createStructureAwareChunkWithMetadata(
+        text: String,
+        index: Int,
+        language: String,
+        sectionHeader: String?,
+        sectionLevel: Int,
+        structuralElements: [String]
+    ) -> TextChunk {
+        let words = text.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }
+        let wordDensity = calculateWordDensity(text)
+        
+        return TextChunk(
+            text: text,
+            index: index,
+            characterCount: text.count,
+            wordCount: words.count,
+            language: language,
+            metadata: [
+                "chunk_type": "structure_aware",
+                "processing_date": ISO8601DateFormatter().string(from: Date()),
+                "word_density": wordDensity,
+                "section_header": sectionHeader ?? "",
+                "section_level": sectionLevel,
+                "structural_elements": structuralElements,
+                "structure_enhanced": true,
+                "has_section_context": sectionHeader != nil
+            ]
+        )
+    }
+    
+    /// Identify structural elements within a chunk
+    private func identifyStructuralElements(in text: String) -> [String] {
+        var elements: [String] = []
+        
+        let lines = text.components(separatedBy: .newlines)
+        
+        for line in lines {
+            let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            if detectHeaderLevel(line: trimmed) != nil {
+                elements.append("header")
+            }
+            
+            if detectTableRow(line: trimmed) {
+                elements.append("table")
+            }
+            
+            if detectListItem(line: trimmed) {
+                elements.append("list")
+            }
+            
+            // Detect code blocks (lines with indentation or code patterns)
+            if line.hasPrefix("    ") || line.hasPrefix("\t") {
+                elements.append("code")
+            }
+        }
+        
+        return Array(Set(elements)) // Remove duplicates
+    }
+    
+    /// Preserve structural context when creating overlaps
+    private func preserveStructuralContext(
+        previousChunk: String,
+        newSegment: String,
+        sectionHeader: String?
+    ) -> String {
+        var contextualStart = ""
+        
+        // Add section header for context if available
+        if let header = sectionHeader, !header.isEmpty {
+            contextualStart = header + "\n\n"
+        }
+        
+        // Add relevant context from previous chunk (last sentence or paragraph)
+        let overlapText = createOverlapText(from: previousChunk)
+        if !overlapText.isEmpty {
+            contextualStart += overlapText + "\n\n"
+        }
+        
+        return contextualStart + newSegment
+    }
+
     // MARK: - Vietnamese Text Processing
     
     /// Detect Vietnamese sentences using language-aware tokenization
@@ -542,6 +1040,59 @@ class DocumentEmbeddingProcessingService {
 }
 
 // MARK: - Supporting Data Structures
+
+/// Document structure containing all detected structural elements
+struct DocumentStructure {
+    let sections: [DocumentSection]
+    let tables: [DocumentTable]
+    let lists: [DocumentList]
+    let metadata: [String: Any]
+}
+
+/// Document section with header and content
+struct DocumentSection {
+    let header: String?
+    let content: String
+    let level: Int
+    let startIndex: Int
+    let endIndex: Int
+}
+
+/// Document table with rows and structure information
+struct DocumentTable {
+    let rows: [DocumentTableRow]
+    let startIndex: Int
+    let endIndex: Int
+    let columnCount: Int
+}
+
+/// Table row containing cells
+struct DocumentTableRow {
+    let cells: [String]
+    let originalLine: String
+}
+
+/// Document list with items and type
+struct DocumentList {
+    let items: [DocumentListItem]
+    let type: DocumentListType
+    let startIndex: Int
+    let endIndex: Int
+}
+
+/// List item with content and indentation
+struct DocumentListItem {
+    let content: String
+    let level: Int
+    let originalLine: String
+}
+
+/// Type of document list
+enum DocumentListType {
+    case bulleted
+    case numbered
+    case lettered
+}
 
 struct TextChunk {
     let text: String
