@@ -76,10 +76,19 @@ class RAGQueryService: RAGQueryServiceProtocol {
         let detectedLanguage = language ?? embeddingService.detectLanguage(for: query)
         print("🌐 Detected language: \(detectedLanguage ?? "unknown")")
         
-        // Step 3: Generate query embedding
+        // Step 2.5: Optimize query for Vietnamese if applicable
+        let optimizedQuery: String
+        if detectedLanguage == "vi" {
+            optimizedQuery = optimizeVietnameseQuery(query)
+            print("🇻🇳 Optimized Vietnamese query: '\(optimizedQuery)'")
+        } else {
+            optimizedQuery = query
+        }
+        
+        // Step 3: Generate query embedding using optimized query
         let queryEmbedding: [Float]
         do {
-            queryEmbedding = try await embeddingService.generateEmbedding(for: query, language: detectedLanguage)
+            queryEmbedding = try await embeddingService.generateEmbedding(for: optimizedQuery, language: detectedLanguage)
             print("🧠 Generated query embedding (dim: \(queryEmbedding.count))")
         } catch {
             throw RAGQueryError.queryEmbeddingFailed(error.localizedDescription)
@@ -273,6 +282,77 @@ class RAGQueryService: RAGQueryServiceProtocol {
         guard !union.isEmpty else { return 0 }
         
         return Float(intersection.count) / Float(union.count)
+    }
+    
+    // MARK: - Vietnamese Query Optimization
+    
+    /// Optimize query for Vietnamese search
+    private func optimizeVietnameseQuery(_ query: String) -> String {
+        print("🔍 Optimizing Vietnamese search query: '\(query)'")
+        
+        // Normalize Vietnamese text
+        let normalizedQuery = normalizeVietnameseText(query)
+        
+        // Tokenize and analyze query
+        let words = tokenizeVietnameseWords(in: normalizedQuery)
+        
+        // Expand query with Vietnamese-specific enhancements
+        let expandedQuery = expandVietnameseQuery(words: words)
+        
+        print("🔍 Optimized query: '\(expandedQuery)'")
+        return expandedQuery
+    }
+    
+    /// Normalize Vietnamese text for consistent processing
+    private func normalizeVietnameseText(_ text: String) -> String {
+        return text
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression) // Normalize whitespace
+            .lowercased() // Vietnamese search is typically case-insensitive
+    }
+    
+    /// Tokenize Vietnamese text into words
+    private func tokenizeVietnameseWords(in text: String) -> [String] {
+        let tokenizer = NLTokenizer(unit: .word)
+        tokenizer.setLanguage(.vietnamese)
+        tokenizer.string = text
+        
+        var words: [String] = []
+        tokenizer.enumerateTokens(in: text.startIndex..<text.endIndex) { tokenRange, _ in
+            let word = String(text[tokenRange])
+            words.append(word)
+            return true
+        }
+        
+        return words.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+    }
+    
+    /// Expand Vietnamese query with linguistic variations
+    private func expandVietnameseQuery(words: [String]) -> String {
+        var expandedWords = words
+        
+        // Add common Vietnamese query expansions
+        for word in words {
+            if let variations = getVietnameseWordVariations(word) {
+                expandedWords.append(contentsOf: variations)
+            }
+        }
+        
+        return expandedWords.joined(separator: " ")
+    }
+    
+    /// Get Vietnamese word variations for search expansion
+    private func getVietnameseWordVariations(_ word: String) -> [String]? {
+        let commonVariations: [String: [String]] = [
+            "tôi": ["mình", "ta", "em", "anh", "chị"],
+            "làm": ["thực hiện", "tiến hành", "thực thi"],
+            "tốt": ["hay", "giỏi", "xuất sắc", "ổn"],
+            "xấu": ["dở", "tệ", "không tốt"],
+            "lớn": ["to", "rộng", "khổng lồ"],
+            "nhỏ": ["bé", "tí", "nhỏ xíu"]
+        ]
+        
+        return commonVariations[word.lowercased()]
     }
 }
 

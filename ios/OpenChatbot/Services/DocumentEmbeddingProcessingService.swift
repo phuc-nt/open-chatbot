@@ -77,6 +77,90 @@ class DocumentEmbeddingProcessingService {
     
     /// Create semantic chunks from text with language awareness
     private func createSemanticChunks(text: String, language: String, documentType: String) -> [TextChunk] {
+        // Use Vietnamese-specific chunking for Vietnamese text
+        if language == "vi" {
+            return createVietnameseAwareChunks(text: text, language: language, documentType: documentType)
+        }
+        
+        // Standard chunking for other languages
+        return createStandardChunks(text: text, language: language, documentType: documentType)
+    }
+    
+    /// Create Vietnamese-aware semantic chunks using inline processing
+    private func createVietnameseAwareChunks(text: String, language: String, documentType: String) -> [TextChunk] {
+        print("🇻🇳 Using Vietnamese-aware chunking")
+        
+        let adaptiveChunkSize = determineOptimalChunkSize(for: documentType, language: language)
+        let adaptiveOverlap = Int(Double(defaultOverlap) * 1.1) // Slightly more overlap for Vietnamese
+        
+        // Vietnamese-specific sentence detection
+        let sentences = detectVietnameseSentences(in: text)
+        print("📝 Detected \(sentences.count) Vietnamese sentences")
+        
+        var chunks: [TextChunk] = []
+        var currentChunk = ""
+        var currentSentences: [String] = []
+        var chunkIndex = 0
+        
+        for sentence in sentences {
+            let trimmedSentence = sentence.trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            // Check if adding this sentence would exceed chunk size
+            if !currentChunk.isEmpty && (currentChunk.count + trimmedSentence.count) > adaptiveChunkSize {
+                // Finalize current chunk
+                let chunk = createVietnameseChunkWithMetadata(
+                    text: currentChunk,
+                    sentences: currentSentences,
+                    index: chunkIndex,
+                    language: language
+                )
+                chunks.append(chunk)
+                
+                // Start new chunk with overlap from previous
+                let overlapText = createVietnameseOverlap(from: currentSentences, maxSize: adaptiveOverlap)
+                currentChunk = overlapText + (overlapText.isEmpty ? "" : " ") + trimmedSentence
+                currentSentences = extractOverlapSentences(from: currentSentences, maxSize: adaptiveOverlap)
+                currentSentences.append(trimmedSentence)
+                chunkIndex += 1
+            } else {
+                // Add sentence to current chunk
+                if currentChunk.isEmpty {
+                    currentChunk = trimmedSentence
+                } else {
+                    currentChunk += " " + trimmedSentence
+                }
+                currentSentences.append(trimmedSentence)
+            }
+        }
+        
+        // Add final chunk if not empty
+        if !currentChunk.isEmpty {
+            let chunk = createVietnameseChunkWithMetadata(
+                text: currentChunk,
+                sentences: currentSentences,
+                index: chunkIndex,
+                language: language
+            )
+            chunks.append(chunk)
+        }
+        
+        // Handle edge case: if no chunks created, create single chunk
+        if chunks.isEmpty && !text.isEmpty {
+            let chunk = createVietnameseChunkWithMetadata(
+                text: text,
+                sentences: [text],
+                index: 0,
+                language: language
+            )
+            chunks.append(chunk)
+        }
+        
+        print("✅ Created \(chunks.count) Vietnamese-aware chunks")
+        return chunks
+    }
+    
+    /// Create standard semantic chunks for non-Vietnamese languages
+    private func createStandardChunks(text: String, language: String, documentType: String) -> [TextChunk] {
         let adaptiveChunkSize = determineOptimalChunkSize(for: documentType, language: language)
         
         // Split by paragraphs first to preserve structure
@@ -184,6 +268,151 @@ class DocumentEmbeddingProcessingService {
     private func calculateWordDensity(_ text: String) -> Double {
         let words = text.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }
         return Double(words.count) / Double(text.count) * 1000 // words per 1000 characters
+    }
+    
+    // MARK: - Vietnamese Text Processing
+    
+    /// Detect Vietnamese sentences using language-aware tokenization
+    private func detectVietnameseSentences(in text: String) -> [String] {
+        let sentenceTokenizer = NLTokenizer(unit: .sentence)
+        sentenceTokenizer.setLanguage(.vietnamese)
+        sentenceTokenizer.string = text
+        
+        var sentences: [String] = []
+        sentenceTokenizer.enumerateTokens(in: text.startIndex..<text.endIndex) { tokenRange, _ in
+            let sentence = String(text[tokenRange])
+            sentences.append(sentence)
+            return true
+        }
+        
+        // Apply Vietnamese-specific refinement
+        return refineVietnameseSentenceBoundaries(sentences)
+    }
+    
+    /// Refine sentence boundaries using Vietnamese grammar rules
+    private func refineVietnameseSentenceBoundaries(_ sentences: [String]) -> [String] {
+        var refinedSentences: [String] = []
+        var currentSentence = ""
+        
+        let vietnameseConjunctions: Set<String> = [
+            "và", "hoặc", "nhưng", "mà", "hay", "thì", "nên", "để", "vì", "do", "bởi vì", "tuy nhiên", "tuy", "dù", "dẫu"
+        ]
+        
+        for sentence in sentences {
+            let trimmed = sentence.trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            // Check if this should be merged with previous sentence
+            let words = trimmed.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }
+            let shouldMerge = !currentSentence.isEmpty && (
+                (words.first.map { vietnameseConjunctions.contains($0.lowercased()) } ?? false) ||
+                (trimmed.count < 20 && words.count < 4) ||
+                !currentSentence.hasSuffix(".") && !currentSentence.hasSuffix("!") && !currentSentence.hasSuffix("?")
+            )
+            
+            if shouldMerge {
+                if !currentSentence.isEmpty {
+                    currentSentence += " " + trimmed
+                } else {
+                    currentSentence = trimmed
+                }
+            } else {
+                // Finalize previous sentence if exists
+                if !currentSentence.isEmpty {
+                    refinedSentences.append(currentSentence)
+                }
+                currentSentence = trimmed
+            }
+        }
+        
+        // Add final sentence
+        if !currentSentence.isEmpty {
+            refinedSentences.append(currentSentence)
+        }
+        
+        return refinedSentences.filter { !$0.isEmpty }
+    }
+    
+    /// Create Vietnamese chunk with enhanced metadata
+    private func createVietnameseChunkWithMetadata(
+        text: String,
+        sentences: [String],
+        index: Int,
+        language: String
+    ) -> TextChunk {
+        let words = text.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }
+        let wordDensity = calculateVietnameseWordDensity(text: text, words: words)
+        
+        return TextChunk(
+            text: text,
+            index: index,
+            characterCount: text.count,
+            wordCount: words.count,
+            language: language,
+            metadata: [
+                "chunk_type": "vietnamese_semantic",
+                "processing_date": ISO8601DateFormatter().string(from: Date()),
+                "word_density": wordDensity,
+                "sentence_count": sentences.count,
+                "vietnamese_enhanced": true,
+                "sentence_boundary_detection": "vietnamese_grammar_aware",
+                "tokenization_method": "nl_tokenizer_vietnamese"
+            ]
+        )
+    }
+    
+    /// Calculate Vietnamese-specific word density
+    private func calculateVietnameseWordDensity(text: String, words: [String]) -> Double {
+        guard !text.isEmpty else { return 0.0 }
+        
+        // Vietnamese has different word density characteristics than English
+        let adjustedWordCount = Double(words.count)
+        let characterCount = Double(text.count)
+        
+        // Vietnamese words are typically longer, so adjust the density calculation
+        return (adjustedWordCount / characterCount) * 1000 * 1.15 // 1.15 adjustment for Vietnamese
+    }
+    
+    /// Create overlap text from previous Vietnamese sentences
+    private func createVietnameseOverlap(from sentences: [String], maxSize: Int) -> String {
+        guard !sentences.isEmpty else { return "" }
+        
+        // Try to include complete sentences within size limit
+        var overlapText = ""
+        var currentSize = 0
+        
+        for sentence in sentences.reversed() {
+            let sentenceSize = sentence.count + 1 // +1 for space
+            if currentSize + sentenceSize <= maxSize {
+                if overlapText.isEmpty {
+                    overlapText = sentence
+                } else {
+                    overlapText = sentence + " " + overlapText
+                }
+                currentSize += sentenceSize
+            } else {
+                break
+            }
+        }
+        
+        return overlapText
+    }
+    
+    /// Extract sentences for Vietnamese overlap
+    private func extractOverlapSentences(from sentences: [String], maxSize: Int) -> [String] {
+        var overlapSentences: [String] = []
+        var currentSize = 0
+        
+        for sentence in sentences.reversed() {
+            let sentenceSize = sentence.count
+            if currentSize + sentenceSize <= maxSize {
+                overlapSentences.insert(sentence, at: 0)
+                currentSize += sentenceSize
+            } else {
+                break
+            }
+        }
+        
+        return overlapSentences
     }
     
     // MARK: - Text Cleaning
