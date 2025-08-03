@@ -134,3 +134,19 @@ assistant*.log
 ai*.log
 claude*.log
 cursor*.log
+
+# Test Assets and Large Files
+assets/
+**/assets/
+test_files/
+**/test_files/
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.mp4
+*.mov
+*.avi
+large_files/
+**/large_files/
